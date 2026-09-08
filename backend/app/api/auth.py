@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.db_models import User, StudentProfile
 from app.schemas.pydantic_schemas import UserRegister, UserLogin, Token, StudentProfileOut
 from app.core.security import verify_password, get_password_hash, create_access_token, decode_access_token
+from app.services.audit_service import audit_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -25,7 +26,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 @router.post("/register", response_model=Token)
-def register(data: UserRegister, db: Session = Depends(get_db)):
+def register(data: UserRegister, request: Request, db: Session = Depends(get_db)):
     existing = db.query(User).filter_by(email=data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email is already registered")
@@ -49,14 +50,36 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    audit_service.log_activity(
+        db=db,
+        action_type="REGISTER",
+        user_id=user.id,
+        request=request,
+        details={"email": user.email, "full_name": user.full_name}
+    )
+
     token = create_access_token(subject=user.id)
     return Token(access_token=token, token_type="bearer", user_id=user.id, full_name=user.full_name)
 
 @router.post("/login", response_model=Token)
-def login(data: UserLogin, db: Session = Depends(get_db)):
+def login(data: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter_by(email=data.email).first()
     if not user or not verify_password(data.password, user.hashed_password):
+        audit_service.log_activity(
+            db=db,
+            action_type="LOGIN_FAILED",
+            request=request,
+            details={"email": data.email}
+        )
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    audit_service.log_activity(
+        db=db,
+        action_type="LOGIN_SUCCESS",
+        user_id=user.id,
+        request=request,
+        details={"email": user.email}
+    )
 
     token = create_access_token(subject=user.id)
     return Token(access_token=token, token_type="bearer", user_id=user.id, full_name=user.full_name)

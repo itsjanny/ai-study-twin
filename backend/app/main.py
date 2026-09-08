@@ -7,7 +7,16 @@ from fastapi.responses import FileResponse, JSONResponse
 from app.core.config import settings
 from app.database.session import Base, engine
 from app.database.seed import seed_database
-from app.api import auth, student, dashboard, subjects, quiz, performance, recommendations, prediction
+
+from app.api.auth import router as auth_router
+from app.api.student import router as student_router
+from app.api.dashboard import router as dashboard_router
+from app.api.subjects import router as subjects_router
+from app.api.quiz import router as quiz_router
+from app.api.performance import router as performance_router
+from app.api.recommendations import router as recommendations_router
+from app.api.prediction import router as prediction_router
+from app.api.admin import router as admin_router
 
 # Initialize DB tables & seed data
 Base.metadata.create_all(bind=engine)
@@ -32,14 +41,15 @@ app.add_middleware(
 )
 
 # Mount API routers under /api
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(student.router, prefix=settings.API_V1_STR)
-app.include_router(dashboard.router, prefix=settings.API_V1_STR)
-app.include_router(subjects.router, prefix=settings.API_V1_STR)
-app.include_router(quiz.router, prefix=settings.API_V1_STR)
-app.include_router(performance.router, prefix=settings.API_V1_STR)
-app.include_router(recommendations.router, prefix=settings.API_V1_STR)
-app.include_router(prediction.router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(student_router, prefix=settings.API_V1_STR)
+app.include_router(dashboard_router, prefix=settings.API_V1_STR)
+app.include_router(subjects_router, prefix=settings.API_V1_STR)
+app.include_router(quiz_router, prefix=settings.API_V1_STR)
+app.include_router(performance_router, prefix=settings.API_V1_STR)
+app.include_router(recommendations_router, prefix=settings.API_V1_STR)
+app.include_router(prediction_router, prefix=settings.API_V1_STR)
+app.include_router(admin_router, prefix=settings.API_V1_STR)
 
 # Serve Frontend static directory if present
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "public"))

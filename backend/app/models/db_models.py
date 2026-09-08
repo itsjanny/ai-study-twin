@@ -18,6 +18,8 @@ class User(Base):
     recommendations = relationship("Recommendation", back_populates="student")
     study_sessions = relationship("StudySession", back_populates="student")
     predictions = relationship("Prediction", back_populates="student")
+    activity_logs = relationship("UserActivityLog", back_populates="user")
+    sessions = relationship("UserSession", back_populates="user")
 
 
 class StudentProfile(Base):
@@ -191,3 +193,34 @@ class Prediction(Base):
 
     student = relationship("User", back_populates="predictions")
     topic = relationship("Topic", back_populates="predictions")
+
+
+class UserActivityLog(Base):
+    __tablename__ = "user_activity_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action_type = Column(String(100), nullable=False, index=True) # e.g., LOGIN, REGISTER, START_QUIZ, SUBMIT_QUIZ
+    endpoint = Column(String(255), nullable=True)
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    details_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+
+    user = relationship("User", back_populates="activity_logs")
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    session_token = Column(String(255), unique=True, index=True, nullable=False)
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    login_at = Column(DateTime, default=datetime.datetime.utcnow)
+    last_activity_at = Column(DateTime, default=datetime.datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+
+    user = relationship("User", back_populates="sessions")
+

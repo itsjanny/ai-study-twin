@@ -1,5 +1,5 @@
 import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
@@ -10,6 +10,7 @@ from app.schemas.pydantic_schemas import (
 )
 from app.api.auth import get_current_user
 from app.services.study_service import study_service
+from app.services.audit_service import audit_service
 
 router = APIRouter(prefix="/quiz", tags=["Adaptive Quiz System"])
 
@@ -19,7 +20,7 @@ class StartQuizRequest(BaseModel):
     question_count: Optional[int] = 5
 
 @router.post("/start", response_model=QuizStartResponse)
-def start_quiz(data: StartQuizRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def start_quiz(data: StartQuizRequest, request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     subject = db.query(Subject).get(data.subject_id)
     if not subject:
         raise HTTPException(status_code=404, detail="Subject not found")
@@ -92,6 +93,20 @@ def start_quiz(data: StartQuizRequest, user: User = Depends(get_current_user), d
         for q in selected_questions
     ]
 
+    audit_service.log_activity(
+        db=db,
+        action_type="START_QUIZ",
+        user_id=user.id,
+        request=request,
+        details={
+            "attempt_id": attempt.id,
+            "subject_name": subject.name,
+            "topic_name": topic.name if topic else "Mixed Topics",
+            "predicted_score": predicted_score,
+            "total_questions": len(selected_questions)
+        }
+    )
+
     return QuizStartResponse(
         attempt_id=attempt.id,
         subject_id=subject.id,
@@ -104,7 +119,7 @@ def start_quiz(data: StartQuizRequest, user: User = Depends(get_current_user), d
     )
 
 @router.post("/submit", response_model=QuizResultResponse)
-def submit_quiz(data: QuizSubmission, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def submit_quiz(data: QuizSubmission, request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     attempt = db.query(QuizAttempt).filter_by(id=data.attempt_id, student_id=user.id).first()
     if not attempt:
         raise HTTPException(status_code=404, detail="Quiz attempt not found")
@@ -187,6 +202,23 @@ def submit_quiz(data: QuizSubmission, user: User = Depends(get_current_user), db
 
     recs = db.query(Topic).filter(Topic.subject_id == attempt.subject_id, Topic.id != attempt.topic_id).all()
     next_topic_name = recs[0].name if recs else "Advanced Problem Solving"
+
+    audit_service.log_activity(
+        db=db,
+        action_type="SUBMIT_QUIZ",
+        user_id=user.id,
+        request=request,
+        details={
+            "attempt_id": attempt.id,
+            "actual_score": actual_score,
+            "predicted_score": attempt.predicted_score,
+            "score_diff": score_diff,
+            "correct_answers": correct_count,
+            "total_questions": total_q,
+            "time_taken_seconds": data.time_taken_seconds,
+            "weak_concepts": weak_concepts
+        }
+    )
 
     return QuizResultResponse(
         attempt_id=attempt.id,
