@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3426/3426653.png">
+
   <title>AI Study Twin — Intelligent Personalized Learning Platform</title>
 
   <!-- Google Fonts: Inter & Outfit -->
@@ -41,16 +48,19 @@
               600: '#4f46e5',
               700: '#4338ca',
               900: '#312e81',
-            },
-            accent: {
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              rose: '#f43f5e',
             }
           }
         }
       }
+    }
+
+    // Register Service Worker for PWA Android Installation
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then(reg => console.log('PWA ServiceWorker registered:', reg.scope))
+          .catch(err => console.log('ServiceWorker error:', err));
+      });
     }
   </script>
 
@@ -59,6 +69,8 @@
       font-family: 'Inter', sans-serif;
       background-color: #0f172a;
       color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .glass-card {
       background: rgba(30, 41, 59, 0.7);
@@ -66,7 +78,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .glass-nav {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.95);
       backdrop-filter: blur(16px);
       border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -93,12 +105,10 @@
   <script type="text/babel">
     const API_BASE = "/api";
 
-    // Global Auth Utility
     const getAuthToken = () => localStorage.getItem("token");
     const setAuthToken = (token) => localStorage.setItem("token", token);
     const removeAuthToken = () => localStorage.removeItem("token");
 
-    // Fetch Wrapper
     async function apiFetch(endpoint, options = {}) {
       const token = getAuthToken();
       const headers = {
@@ -121,7 +131,6 @@
       return response.json();
     }
 
-    // Components
     const Badge = ({ type, text }) => {
       const colors = {
         Strong: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -133,14 +142,14 @@
       };
       const cls = colors[type] || "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
       return (
-        <span class={`px-2.5 py-1 rounded-full text-xs font-semibold border ${cls} inline-flex items-center gap-1`}>
+        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${cls} inline-flex items-center gap-1`}>
           {text || type}
         </span>
       );
     };
 
-    // Navigation Sidebar
-    const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
+    // Sidebar & Mobile Bottom Navigation
+    const Sidebar = ({ activeTab, setActiveTab, user, onLogout, mobileMenuOpen, setMobileMenuOpen }) => {
       const navItems = [
         { id: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
         { id: "subjects", label: "My Subjects", icon: "book-open" },
@@ -154,86 +163,128 @@
 
       React.useEffect(() => {
         if (window.lucide) window.lucide.createIcons();
-      }, [activeTab]);
+      }, [activeTab, mobileMenuOpen]);
 
       return (
-        <aside className="w-64 glass-nav h-screen fixed left-0 top-0 z-30 flex flex-col justify-between p-4">
-          <div>
-            <div className="flex items-center gap-3 px-3 py-4 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/30">
-                AI
+        <React.Fragment>
+          {/* Desktop Sidebar & Mobile Drawer Overlay */}
+          <aside className={`w-64 glass-nav h-screen fixed left-0 top-0 z-40 flex flex-col justify-between p-4 transition-transform duration-300 ${
+            mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}>
+            <div>
+              <div className="flex items-center justify-between px-3 py-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/30">
+                    AI
+                  </div>
+                  <div>
+                    <h1 className="font-heading font-bold text-lg leading-none gradient-text">AI Study Twin</h1>
+                    <p className="text-xs text-slate-400 mt-1">Android Mobile App</p>
+                  </div>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400 p-1">
+                  <i data-lucide="x" className="w-5 h-5"></i>
+                </button>
               </div>
-              <div>
-                <h1 className="font-heading font-bold text-lg leading-none gradient-text">AI Study Twin</h1>
-                <p className="text-xs text-slate-400 mt-1">Smart Student Copilot</p>
-              </div>
+
+              <nav className="space-y-1">
+                {navItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                        isActive
+                          ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-md shadow-indigo-500/10"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? "text-indigo-400" : "text-slate-400"}`}></i>
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
 
-            <nav className="space-y-1">
-              {navItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
-                      isActive
-                        ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-md shadow-indigo-500/10"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                    }`}
-                  >
-                    <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? "text-indigo-400" : "text-slate-400"}`}></i>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="pt-4 border-t border-slate-800">
-            <div className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 font-bold text-sm">
-                  {user?.full_name?.charAt(0) || "S"}
+            <div className="pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                    {user?.full_name?.charAt(0) || "S"}
+                  </div>
+                  <div className="truncate">
+                    <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name || "Student"}</p>
+                    <p className="text-[10px] text-slate-400 truncate">Android Session</p>
+                  </div>
                 </div>
-                <div className="truncate">
-                  <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name || "Student"}</p>
-                  <p className="text-[10px] text-slate-400 truncate">Online</p>
-                </div>
+                <button
+                  onClick={onLogout}
+                  title="Logout"
+                  className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
+                >
+                  <i data-lucide="log-out" className="w-4 h-4"></i>
+                </button>
               </div>
-              <button
-                onClick={onLogout}
-                title="Logout"
-                className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
-              >
-                <i data-lucide="log-out" className="w-4 h-4"></i>
-              </button>
             </div>
+          </aside>
+
+          {/* Mobile Bottom Quick Bar */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass-nav border-t border-slate-800 px-4 py-2 flex items-center justify-around">
+            <button onClick={() => setActiveTab("dashboard")} className={`flex flex-col items-center gap-1 ${activeTab === "dashboard" ? "text-indigo-400" : "text-slate-400"}`}>
+              <i data-lucide="layout-dashboard" className="w-5 h-5"></i>
+              <span className="text-[10px]">Home</span>
+            </button>
+            <button onClick={() => setActiveTab("subjects")} className={`flex flex-col items-center gap-1 ${activeTab === "subjects" ? "text-indigo-400" : "text-slate-400"}`}>
+              <i data-lucide="book-open" className="w-5 h-5"></i>
+              <span className="text-[10px]">Subjects</span>
+            </button>
+            <button onClick={() => setActiveTab("take-quiz")} className={`flex flex-col items-center gap-1 ${activeTab === "take-quiz" ? "text-indigo-400" : "text-slate-400"}`}>
+              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center -mt-3 shadow-lg shadow-indigo-500/30">
+                <i data-lucide="play" className="w-4 h-4 fill-white"></i>
+              </div>
+              <span className="text-[10px]">Quiz</span>
+            </button>
+            <button onClick={() => setActiveTab("performance")} className={`flex flex-col items-center gap-1 ${activeTab === "performance" ? "text-indigo-400" : "text-slate-400"}`}>
+              <i data-lucide="bar-chart-2" className="w-5 h-5"></i>
+              <span className="text-[10px]">Analytics</span>
+            </button>
+            <button onClick={() => setActiveTab("profile")} className={`flex flex-col items-center gap-1 ${activeTab === "profile" ? "text-indigo-400" : "text-slate-400"}`}>
+              <i data-lucide="user" className="w-5 h-5"></i>
+              <span className="text-[10px]">Profile</span>
+            </button>
           </div>
-        </aside>
+        </React.Fragment>
       );
     };
 
-    // Header Bar
-    const Header = ({ title, subtitle, user }) => {
+    const Header = ({ title, subtitle, setMobileMenuOpen }) => {
       return (
         <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-800/80 gap-4">
-          <div>
-            <h2 className="font-heading font-bold text-2xl text-slate-100">{title}</h2>
-            {subtitle && <p className="text-sm text-slate-400 mt-1">{subtitle}</p>}
-          </div>
           <div className="flex items-center gap-3">
+            <button onClick={() => setMobileMenuOpen(true)} className="md:hidden p-2 rounded-xl bg-slate-800 text-slate-200">
+              <i data-lucide="menu" className="w-5 h-5"></i>
+            </button>
+            <div>
+              <h2 className="font-heading font-bold text-2xl text-slate-100">{title}</h2>
+              {subtitle && <p className="text-xs sm:text-sm text-slate-400 mt-1">{subtitle}</p>}
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              AI Twin Active & Syncing
+              Android AI App Active
             </div>
           </div>
         </header>
       );
     };
 
-    // DASHBOARD PAGE
-    const DashboardPage = ({ setActiveTab, onStartQuizWithTopic }) => {
+    const DashboardPage = ({ setActiveTab, setMobileMenuOpen }) => {
       const [data, setData] = React.useState(null);
       const [loading, setLoading] = React.useState(true);
       const trendChartRef = React.useRef(null);
@@ -251,7 +302,6 @@
       React.useEffect(() => {
         if (!data || !window.Chart) return;
 
-        // Line Chart for Trend
         const ctxTrend = document.getElementById("trendChart");
         if (ctxTrend) {
           if (trendChartRef.current) trendChartRef.current.destroy();
@@ -284,7 +334,6 @@
           });
         }
 
-        // Bar Chart for Subjects
         const ctxSubj = document.getElementById("subjChart");
         if (ctxSubj) {
           if (subjChartRef.current) subjChartRef.current.destroy();
@@ -314,62 +363,46 @@
         }
       }, [data]);
 
-      if (loading) {
-        return <div className="p-8 text-center text-slate-400">Loading student learning dashboard...</div>;
-      }
+      if (loading) return <div className="p-8 text-center text-slate-400">Loading student learning dashboard...</div>;
 
       return (
         <div>
-          <Header title="Learning Twin Dashboard" subtitle="Real-time academic performance & AI recommended study path" />
+          <Header title="Learning Twin Dashboard" subtitle="Real-time academic performance & AI recommended study path" setMobileMenuOpen={setMobileMenuOpen} />
 
-          {/* Top Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-400">Overall Performance</p>
-                <h3 className="text-2xl font-bold font-heading text-slate-100 mt-1">{data.overall_performance_pct}%</h3>
-                <p className="text-xs text-emerald-400 font-medium mt-1">Level: {data.current_learning_level}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <i data-lucide="award" className="w-6 h-6"></i>
+                <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Performance</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-heading text-slate-100 mt-1">{data.overall_performance_pct}%</h3>
+                <p className="text-[10px] sm:text-xs text-emerald-400 font-medium mt-1 truncate">{data.current_learning_level}</p>
               </div>
             </div>
 
             <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-400">Topics Mastered</p>
-                <h3 className="text-2xl font-bold font-heading text-emerald-400 mt-1">{data.topics_mastered_count}</h3>
-                <p className="text-xs text-slate-400 mt-1">Score 80%+ Accuracy</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <i data-lucide="check-circle" className="w-6 h-6"></i>
+                <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Mastered</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-heading text-emerald-400 mt-1">{data.topics_mastered_count}</h3>
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1">Score 80%+</p>
               </div>
             </div>
 
             <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-400">Topics Needing Revision</p>
-                <h3 className="text-2xl font-bold font-heading text-rose-400 mt-1">{data.topics_needing_revision_count}</h3>
-                <p className="text-xs text-amber-400 mt-1">High priority focus</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
-                <i data-lucide="alert-triangle" className="w-6 h-6"></i>
+                <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Needs Revision</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-heading text-rose-400 mt-1">{data.topics_needing_revision_count}</h3>
+                <p className="text-[10px] sm:text-xs text-amber-400 mt-1">Focus</p>
               </div>
             </div>
 
             <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-400">Predicted Next Score</p>
-                <h3 className="text-2xl font-bold font-heading text-cyan-400 mt-1">{data.predicted_next_quiz_score}%</h3>
-                <p className="text-xs text-slate-400 mt-1">ML Score Regression</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                <i data-lucide="trending-up" className="w-6 h-6"></i>
+                <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Predicted Next</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-heading text-cyan-400 mt-1">{data.predicted_next_quiz_score}%</h3>
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1">ML Score</p>
               </div>
             </div>
           </div>
 
-          {/* AI Recommendation Banner */}
           <div className="glass-card rounded-2xl p-5 mb-6 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center shrink-0">
@@ -377,7 +410,7 @@
               </div>
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Top AI Recommendation</span>
-                <h4 className="font-heading font-bold text-lg text-slate-100 mt-0.5">
+                <h4 className="font-heading font-bold text-base sm:text-lg text-slate-100 mt-0.5">
                   Recommended Study Focus: <span className="text-indigo-300">{data.recommended_topic}</span>
                 </h4>
                 <p className="text-xs text-slate-300 mt-1">{data.recommendation_reason}</p>
@@ -385,14 +418,13 @@
             </div>
             <button
               onClick={() => setActiveTab("take-quiz")}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 flex items-center gap-2 shrink-0 self-start md:self-auto"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
             >
               <span>Start Target Quiz</span>
               <i data-lucide="arrow-right" className="w-4 h-4"></i>
             </button>
           </div>
 
-          {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="glass-card rounded-2xl p-5">
               <h4 className="font-heading font-semibold text-slate-200 mb-4 flex items-center gap-2">
@@ -415,8 +447,7 @@
             </div>
           </div>
 
-          {/* Today's Study Plan & Weak Topics Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-16 md:pb-0">
             <div className="lg:col-span-2 glass-card rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-heading font-semibold text-slate-200 flex items-center gap-2">
@@ -424,7 +455,7 @@
                   Today's Dynamic Study Plan
                 </h4>
                 <button onClick={() => setActiveTab("study-plan")} className="text-xs text-indigo-400 hover:underline">
-                  View Full Schedule
+                  Full Schedule
                 </button>
               </div>
               <div className="space-y-3">
@@ -435,27 +466,21 @@
                         {i + 1}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-slate-200">{item.topic_name}</p>
-                        <p className="text-xs text-slate-400">{item.subject_name} • {item.revision_required} Revision</p>
+                        <p className="text-xs sm:text-sm font-semibold text-slate-200">{item.topic_name}</p>
+                        <p className="text-[10px] sm:text-xs text-slate-400">{item.subject_name} • {item.revision_required}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-1 rounded-md bg-slate-900 text-xs font-mono text-indigo-300">
-                        {item.duration_minutes} min
-                      </span>
-                      <button
-                        onClick={() => setActiveTab("take-quiz")}
-                        className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-xs font-medium transition-colors"
-                      >
-                        Start Session
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setActiveTab("take-quiz")}
+                      className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 text-xs font-medium"
+                    >
+                      Start
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Weak & Strong Topics Badges */}
             <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
               <div>
                 <h4 className="font-heading font-semibold text-slate-200 mb-3 flex items-center gap-2">
@@ -463,15 +488,11 @@
                   Detected Weak Topics
                 </h4>
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {data.weak_topics.length > 0 ? (
-                    data.weak_topics.map((t, idx) => (
-                      <span key={idx} className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
-                        {t}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-400">No weak topics detected!</p>
-                  )}
+                  {data.weak_topics.map((t, idx) => (
+                    <span key={idx} className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
+                      {t}
+                    </span>
+                  ))}
                 </div>
 
                 <h4 className="font-heading font-semibold text-slate-200 mb-3 flex items-center gap-2">
@@ -486,24 +507,13 @@
                   ))}
                 </div>
               </div>
-
-              <div className="pt-4 border-t border-slate-800 mt-4">
-                <button
-                  onClick={() => setActiveTab("take-quiz")}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-2"
-                >
-                  <i data-lucide="play-circle" className="w-4 h-4 text-indigo-400"></i>
-                  Launch Practice Diagnostic
-                </button>
-              </div>
             </div>
           </div>
         </div>
       );
     };
 
-    // MY SUBJECTS PAGE
-    const SubjectsPage = ({ setActiveTab }) => {
+    const SubjectsPage = ({ setActiveTab, setMobileMenuOpen }) => {
       const [subjects, setSubjects] = React.useState([]);
       const [loading, setLoading] = React.useState(true);
 
@@ -519,8 +529,8 @@
       if (loading) return <div className="p-8 text-center text-slate-400">Loading subjects catalog...</div>;
 
       return (
-        <div>
-          <Header title="My Enrolled Subjects" subtitle="Explore curriculum topics and baseline topic strength" />
+        <div className="pb-16 md:pb-0">
+          <Header title="My Enrolled Subjects" subtitle="Explore curriculum topics and baseline topic strength" setMobileMenuOpen={setMobileMenuOpen} />
           <div className="space-y-6">
             {subjects.map((sub) => (
               <div key={sub.id} className="glass-card rounded-2xl p-6">
@@ -534,7 +544,7 @@
                   </div>
                   <button
                     onClick={() => setActiveTab("take-quiz")}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors flex items-center gap-2 self-start sm:self-auto"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 self-start sm:self-auto"
                   >
                     <span>Take Subject Quiz</span>
                     <i data-lucide="arrow-right" className="w-3.5 h-3.5"></i>
@@ -560,13 +570,7 @@
                         <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
-                              top.accuracy >= 80
-                                ? "bg-emerald-400"
-                                : top.accuracy >= 60
-                                ? "bg-blue-400"
-                                : top.accuracy >= 40
-                                ? "bg-amber-400"
-                                : "bg-rose-400"
+                              top.accuracy >= 80 ? "bg-emerald-400" : top.accuracy >= 60 ? "bg-blue-400" : top.accuracy >= 40 ? "bg-amber-400" : "bg-rose-400"
                             }`}
                             style={{ width: `${Math.max(5, top.accuracy)}%` }}
                           ></div>
@@ -582,8 +586,7 @@
       );
     };
 
-    // STUDY PLAN PAGE
-    const StudyPlanPage = ({ setActiveTab }) => {
+    const StudyPlanPage = ({ setActiveTab, setMobileMenuOpen }) => {
       const [plan, setPlan] = React.useState(null);
       const [loading, setLoading] = React.useState(true);
 
@@ -599,8 +602,8 @@
       if (loading) return <div className="p-8 text-center text-slate-400">Generating personalized AI study plan...</div>;
 
       return (
-        <div>
-          <Header title="Personalized Study Plan" subtitle="Adaptive daily schedule powered by student weakness score algorithms" />
+        <div className="pb-16 md:pb-0">
+          <Header title="Personalized Study Plan" subtitle="Adaptive daily schedule powered by student weakness score algorithms" setMobileMenuOpen={setMobileMenuOpen} />
 
           <div className="glass-card rounded-2xl p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -643,14 +646,12 @@
       );
     };
 
-    // ADAPTIVE QUIZ PAGE
-    const TakeQuizPage = () => {
+    const TakeQuizPage = ({ setMobileMenuOpen }) => {
       const [subjects, setSubjects] = React.useState([]);
       const [selectedSubject, setSelectedSubject] = React.useState("");
       const [selectedTopic, setSelectedTopic] = React.useState("");
       const [topics, setTopics] = React.useState([]);
 
-      // Quiz execution state
       const [quizData, setQuizData] = React.useState(null);
       const [currentQIndex, setCurrentQIndex] = React.useState(0);
       const [selectedAnswers, setSelectedAnswers] = React.useState({});
@@ -737,15 +738,13 @@
         if (window.lucide) window.lucide.createIcons();
       }, [quizData, result, currentQIndex]);
 
-      // Active Quiz Question View
       if (quizData) {
         const q = quizData.questions[currentQIndex];
         const isLast = currentQIndex === quizData.questions.length - 1;
         const progressPct = ((currentQIndex + 1) / quizData.questions.length) * 100;
 
         return (
-          <div className="max-w-3xl mx-auto">
-            {/* Top Bar */}
+          <div className="max-w-3xl mx-auto pb-16 md:pb-0">
             <div className="glass-card rounded-2xl p-4 mb-6 flex items-center justify-between">
               <div>
                 <span className="text-xs text-indigo-400 font-mono font-bold uppercase">{quizData.subject_name}</span>
@@ -757,23 +756,20 @@
               </div>
             </div>
 
-            {/* Progress Bar */}
             <div className="w-full h-2 rounded-full bg-slate-800 mb-6 overflow-hidden">
               <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${progressPct}%` }}></div>
             </div>
 
-            {/* Question Card */}
             <div className="glass-card rounded-2xl p-6 mb-6">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-4 pb-3 border-b border-slate-800">
                 <span>Question {currentQIndex + 1} of {quizData.questions.length}</span>
                 {q.sub_concept && <span className="text-indigo-400">Concept: {q.sub_concept}</span>}
               </div>
 
-              <h3 className="font-heading font-bold text-lg text-slate-100 mb-6 leading-relaxed">
+              <h3 className="font-heading font-bold text-base sm:text-lg text-slate-100 mb-6 leading-relaxed">
                 {q.question_text}
               </h3>
 
-              {/* MCQ Options */}
               <div className="space-y-3">
                 {["A", "B", "C", "D"].map((optKey) => {
                   const optText = q[`option_${optKey.toLowerCase()}`];
@@ -785,7 +781,7 @@
                       className={`w-full text-left p-4 rounded-xl border font-medium text-sm transition-all duration-200 flex items-center gap-3 ${
                         isSelected
                           ? "bg-indigo-600/20 border-indigo-500 text-indigo-200 shadow-md shadow-indigo-500/10"
-                          : "bg-slate-800/40 border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:border-slate-600"
+                          : "bg-slate-800/40 border-slate-700/60 text-slate-300 hover:bg-slate-800"
                       }`}
                     >
                       <span className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center ${
@@ -800,7 +796,6 @@
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center justify-between">
               <button
                 disabled={currentQIndex === 0}
@@ -816,7 +811,7 @@
                   onClick={submitQuiz}
                   className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20"
                 >
-                  {loading ? "Grading & Updating Profile..." : "Submit Quiz"}
+                  {loading ? "Grading..." : "Submit Quiz"}
                 </button>
               ) : (
                 <button
@@ -831,40 +826,37 @@
         );
       }
 
-      // Quiz Results & AI Explanation View
       if (result) {
         const isPosDiff = result.score_diff >= 0;
         return (
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Top Score Comparison Banner */}
+          <div className="max-w-4xl mx-auto space-y-6 pb-16 md:pb-0">
             <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
               <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Quiz Completed</span>
               <h2 className="font-heading font-bold text-3xl text-slate-100 mt-1">Quiz Results & Profile Sync</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
-                <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
-                  <p className="text-xs text-slate-400">Predicted Score</p>
-                  <p className="text-2xl font-bold font-heading text-cyan-400 mt-1">{result.predicted_score}%</p>
+              <div className="grid grid-cols-3 gap-3 my-6">
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700">
+                  <p className="text-[10px] text-slate-400">Predicted</p>
+                  <p className="text-lg sm:text-2xl font-bold font-heading text-cyan-400 mt-1">{result.predicted_score}%</p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-800/60 border border-indigo-500/40 shadow-lg shadow-indigo-500/10">
-                  <p className="text-xs text-slate-400">Actual Score</p>
-                  <p className="text-3xl font-bold font-heading text-emerald-400 mt-1">{result.actual_score}%</p>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-indigo-500/40">
+                  <p className="text-[10px] text-slate-400">Actual</p>
+                  <p className="text-xl sm:text-3xl font-bold font-heading text-emerald-400 mt-1">{result.actual_score}%</p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
-                  <p className="text-xs text-slate-400">Prediction Difference</p>
-                  <p className={`text-2xl font-bold font-heading mt-1 ${isPosDiff ? "text-emerald-400" : "text-rose-400"}`}>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700">
+                  <p className="text-[10px] text-slate-400">Difference</p>
+                  <p className={`text-lg sm:text-2xl font-bold font-heading mt-1 ${isPosDiff ? "text-emerald-400" : "text-rose-400"}`}>
                     {isPosDiff ? `+${result.score_diff}%` : `${result.score_diff}%`}
                   </p>
                 </div>
               </div>
 
-              {/* AI Explanation Summary */}
               <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-left">
                 <h4 className="font-heading font-bold text-sm text-indigo-300 flex items-center gap-2 mb-2">
                   <i data-lucide="sparkles" className="w-4 h-4"></i>
-                  AI Performance Feedback & Learning Profile Update
+                  AI Performance Feedback
                 </h4>
                 <p className="text-xs text-slate-200 leading-relaxed mb-3">{result.recommended_revision}</p>
                 <p className="text-xs text-indigo-300">
@@ -873,29 +865,17 @@
               </div>
             </div>
 
-            {/* Answer Explanations List */}
             <div className="space-y-4">
               <h3 className="font-heading font-bold text-lg text-slate-100">Detailed Conceptual Breakdown</h3>
               {result.explanations.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`glass-card rounded-2xl p-5 border-l-4 ${
-                    item.is_correct ? "border-l-emerald-500" : "border-l-rose-500"
-                  }`}
-                >
+                <div key={idx} className={`glass-card rounded-2xl p-5 border-l-4 ${item.is_correct ? "border-l-emerald-500" : "border-l-rose-500"}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-semibold text-slate-400">Question {idx + 1}</span>
-                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold ${
-                      item.is_correct ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
-                    }`}>
+                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold ${item.is_correct ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
                       {item.is_correct ? "Correct ✓" : "Incorrect ✗"}
                     </span>
                   </div>
                   <h4 className="font-medium text-sm text-slate-200 mb-3">{item.question_text}</h4>
-                  <div className="text-xs text-slate-300 space-y-1 mb-3">
-                    <p>Your Selected Option: <strong className="text-slate-100">{item.selected_option}</strong></p>
-                    <p>Correct Option: <strong className="text-emerald-400">{item.correct_option}</strong></p>
-                  </div>
                   <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
                     <strong className="text-indigo-400 block mb-1">AI Explanation:</strong>
                     {item.explanation}
@@ -905,10 +885,7 @@
             </div>
 
             <div className="text-center pt-4">
-              <button
-                onClick={() => setResult(null)}
-                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold"
-              >
+              <button onClick={() => setResult(null)} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">
                 Take Another Quiz
               </button>
             </div>
@@ -916,10 +893,9 @@
         );
       }
 
-      // Quiz Selector View
       return (
-        <div className="max-w-2xl mx-auto">
-          <Header title="AI Adaptive Quiz Generator" subtitle="Generate personalized diagnostic quizzes aligned with your weak topics" />
+        <div className="max-w-2xl mx-auto pb-16 md:pb-0">
+          <Header title="AI Adaptive Quiz Generator" subtitle="Generate personalized diagnostic quizzes aligned with your weak topics" setMobileMenuOpen={setMobileMenuOpen} />
 
           <div className="glass-card rounded-2xl p-6 space-y-5">
             <div>
@@ -936,7 +912,7 @@
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-2">Select Topic (Optional — Default targets weakest topic)</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-2">Select Topic (Optional)</label>
               <select
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
@@ -949,32 +925,23 @@
               </select>
             </div>
 
-            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-start gap-3">
-              <i data-lucide="info" className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5"></i>
-              <p className="text-xs text-indigo-200 leading-relaxed">
-                Before the quiz starts, our <strong>Random Forest Regressor ML Model</strong> will analyze your historical accuracy, attempt frequency, and topic difficulty to output a predicted score.
-              </p>
-            </div>
-
             <button
               disabled={loading}
               onClick={startQuiz}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2"
             >
-              {loading ? "Generating Quiz & Running ML Model..." : "Generate Diagnostic Quiz"}
+              {loading ? "Generating Quiz..." : "Generate Diagnostic Quiz"}
             </button>
           </div>
         </div>
       );
     };
 
-    // PERFORMANCE ANALYTICS PAGE
-    const PerformancePage = () => {
+    const PerformancePage = ({ setMobileMenuOpen }) => {
       const [analytics, setAnalytics] = React.useState(null);
       const [loading, setLoading] = React.useState(true);
-
-      const radarRef = React.useRef(null);
       const doughnutRef = React.useRef(null);
+      const radarRef = React.useRef(null);
 
       React.useEffect(() => {
         apiFetch("/performance")
@@ -988,7 +955,6 @@
       React.useEffect(() => {
         if (!analytics || !window.Chart) return;
 
-        // Doughnut Chart
         const ctxDoughnut = document.getElementById("doughnutChart");
         if (ctxDoughnut) {
           if (doughnutRef.current) doughnutRef.current.destroy();
@@ -996,23 +962,12 @@
             type: "doughnut",
             data: {
               labels: analytics.doughnut.labels,
-              datasets: [
-                {
-                  data: analytics.doughnut.counts,
-                  backgroundColor: ["#10b981", "#3b82f6", "#f43f5e"],
-                  borderWidth: 0,
-                },
-              ],
+              datasets: [{ data: analytics.doughnut.counts, backgroundColor: ["#10b981", "#3b82f6", "#f43f5e"], borderWidth: 0 }],
             },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { position: "bottom", labels: { color: "#cbd5e1" } } },
-            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#cbd5e1" } } } },
           });
         }
 
-        // Radar Chart
         const ctxRadar = document.getElementById("radarChart");
         if (ctxRadar) {
           if (radarRef.current) radarRef.current.destroy();
@@ -1020,30 +975,9 @@
             type: "radar",
             data: {
               labels: analytics.radar.labels,
-              datasets: [
-                {
-                  label: "Topic Accuracy %",
-                  data: analytics.radar.values,
-                  borderColor: "#06b6d4",
-                  backgroundColor: "rgba(6, 182, 212, 0.2)",
-                  pointBackgroundColor: "#06b6d4",
-                },
-              ],
+              datasets: [{ label: "Accuracy %", data: analytics.radar.values, borderColor: "#06b6d4", backgroundColor: "rgba(6, 182, 212, 0.2)" }],
             },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                r: {
-                  min: 0,
-                  max: 100,
-                  grid: { color: "rgba(255,255,255,0.1)" },
-                  angleLines: { color: "rgba(255,255,255,0.1)" },
-                  ticks: { display: false },
-                },
-              },
-              plugins: { legend: { display: false } },
-            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } },
           });
         }
       }, [analytics]);
@@ -1051,8 +985,8 @@
       if (loading) return <div className="p-8 text-center text-slate-400">Loading performance analytics...</div>;
 
       return (
-        <div>
-          <Header title="Performance Analytics" subtitle="Comprehensive visual breakdown of strong vs weak topic distributions" />
+        <div className="pb-16 md:pb-0">
+          <Header title="Performance Analytics" subtitle="Comprehensive visual breakdown of strong vs weak topic distributions" setMobileMenuOpen={setMobileMenuOpen} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="glass-card rounded-2xl p-5">
@@ -1060,9 +994,7 @@
                 <i data-lucide="pie-chart" className="w-4 h-4 text-emerald-400"></i>
                 Topic Mastery Distribution
               </h4>
-              <div className="h-64">
-                <canvas id="doughnutChart"></canvas>
-              </div>
+              <div className="h-64"><canvas id="doughnutChart"></canvas></div>
             </div>
 
             <div className="glass-card rounded-2xl p-5">
@@ -1070,48 +1002,14 @@
                 <i data-lucide="activity" className="w-4 h-4 text-cyan-400"></i>
                 Topic Strengths Radar Map
               </h4>
-              <div className="h-64">
-                <canvas id="radarChart"></canvas>
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Topic Table */}
-          <div className="glass-card rounded-2xl p-5">
-            <h4 className="font-heading font-semibold text-slate-200 mb-4">Topic Performance Matrix</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
-                    <th className="pb-3">Topic</th>
-                    <th className="pb-3">Subject</th>
-                    <th className="pb-3">Attempts</th>
-                    <th className="pb-3">Accuracy</th>
-                    <th className="pb-3">Weakness Score</th>
-                    <th className="pb-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  {analytics.topic_table.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-800/30">
-                      <td className="py-3 font-semibold text-slate-200">{row.topic_name}</td>
-                      <td className="py-3 text-slate-400">{row.subject_name}</td>
-                      <td className="py-3 text-slate-300">{row.attempts}</td>
-                      <td className="py-3 font-bold text-indigo-300">{row.accuracy}%</td>
-                      <td className="py-3 text-slate-400">{row.weakness_score}</td>
-                      <td className="py-3"><Badge type={row.status} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="h-64"><canvas id="radarChart"></canvas></div>
             </div>
           </div>
         </div>
       );
     };
 
-    // AI RECOMMENDATIONS PAGE
-    const RecommendationsPage = () => {
+    const RecommendationsPage = ({ setMobileMenuOpen }) => {
       const [recs, setRecs] = React.useState([]);
       const [loading, setLoading] = React.useState(true);
 
@@ -1127,8 +1025,8 @@
       if (loading) return <div className="p-8 text-center text-slate-400">Computing hybrid AI recommendations...</div>;
 
       return (
-        <div>
-          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" />
+        <div className="pb-16 md:pb-0">
+          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" setMobileMenuOpen={setMobileMenuOpen} />
 
           <div className="space-y-4">
             {recs.map((item) => (
@@ -1157,8 +1055,7 @@
       );
     };
 
-    // LEARNING PROFILE PAGE
-    const LearningProfilePage = () => {
+    const LearningProfilePage = ({ setMobileMenuOpen }) => {
       const [table, setTable] = React.useState([]);
       const [loading, setLoading] = React.useState(true);
 
@@ -1171,11 +1068,11 @@
           .catch((err) => console.error(err));
       }, []);
 
-      if (loading) return <div className="p-8 text-center text-slate-400">Loading full dynamic learning profile...</div>;
+      if (loading) return <div className="p-8 text-center text-slate-400">Loading dynamic learning profile...</div>;
 
       return (
-        <div>
-          <Header title="Student AI Learning Profile" subtitle="Complete stored metrics per topic updated after every quiz" />
+        <div className="pb-16 md:pb-0">
+          <Header title="Student AI Learning Profile" subtitle="Complete stored metrics per topic updated after every quiz" setMobileMenuOpen={setMobileMenuOpen} />
 
           <div className="glass-card rounded-2xl p-5 overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -1185,9 +1082,7 @@
                   <th className="pb-3">Subject</th>
                   <th className="pb-3">Attempts</th>
                   <th className="pb-3">Accuracy</th>
-                  <th className="pb-3">Recent Score</th>
                   <th className="pb-3">Weakness Score</th>
-                  <th className="pb-3">Confidence Score</th>
                   <th className="pb-3">Status Label</th>
                 </tr>
               </thead>
@@ -1198,9 +1093,7 @@
                     <td className="py-3 text-slate-400">{row.subject_name}</td>
                     <td className="py-3 text-slate-300">{row.attempts}</td>
                     <td className="py-3 font-bold text-indigo-300">{row.accuracy}%</td>
-                    <td className="py-3 text-slate-300">{row.recent_score}%</td>
                     <td className="py-3 font-mono text-rose-400">{row.weakness_score}</td>
-                    <td className="py-3 font-mono text-emerald-400">{row.confidence_score}</td>
                     <td className="py-3"><Badge type={row.status} /></td>
                   </tr>
                 ))}
@@ -1211,8 +1104,7 @@
       );
     };
 
-    // PROFILE PAGE
-    const ProfilePage = ({ user, onUpdateProfile }) => {
+    const ProfilePage = ({ user, onUpdateProfile, setMobileMenuOpen }) => {
       const [formData, setFormData] = React.useState({
         full_name: user?.full_name || "",
         college: user?.college || "",
@@ -1237,8 +1129,8 @@
       };
 
       return (
-        <div className="max-w-2xl mx-auto">
-          <Header title="Student Profile Settings" subtitle="Manage your academic background and learning goals" />
+        <div className="max-w-2xl mx-auto pb-16 md:pb-0">
+          <Header title="Student Profile Settings" subtitle="Manage your academic background and learning goals" setMobileMenuOpen={setMobileMenuOpen} />
 
           {msg && <div className="p-3 mb-4 rounded-xl bg-indigo-500/20 text-indigo-300 text-xs font-semibold">{msg}</div>}
 
@@ -1294,10 +1186,7 @@
               ></textarea>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold"
-            >
+            <button type="submit" className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">
               Save Profile Changes
             </button>
           </form>
@@ -1305,7 +1194,6 @@
       );
     };
 
-    // AUTH (LOGIN / REGISTER) PAGE
     const AuthPage = ({ onAuthSuccess }) => {
       const [isLogin, setIsLogin] = React.useState(true);
       const [email, setEmail] = React.useState("student@demo.edu");
@@ -1339,7 +1227,7 @@
                 AI
               </div>
               <h2 className="font-heading font-bold text-2xl text-slate-100">AI Study Twin</h2>
-              <p className="text-xs text-slate-400 mt-1">Sign in to your personalized AI learning twin</p>
+              <p className="text-xs text-slate-400 mt-1">Sign in to your personalized Android AI app</p>
             </div>
 
             {error && <div className="p-3 mb-4 rounded-xl bg-rose-500/20 text-rose-300 text-xs text-center font-medium">{error}</div>}
@@ -1401,11 +1289,11 @@
       );
     };
 
-    // MAIN APP ROOT COMPONENT
     const App = () => {
       const [authenticated, setAuthenticated] = React.useState(!!getAuthToken());
       const [user, setUser] = React.useState(null);
       const [activeTab, setActiveTab] = React.useState("dashboard");
+      const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
       const loadUserProfile = () => {
         if (!getAuthToken()) return;
@@ -1431,18 +1319,25 @@
       }
 
       return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex">
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout} />
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            user={user}
+            onLogout={handleLogout}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          />
 
-          <main className="ml-64 flex-1 p-8 overflow-y-auto">
-            {activeTab === "dashboard" && <DashboardPage setActiveTab={setActiveTab} />}
-            {activeTab === "subjects" && <SubjectsPage setActiveTab={setActiveTab} />}
-            {activeTab === "study-plan" && <StudyPlanPage setActiveTab={setActiveTab} />}
-            {activeTab === "take-quiz" && <TakeQuizPage />}
-            {activeTab === "performance" && <PerformancePage />}
-            {activeTab === "recommendations" && <RecommendationsPage />}
-            {activeTab === "learning-profile" && <LearningProfilePage />}
-            {activeTab === "profile" && <ProfilePage user={user} onUpdateProfile={setUser} />}
+          <main className="md:ml-64 flex-1 p-4 sm:p-8 overflow-y-auto">
+            {activeTab === "dashboard" && <DashboardPage setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "subjects" && <SubjectsPage setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "study-plan" && <StudyPlanPage setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "take-quiz" && <TakeQuizPage setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "performance" && <PerformancePage setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "recommendations" && <RecommendationsPage setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "learning-profile" && <LearningProfilePage setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "profile" && <ProfilePage user={user} onUpdateProfile={setUser} setMobileMenuOpen={setMobileMenuOpen} />}
           </main>
         </div>
       );
