@@ -1,6 +1,6 @@
-# AI Study Twin — Intelligent Personalized Learning Platform
+# AI Study Twin — Intelligent Personalized Learning Web Platform
 
-AI Study Twin is a full-stack, machine learning-driven educational platform designed for college students. It builds a dynamic student learning profile, continuously tracks academic performance across subjects and topics, predicts expected quiz scores using machine learning regression, identifies weak and strong topics, generates tailored study schedules, and provides post-quiz AI explanations.
+AI Study Twin is a full-stack, machine learning-driven web application designed for college students. It builds a dynamic student learning profile, continuously tracks academic performance across subjects and topics, predicts expected quiz scores using machine learning regression, identifies weak and strong topics, generates tailored study schedules, and provides post-quiz AI explanations.
 
 ---
 
@@ -117,11 +117,3 @@ Open your browser and navigate to:
 **Default Demo Credentials:**
 - **Email**: `student@demo.edu`
 - **Password**: `password123`
-
----
-
-## 6. How the AI/ML System Works
-
-1. **Weakness Scoring**: When a student takes a quiz, the system records correct/incorrect answers per topic. `ClassifierModel` calculates an effective accuracy using exponential moving average (60% weight on recent score + 40% on historical accuracy) adjusted for difficulty level.
-2. **Score Regression**: Before starting a quiz, `QuizScorePredictor` inputs feature vectors `[attempts, topic_accuracy, recent_score, overall_avg, revision_count, days_since_last_study, difficulty_level]` into a Random Forest Regressor to forecast expected score.
-3. **Hybrid Recommendation**: `RecommendationEngine` evaluates forgetting curve time decay (+1.5 points per day unstudied), weakness score, topic importance weight, and prerequisite completion to generate a priority-ranked revision list.
