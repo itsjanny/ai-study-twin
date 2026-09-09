@@ -469,10 +469,14 @@
         return Math.round(Math.max(15, Math.min(98, pred)) * 10) / 10;
       },
 
-      // Model 3: Hybrid Recommendation Engine
-      generateRecommendations: (state) => {
+      // Model 3: Hybrid Recommendation Engine (Supports Subject-Specific Filtering)
+      generateRecommendations: (state, subjectId = "all") => {
         const recs = [];
-        state.subjects.forEach(sub => {
+        const targetSubjects = (subjectId && subjectId !== "all") 
+          ? state.subjects.filter(s => s.id === parseInt(subjectId))
+          : state.subjects;
+
+        targetSubjects.forEach(sub => {
           sub.topics.forEach(top => {
             const time_factor = Math.min(30, (top.last_studied_days || 1) * 1.5);
             const p_score = (top.weakness_score * 0.45) + time_factor + (top.difficulty * 3.0) + (top.importance * 10.0);
@@ -490,7 +494,7 @@
               duration = 20;
             }
 
-            let reason = `${sub.code} — ${top.name} is a '${top.status}' area with low recent accuracy (${top.recent_score}%). Focus on targeted revision.`;
+            let reason = `${sub.code} — ${top.name} is a '${top.status}' area with recent accuracy (${top.recent_score}%). Focus on targeted revision.`;
             if (top.last_studied_days > 7) {
               reason = `${top.name} has not been studied in ${top.last_studied_days} days. Scheduled for memory retention.`;
             }
@@ -498,6 +502,8 @@
             recs.push({
               topic_id: top.id,
               topic_name: top.name,
+              subject_id: sub.id,
+              subject_code: sub.code,
               subject_name: sub.name,
               priority_score: Math.round(p_score * 10) / 10,
               reason: reason,
@@ -815,7 +821,7 @@
                   </div>
                   <div>
                     <h1 className="font-heading font-bold text-lg leading-none gradient-text">AI Study Twin</h1>
-                    <p className="text-xs text-slate-400 mt-1">GitHub Pages Live App</p>
+                    <p className="text-xs text-indigo-400 font-medium mt-1">Smart Learning Workspace</p>
                   </div>
                 </div>
                 <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400 p-1">
@@ -913,7 +919,7 @@
           <div className="hidden sm:flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Client AI Engine Ready (GitHub Pages)
+              AI Engine Active
             </div>
             <button
               onClick={onLogout}
@@ -927,24 +933,36 @@
       );
     };
 
-    // DASHBOARD PAGE
+    // DASHBOARD PAGE (WITH SUBJECT-SPECIFIC ANALYSIS & AI RECOMMENDATION FILTER)
     const DashboardPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       const trendChartRef = React.useRef(null);
       const subjChartRef = React.useRef(null);
 
-      const allTopics = state.subjects.flatMap(s => s.topics);
-      const totalTopics = allTopics.length;
-      const mastered = allTopics.filter(t => t.status === "Strong");
-      const weak = allTopics.filter(t => t.status === "Weak" || t.status === "Very Weak");
-      const avgAccuracy = Math.round(allTopics.reduce((acc, t) => acc + t.accuracy, 0) / totalTopics * 10) / 10;
+      const [selectedSubjectId, setSelectedSubjectId] = React.useState("all");
 
-      const recs = ClientMLEngine.generateRecommendations(state);
-      const topRec = recs[0];
-      const predictedNext = ClientMLEngine.predictQuizScore(allTopics.find(t => t.name === topRec.topic_name) || allTopics[0]);
+      const targetSubject = selectedSubjectId !== "all" 
+        ? state.subjects.find(s => s.id === parseInt(selectedSubjectId))
+        : null;
+
+      const filteredTopics = targetSubject 
+        ? targetSubject.topics 
+        : state.subjects.flatMap(s => s.topics);
+
+      const totalTopics = filteredTopics.length;
+      const mastered = filteredTopics.filter(t => t.status === "Strong");
+      const weak = filteredTopics.filter(t => t.status === "Weak" || t.status === "Very Weak");
+      const avgAccuracy = totalTopics > 0 
+        ? Math.round(filteredTopics.reduce((acc, t) => acc + t.accuracy, 0) / totalTopics * 10) / 10
+        : 0;
+
+      const recs = ClientMLEngine.generateRecommendations(state, selectedSubjectId);
+      const topRec = recs[0] || { topic_name: "Select a Subject Topic", reason: "Complete targeted quizzes to build recommendations", subject_name: "" };
+      const predictedNext = ClientMLEngine.predictQuizScore(filteredTopics.find(t => t.name === topRec.topic_name) || filteredTopics[0]);
 
       React.useEffect(() => {
         if (!window.Chart) return;
 
+        // 1. Performance Trend Chart
         const ctxTrend = document.getElementById("trendChart");
         if (ctxTrend) {
           if (trendChartRef.current) trendChartRef.current.destroy();
@@ -979,17 +997,31 @@
           });
         }
 
+        // 2. Dynamic Subject / Topic Comparison Chart
         const ctxSubj = document.getElementById("subjChart");
         if (ctxSubj) {
           if (subjChartRef.current) subjChartRef.current.destroy();
+
+          const chartLabels = targetSubject 
+            ? targetSubject.topics.map(t => t.name.length > 16 ? t.name.substring(0, 14) + '...' : t.name)
+            : state.subjects.map(s => s.code);
+
+          const chartData = targetSubject
+            ? targetSubject.topics.map(t => Math.round(t.accuracy))
+            : state.subjects.map(s => Math.round(s.topics.reduce((acc, t) => acc + t.accuracy, 0) / s.topics.length));
+
+          const chartColors = targetSubject
+            ? targetSubject.topics.map((t, idx) => ["#6366f1", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6"][idx % 6])
+            : ["#6366f1", "#06b6d4", "#10b981", "#f59e0b"];
+
           subjChartRef.current = new window.Chart(ctxSubj, {
             type: "bar",
             data: {
-              labels: state.subjects.map(s => s.code),
+              labels: chartLabels,
               datasets: [{
-                label: "Accuracy %",
-                data: state.subjects.map(s => Math.round(s.topics.reduce((acc, t) => acc + t.accuracy, 0) / s.topics.length)),
-                backgroundColor: ["#6366f1", "#06b6d4", "#10b981", "#f59e0b"],
+                label: targetSubject ? `${targetSubject.code} Topic Accuracy %` : "Subject Avg Accuracy %",
+                data: chartData,
+                backgroundColor: chartColors,
                 borderRadius: 6
               }]
             },
@@ -1001,33 +1033,62 @@
             }
           });
         }
-      }, [state]);
+      }, [state, selectedSubjectId]);
 
       return (
         <div className="pb-16 md:pb-0">
           <Header
             title={`Welcome back, ${state.user?.full_name || "Student"}!`}
-            subtitle="Personalized AI Learning Twin Dashboard running live on GitHub Pages"
+            subtitle="Personalized AI Learning Twin Dashboard — Accurate real-time subject analytics"
             setMobileMenuOpen={setMobileMenuOpen}
             onLogout={onLogout}
           />
 
-          {/* Top KPI Cards */}
+          {/* Interactive Subject Selection Filter */}
+          <div className="glass-card rounded-2xl p-4 sm:p-5 mb-6 border-l-4 border-l-indigo-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-bold tracking-wider text-indigo-400 uppercase">Subject Analytics & Focus Selector</span>
+              <h3 className="font-heading font-bold text-base sm:text-lg text-slate-100 mt-0.5">
+                {targetSubject ? `Selected Course: ${targetSubject.name}` : "Showing Combined Analytics Across All Subjects"}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">Select a subject below to view accurate subject-specific AI recommendations, mastery scores & topic breakdowns.</p>
+            </div>
+            <div className="w-full sm:w-auto shrink-0">
+              <select
+                value={selectedSubjectId}
+                onChange={(e) => setSelectedSubjectId(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-indigo-300 font-bold text-xs focus:outline-none focus:border-indigo-500 shadow-md cursor-pointer"
+              >
+                <option value="all">🌟 All Enrolled Subjects (Combined View)</option>
+                {state.subjects.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.code} — {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Top KPI Cards (Subject-Aware) */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <div className="glass-card rounded-2xl p-4">
-              <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Overall Performance</p>
+              <p className="text-[10px] sm:text-xs font-semibold text-slate-400">
+                {targetSubject ? `${targetSubject.code} Accuracy` : "Overall Performance"}
+              </p>
               <h3 className="text-xl sm:text-2xl font-bold font-heading text-slate-100 mt-1">{avgAccuracy}%</h3>
-              <p className="text-[10px] sm:text-xs text-emerald-400 font-medium mt-1">Level: Intermediate</p>
+              <p className="text-[10px] sm:text-xs text-emerald-400 font-medium mt-1">
+                {avgAccuracy >= 80 ? "Level: Advanced" : avgAccuracy >= 60 ? "Level: Intermediate" : "Level: Beginner"}
+              </p>
             </div>
             <div className="glass-card rounded-2xl p-4">
               <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Topics Mastered</p>
-              <h3 className="text-xl sm:text-2xl font-bold font-heading text-emerald-400 mt-1">{mastered.length}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold font-heading text-emerald-400 mt-1">{mastered.length} / {totalTopics}</h3>
               <p className="text-[10px] sm:text-xs text-slate-400 mt-1">Score 80%+</p>
             </div>
             <div className="glass-card rounded-2xl p-4">
               <p className="text-[10px] sm:text-xs font-semibold text-slate-400">Needs Revision</p>
               <h3 className="text-xl sm:text-2xl font-bold font-heading text-rose-400 mt-1">{weak.length}</h3>
-              <p className="text-[10px] sm:text-xs text-amber-400 mt-1">High Focus</p>
+              <p className="text-[10px] sm:text-xs text-amber-400 mt-1">High Focus Areas</p>
             </div>
             <div className="glass-card rounded-2xl p-4">
               <p className="text-[10px] sm:text-xs font-semibold text-slate-400">ML Predicted Next</p>
@@ -1036,14 +1097,23 @@
             </div>
           </div>
 
-          {/* AI Banner */}
+          {/* AI Banner (Subject-Aware) */}
           <div className="glass-card rounded-2xl p-5 mb-6 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center shrink-0">
                 <i data-lucide="sparkles" className="w-5 h-5"></i>
               </div>
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Top Recommendation</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                    {targetSubject ? `AI Recommendation for ${targetSubject.code}` : "Top AI Recommendation"}
+                  </span>
+                  {topRec.subject_code && (
+                    <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">
+                      {topRec.subject_code}
+                    </span>
+                  )}
+                </div>
                 <h4 className="font-heading font-bold text-base sm:text-lg text-slate-100 mt-0.5">
                   Recommended Study Focus: <span className="text-indigo-300">{topRec.topic_name}</span>
                 </h4>
@@ -1071,11 +1141,13 @@
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="glass-card rounded-2xl p-5">
-              <h4 className="font-heading font-semibold text-slate-200 mb-4">Performance Trend</h4>
+              <h4 className="font-heading font-semibold text-slate-200 mb-4">Performance Trend History</h4>
               <div className="h-64"><canvas id="trendChart"></canvas></div>
             </div>
             <div className="glass-card rounded-2xl p-5">
-              <h4 className="font-heading font-semibold text-slate-200 mb-4">Subject Comparison</h4>
+              <h4 className="font-heading font-semibold text-slate-200 mb-4">
+                {targetSubject ? `${targetSubject.code} Topic Accuracy Breakdown` : "Subject Performance Comparison"}
+              </h4>
               <div className="h-64"><canvas id="subjChart"></canvas></div>
             </div>
           </div>
@@ -1580,12 +1652,32 @@
       );
     };
 
-    // AI RECOMMENDATIONS PAGE
+    // AI RECOMMENDATIONS PAGE (WITH SUBJECT SELECTION FILTER)
     const RecommendationsPage = ({ state, setMobileMenuOpen, onLogout }) => {
-      const recs = ClientMLEngine.generateRecommendations(state);
+      const [selectedSubjectId, setSelectedSubjectId] = React.useState("all");
+      const recs = ClientMLEngine.generateRecommendations(state, selectedSubjectId);
+
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning tailored by subject" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+
+          <div className="glass-card rounded-2xl p-4 sm:p-5 mb-6 border-l-4 border-l-indigo-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="font-heading font-bold text-sm text-slate-200">Filter Recommendations by Subject</h4>
+              <p className="text-xs text-slate-400 mt-0.5">Select a specific course to rank priority study topics for that subject</p>
+            </div>
+            <select
+              value={selectedSubjectId}
+              onChange={e => setSelectedSubjectId(e.target.value)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-indigo-300 font-bold text-xs focus:outline-none focus:border-indigo-500 shadow-md cursor-pointer"
+            >
+              <option value="all">🌟 All Enrolled Subjects</option>
+              {state.subjects.map(s => (
+                <option key={s.id} value={s.id}>{s.code} — {s.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="space-y-4">
             {recs.map(item => (
               <div key={item.topic_id} className="glass-card rounded-2xl p-5 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1595,7 +1687,7 @@
                     <h4 className="font-heading font-bold text-lg text-slate-100">{item.topic_name}</h4>
                     <Badge type={item.revision_required} />
                   </div>
-                  <p className="text-xs text-indigo-300 font-semibold mt-1">{item.subject_name}</p>
+                  <p className="text-xs text-indigo-300 font-semibold mt-1">{item.subject_code} — {item.subject_name}</p>
                   <p className="text-xs text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800 mt-2">{item.reason}</p>
                 </div>
                 <div className="text-right shrink-0">
