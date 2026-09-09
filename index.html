@@ -99,9 +99,104 @@
         course: "B.Tech Computer Science",
         semester: "Semester 4",
         target_gpa: 3.9,
-        learning_goals: "Master Python & Java Basic to Advanced, Data Structures, and Database Systems for upcoming placement exams."
+        learning_goals: "Master Python, Java, DSA Beginning to Advanced, and DBMS for upcoming placement exams."
       }
     ];
+
+    // COMPREHENSIVE STUDY MATERIALS FOR EVERY TOPIC
+    const STUDY_MATERIALS_DB = {
+      10101: {
+        title: "Python Syntax, Variables & Data Types",
+        markdown: "Python is a dynamically-typed, high-level programming language. Variable types are determined automatically at runtime. Essential primitive & collection types include int, float, str, list, tuple, dict, and set. Memory management is handled via reference counting and a generational garbage collector.",
+        code: `# Basic Types & Mutability Demo\nx = 42                       # int (Immutable)\nprice = 99.99                # float\nname = "AI Study Twin"       # str (Immutable)\n\n# Collections\nnumbers = [1, 2, 3]          # list (Mutable)\npoint = (10, 20)             # tuple (Immutable)\nuser = {"name": "Alex"}      # dict (Mutable)\n\nprint(f"{name} -> {numbers[0]}")`,
+        cheat_sheet: "• Mutable: list, dict, set, bytearray\n• Immutable: int, float, str, tuple, frozenset, bytes\n• Type Check: type(x) or isinstance(x, int)\n• Truthy / Falsy: Empty [], (), {}, '', 0, None evaluate to False.",
+        interview_tips: "Q: Why are tuples immutable in Python?\nA: Immutability allows tuples to be hashable (usable as dictionary keys) and provides memory optimizations and thread-safety."
+      },
+      10102: {
+        title: "Control Flow, Loops & First-Class Functions",
+        markdown: "Functions in Python are first-class citizens, meaning they can be passed as arguments, returned from functions, and assigned to variables. Loop structures include for (iterating over iterables) and while loops with break/continue/else branches.",
+        code: `# First-class functions & List Comprehensions\ndef apply_func(func, data):\n    return [func(x) for x in data if x > 0]\n\nsquare = lambda x: x ** 2\nresult = apply_func(square, [-2, 1, 3, 5])\nprint(result)  # Output: [1, 9, 25]`,
+        cheat_sheet: "• range(start, stop, step): Half-open interval [start, stop)\n• List Comp: [expr for item in iterable if cond]\n• Lambda: Inline anonymous function: lambda x: expr",
+        interview_tips: "Q: What is the purpose of the 'else' block after a for/while loop?\nA: The 'else' block executes only if the loop finishes normally without encountering a 'break' statement."
+      },
+      10105: {
+        title: "Decorators, Generators & Context Managers",
+        markdown: "Decorators wrap functions to dynamically alter behavior (@functools.wraps preserves metadata). Generators yield values lazily one at a time, avoiding storing entire sequences in memory. Context managers (with statement) handle resource allocation and cleanup (__enter__ and __exit__).",
+        code: `import time\n\n# Custom Timing Decorator\ndef timer_decorator(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        print(f"{func.__name__} executed in {time.time() - start:.4f}s")\n        return result\n    return wrapper\n\n# Lazy Generator\ndef fibonacci_gen(limit):\n    a, b = 0, 1\n    for _ in range(limit):\n        yield a\n        a, b = b, a + b\n\nprint(list(fibonacci_gen(8))) # [0, 1, 1, 2, 3, 5, 8, 13]`,
+        cheat_sheet: "• Decorator: @my_decorator syntax wraps a target function\n• Generator: Uses 'yield' to suspend state lazily\n• Context Manager: 'with open(...) as f:' guarantees cleanup",
+        interview_tips: "Q: How do generators reduce memory overhead?\nA: Instead of allocating a full array in RAM, generators compute values on demand during iteration (O(1) auxiliary space)."
+      },
+      20101: {
+        title: "Java Syntax, Variables & Memory Architecture",
+        markdown: "Java is a statically typed, compiled, object-oriented language executed on the Java Virtual Machine (JVM). Memory is divided into Stack (local variables & call frames) and Heap (dynamically allocated objects managed by Garbage Collection).",
+        code: `public class Main {\n    public static void main(String[] args) {\n        int age = 21;                  // 32-bit stack variable\n        long studentId = 1000000000L;  // 64-bit primitive\n        double gpa = 3.92;\n        boolean isActive = true;\n\n        System.out.println("ID: " + studentId + " | GPA: " + gpa);\n    }\n}`,
+        cheat_sheet: "• Primitives: byte(8b), short(16b), int(32b), long(64b), float(32b), double(64b), char(16b), boolean\n• Stack: Local primitives & object references\n• Heap: Object instances & arrays",
+        interview_tips: "Q: Difference between Primitive types and Wrapper classes?\nA: Primitives store raw values on the stack with zero overhead; Wrapper classes (Integer, Double) are boxed heap objects supporting Generics & null."
+      },
+      20105: {
+        title: "Polymorphism, Overriding & Dynamic Dispatch",
+        markdown: "Polymorphism allows objects of different classes to be treated through a common parent interface. Method Overriding happens at runtime (Dynamic Binding / Late Dispatch) where the child class implementation is invoked based on the actual object instance.",
+        code: `abstract class Shape {\n    abstract double calculateArea();\n}\n\nclass Circle extends Shape {\n    double radius;\n    Circle(double r) { this.radius = r; }\n    @Override double calculateArea() { return Math.PI * radius * radius; }\n}\n\nShape s = new Circle(5.0);\nSystem.out.println(s.calculateArea()); // Dynamic dispatch calls Circle's method`,
+        cheat_sheet: "• Overloading: Same method name, different parameters (Compile-time)\n• Overriding: Same method name & signature in subclass (Runtime)\n• final keyword: Prevents class inheritance or method overriding",
+        interview_tips: "Q: What is dynamic method dispatch in Java?\nA: It is the mechanism by which a call to an overridden method is resolved at runtime rather than compile-time based on the runtime object type."
+      },
+      20108: {
+        title: "Multithreading, Concurrency & Java Stream API",
+        markdown: "Java multithreading enables concurrent execution using Threads, Runnable, and Executor Services. Java 8 Stream API provides functional processing pipelines (filter, map, flatMap, reduce) that can run sequentially or in parallel.",
+        code: `import java.util.*;\nimport java.util.stream.*;\n\nList<String> names = List.of("Alice", "Bob", "Charlie", "David");\nList<String> result = names.stream()\n    .filter(n -> n.length() > 3)\n    .map(String::toUpperCase)\n    .sorted()\n    .collect(Collectors.toList());\n\nSystem.out.println(result); // [ALICE, CHARLIE, DAVID]`,
+        cheat_sheet: "• Stream Operations: Intermediate (lazy: filter, map) & Terminal (eager: collect, reduce)\n• Thread Safety: Synchronized blocks, ReentrantLock, ConcurrentHashMap\n• Thread Pool: Executors.newFixedThreadPool(int n)",
+        interview_tips: "Q: Difference between Collection and Stream in Java?\nA: Collections are data structures storing elements in memory; Streams are computational pipelines that iterate elements lazily without storing data."
+      },
+      30101: {
+        title: "DSA Foundations: Asymptotic Analysis & Big-O Notation",
+        markdown: "Asymptotic analysis evaluates algorithm efficiency as input size N grows toward infinity. Big-O defines upper bound execution time/space. Common complexity classes: O(1) < O(log N) < O(N) < O(N log N) < O(N^2) < O(2^N).",
+        code: `# Binary Search: O(log N) Time, O(1) Space\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1`,
+        cheat_sheet: "• O(1): Array lookup by index\n• O(log N): Binary Search / Balanced BST\n• O(N): Linear scan\n• O(N log N): MergeSort / HeapSort / QuickSort avg\n• O(N^2): Nested loops (Bubble / Insertion Sort)",
+        interview_tips: "Q: What is the space complexity of recursive functions?\nA: Auxiliary space includes the call stack depth (e.g. O(N) stack space for recursion depth N)."
+      },
+      30102: {
+        title: "Arrays, Strings, Two-Pointers & Sliding Window",
+        markdown: "Two-pointer and sliding window techniques convert brute-force O(N^2) subarray/substring searches into linear O(N) single-pass algorithms by adjusting boundary pointers.",
+        code: `# Two-Sum on Sorted Array (Two-Pointer Technique)\ndef two_sum_sorted(arr, target):\n    left, right = 0, len(arr) - 1\n    while left < right:\n        curr_sum = arr[left] + arr[right]\n        if curr_sum == target:\n            return [left, right]\n        elif curr_sum < target:\n            left += 1\n        else:\n            right -= 1\n    return []`,
+        cheat_sheet: "• Fixed Sliding Window: Window size K constant\n• Dynamic Sliding Window: Expand right pointer until constraint violated, then shrink left\n• Two Pointers: Left & right pointers moving inward on sorted data",
+        interview_tips: "Q: How does sliding window reduce time complexity?\nA: By reusing computation from overlapping elements rather than recalculating the entire window sum from scratch."
+      },
+      30103: {
+        title: "Stacks, Queues, Linked Lists & Hash Tables",
+        markdown: "Linear data structures: Stacks use LIFO (Last-In-First-Out); Queues use FIFO (First-In-First-Out); Linked Lists consist of nodes with pointers. Hash Tables provide O(1) average key-value lookups via hashing algorithms.",
+        code: `# Stack (LIFO) & Queue (FIFO) in Python\nfrom collections import deque\n\nstack = []\nstack.append(1); stack.append(2)\ntop = stack.pop()  # 2 (LIFO)\n\nqueue = deque([1, 2, 3])\nqueue.append(4)\nfirst = queue.popleft() # 1 (FIFO)`,
+        cheat_sheet: "• Stack Ops: push O(1), pop O(1), peek O(1)\n• Queue Ops: enqueue O(1), dequeue O(1)\n• Hash Table Collision Resolution: Chaining (LinkedList) or Open Addressing (Linear Probing)",
+        interview_tips: "Q: How to detect a cycle in a Linked List?\nA: Use Floyd's Cycle Detection (Slow and Fast Pointers / Tortoise and Hare algorithm) in O(N) time and O(1) space."
+      },
+      30104: {
+        title: "Binary Trees, Binary Search Trees (BST) & Heaps",
+        markdown: "A Binary Search Tree guarantees left_child < parent < right_child. Inorder traversal yields sorted elements. Heaps (Min-Heap / Max-Heap) maintain complete binary trees where parent is <= or >= children, ideal for Priority Queues.",
+        code: `import heapq\n\n# Min-Heap Priority Queue\nheap = []\nheapq.heappush(heap, 15)\nheapq.heappush(heap, 5)\nheapq.heappush(heap, 20)\n\nmin_element = heapq.heappop(heap) # Returns 5 (O(log N))`,
+        cheat_sheet: "• BST Inorder Traversal: Left -> Node -> Right = Sorted order\n• Heap Insert/Delete: O(log N) heapify\n• Top-K Elements: Use Min-Heap of size K (Time: O(N log K))",
+        interview_tips: "Q: What happens to a BST if elements are inserted in already sorted order?\nA: It degrades into a single linked list chain with O(N) search time. AVL or Red-Black trees auto-balance to maintain O(log N)."
+      },
+      30105: {
+        title: "Graph Algorithms: BFS, DFS & Shortest Path",
+        markdown: "Graphs contain Vertices (V) and Edges (E). Breadth-First Search (BFS) uses a Queue for level-order traversal and shortest path in unweighted graphs. Depth-First Search (DFS) uses recursion/stack for connectivity and cycle detection. Dijkstra's Algorithm computes single-source shortest paths in non-negative weighted graphs.",
+        code: `from collections import deque\n\n# Breadth-First Search (BFS)\ndef bfs(graph, start_node):\n    visited = {start_node}\n    queue = deque([start_node])\n    while queue:\n        curr = queue.popleft()\n        for neighbor in graph[curr]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)`,
+        cheat_sheet: "• BFS: Queue-based O(V + E) — Shortest path in unweighted graphs\n• DFS: Stack/Recursion O(V + E) — Topological sort & cycle detection\n• Dijkstra: Min-Heap O((V + E) log V) — Non-negative weighted graphs",
+        interview_tips: "Q: When should you prefer BFS over DFS?\nA: Use BFS when searching for the shortest path or nearest neighbor in an unweighted graph, because BFS visits nodes in increasing distance order."
+      },
+      30106: {
+        title: "Dynamic Programming (DP) & Backtracking",
+        markdown: "Dynamic Programming solves optimization problems by breaking them into overlapping subproblems with optimal substructure. Techniques: Top-down (Recursion + Memoization) and Bottom-up (Iterative Tabulation). Backtracking explores state spaces with pruning.",
+        code: `# Dynamic Programming: Fibonacci Tabulation O(N) Time, O(1) Space\ndef fib_dp(n):\n    if n <= 1: return n\n    prev2, prev1 = 0, 1\n    for _ in range(2, n + 1):\n        curr = prev1 + prev2\n        prev2, prev1 = prev1, curr\n    return prev1`,
+        cheat_sheet: "• DP Prerequisites: Overlapping Subproblems + Optimal Substructure\n• Top-Down: Recursion + Dict/Array Cache\n• Bottom-Up: Iterative array table build\n• Backtracking: Choice -> Recurse -> Backtrack (Undo)",
+        interview_tips: "Q: What is the difference between Divide & Conquer and Dynamic Programming?\nA: Divide & Conquer works on non-overlapping independent subproblems (e.g. MergeSort), while DP reuses solutions to overlapping subproblems."
+      },
+      40101: {
+        title: "SQL Joins, Aggregation & Subqueries",
+        markdown: "Relational database queries combine multi-table datasets via Joins (INNER, LEFT, RIGHT, FULL OUTER) and compute aggregate metrics (COUNT, SUM, AVG) grouped by dimensions.",
+        code: `SELECT u.full_name, COUNT(q.id) AS total_quizzes, AVG(q.actual_score) AS avg_score\nFROM users u\nJOIN quiz_attempts q ON u.id = q.student_id\nWHERE q.completed_at >= NOW() - INTERVAL 30 DAY\nGROUP BY u.id, u.full_name\nHAVING AVG(q.actual_score) >= 75.0\nORDER BY avg_score DESC;`,
+        cheat_sheet: "• INNER JOIN: Exact matching rows in both tables\n• LEFT JOIN: All left table rows + matched right table rows\n• GROUP BY + HAVING: Filter aggregated metrics after grouping",
+        interview_tips: "Q: What is the difference between WHERE and HAVING in SQL?\nA: WHERE filters raw rows BEFORE aggregation occurs; HAVING filters grouped aggregate results AFTER GROUP BY."
+      }
+    };
 
     const DEFAULT_DATA = {
       user: SEED_ACCOUNTS[0],
@@ -138,13 +233,16 @@
         },
         {
           id: 3,
-          name: "Data Structures & Algorithms",
+          name: "Data Structures & Algorithms (Beginning to Advanced)",
           code: "CS202",
-          description: "Fundamental algorithms, time/space complexity analysis, linear and non-linear data structures.",
+          description: "Complete DSA mastery from asymptotic analysis, arrays, stacks, and binary search trees to graph theory, shortest paths, and dynamic programming.",
           topics: [
-            { id: 30101, name: "Big-O Time Complexity", difficulty: 2, importance: 1.5, status: "Average", accuracy: 70.0, attempts: 2, recent_score: 72.0, weakness_score: 30.0, confidence_score: 70.0, last_studied_days: 3 },
-            { id: 30102, name: "Stacks & Queues", difficulty: 2, importance: 1.2, status: "Strong", accuracy: 85.0, attempts: 3, recent_score: 88.0, weakness_score: 15.0, confidence_score: 85.0, last_studied_days: 2 },
-            { id: 30103, name: "Sorting Algorithms", difficulty: 4, importance: 1.4, status: "Very Weak", accuracy: 35.0, attempts: 1, recent_score: 30.0, weakness_score: 70.0, confidence_score: 30.0, last_studied_days: 10 }
+            { id: 30101, name: "DSA Foundations, Time & Space Complexity (Big-O, Omega, Theta)", difficulty: 1, importance: 1.0, status: "Strong", accuracy: 88.0, attempts: 4, recent_score: 90.0, weakness_score: 12.0, confidence_score: 88.0, last_studied_days: 1 },
+            { id: 30102, name: "Arrays, Strings, Two-Pointers & Sliding Window", difficulty: 2, importance: 1.2, status: "Average", accuracy: 72.0, attempts: 3, recent_score: 75.0, weakness_score: 28.0, confidence_score: 72.0, last_studied_days: 2 },
+            { id: 30103, name: "Stacks, Queues, Linked Lists & Hash Tables", difficulty: 3, importance: 1.3, status: "Average", accuracy: 68.0, attempts: 2, recent_score: 70.0, weakness_score: 32.0, confidence_score: 68.0, last_studied_days: 3 },
+            { id: 30104, name: "Binary Search Trees, Heaps & Priority Queues", difficulty: 4, importance: 1.4, status: "Weak", accuracy: 50.0, attempts: 2, recent_score: 48.0, weakness_score: 50.0, confidence_score: 50.0, last_studied_days: 5 },
+            { id: 30105, name: "Graph Algorithms (BFS, DFS, Dijkstra & Shortest Path)", difficulty: 5, importance: 1.5, status: "Very Weak", accuracy: 38.0, attempts: 2, recent_score: 35.0, weakness_score: 65.0, confidence_score: 35.0, last_studied_days: 8 },
+            { id: 30106, name: "Dynamic Programming & Backtracking", difficulty: 5, importance: 1.5, status: "Very Weak", accuracy: 30.0, attempts: 1, recent_score: 28.0, weakness_score: 72.0, confidence_score: 28.0, last_studied_days: 10 }
           ]
         },
         {
@@ -177,14 +275,21 @@
         { id: 205, topic_id: 20105, question: "What distinguishes Method Overriding from Method Overloading in Java?", a: "Overriding occurs in the same class; Overloading requires inheritance.", b: "Overriding involves runtime dynamic dispatch with identical method signature in a subclass.", c: "Overloading changes the return type only.", d: "There is no difference.", correct: "B", explanation: "Method Overriding happens at runtime (Dynamic Binding) when a child class redefines a parent method with exact matching arguments.", concept: "Dynamic Dispatch" },
         { id: 206, topic_id: 20106, question: "Which block is guaranteed to execute regardless of whether an exception is caught or thrown?", a: "try", b: "catch", c: "finally", d: "throws", correct: "C", explanation: "The 'finally' block always executes after try/catch, making it ideal for cleanup like closing resource connections.", concept: "Try-Catch-Finally" },
         { id: 207, topic_id: 20107, question: "Which Map implementation in Java Collections provides O(1) average time complexity and does NOT maintain insertion order?", a: "TreeMap", b: "HashMap", c: "LinkedHashMap", d: "ConcurrentSkipListMap", correct: "B", explanation: "HashMap relies on hashing for O(1) average lookup and does not guarantee element ordering.", concept: "HashMap Collections" },
-        { id: 208, topic_id: 20108, question: "Which Java 8 feature allows functional-style operations (map, filter, reduce) on element streams?", a: "Reflection API", b: "Java Streams API", c: "Servlet API", d: "JDBC API", correct: "B", explanation: "The Java 8 Stream API provides declarative processing pipeline primitives (map, filter, flatMap, reduce).", concept: "Stream API" },
+        { id: 208, topic_id: 20108, question: "Which Java 8 feature allows functional-style operations (map, filter, reduce) on element streams?", a: "Reflection API", b: "Java Streams API", c: "Servlet API", d: "JDBC API", correct: "B", explanation: "The Java 8 Stream API provides declarative processing pipeline primitives.", concept: "Stream API" },
 
-        // DSA & DBMS QUESTIONS
+        // DSA BEGINNING TO ADVANCED QUESTIONS
         { id: 301, topic_id: 30101, question: "What is the time complexity of Binary Search on a sorted array of N elements?", a: "O(N)", b: "O(log N)", c: "O(1)", d: "O(N log N)", correct: "B", explanation: "Binary search halves the search space with each comparison step, leading to logarithmic O(log N) complexity.", concept: "Binary Search" },
-        { id: 302, topic_id: 30103, question: "What is the worst-case time complexity of QuickSort when a poor pivot is chosen repeatedly?", a: "O(N log N)", b: "O(N^2)", c: "O(N)", d: "O(log N)", correct: "B", explanation: "When an array is already sorted and the extreme element is selected as pivot, QuickSort degrades to O(N^2).", concept: "QuickSort Complexity" }
+        { id: 302, topic_id: 30102, question: "What is the optimal time complexity of finding a pair with a target sum in a SORTED array using two pointers?", a: "O(N^2)", b: "O(N)", c: "O(log N)", d: "O(N log N)", correct: "B", explanation: "Two pointers starting at opposite ends move inward in linear O(N) time.", concept: "Two-Pointers" },
+        { id: 303, topic_id: 30103, question: "Which data structure operates on a Last-In, First-Out (LIFO) principle?", a: "Queue", b: "Stack", c: "LinkedList", d: "PriorityQueue", correct: "B", explanation: "Stacks follow LIFO semantics.", concept: "LIFO Semantics" },
+        { id: 304, topic_id: 30104, question: "What is the worst-case search time complexity in an UNBALANCED Binary Search Tree (BST)?", a: "O(1)", b: "O(log N)", c: "O(N)", d: "O(N^2)", correct: "C", explanation: "An unbalanced BST degrades into a single linked list chain giving O(N) search.", concept: "BST Degradation" },
+        { id: 305, topic_id: 30105, question: "Which algorithm is optimal for finding the single-source shortest path in a graph with non-negative edge weights?", a: "BFS", b: "Dijkstra's Algorithm", c: "Bellman-Ford", d: "Kruskal's Algorithm", correct: "B", explanation: "Dijkstra's algorithm efficiently computes shortest paths in non-negative weighted graphs in O((V+E) log V).", concept: "Shortest Path" },
+        { id: 306, topic_id: 30106, question: "What two key properties must a problem satisfy to be solvable using Dynamic Programming?", a: "Greedy Choice & Sorting", b: "Overlapping Subproblems & Optimal Substructure", c: "Divide and Conquer & Parallelism", d: "LIFO & FIFO", correct: "B", explanation: "DP requires overlapping subproblems and optimal substructure.", concept: "DP Properties" },
+
+        // DBMS QUESTIONS
+        { id: 401, topic_id: 40101, question: "Which JOIN returns all rows from the left table and matched records from the right table?", a: "INNER JOIN", b: "LEFT OUTER JOIN", c: "RIGHT OUTER JOIN", d: "FULL JOIN", correct: "B", explanation: "LEFT JOIN returns all records from the left table regardless of right table matches.", concept: "Outer Joins" }
       ],
       attempts: [
-        { id: 1, topic_name: "Polymorphism, Overriding & Dynamic Dispatch", subject_name: "Java Programming (Basic to Advanced)", predicted: 52.0, actual: 40.0, diff: -12.0, date: "Yesterday" },
+        { id: 1, topic_name: "Graph Algorithms (BFS, DFS, Dijkstra & Shortest Path)", subject_name: "Data Structures & Algorithms (Beginning to Advanced)", predicted: 45.0, actual: 38.0, diff: -7.0, date: "Yesterday" },
         { id: 2, topic_name: "Python Syntax, Variables & Data Types", subject_name: "Python Programming (Basic to Advanced)", predicted: 88.0, actual: 95.0, diff: +7.0, date: "3 days ago" }
       ]
     };
@@ -228,8 +333,8 @@
       }
       try {
         const parsed = JSON.parse(saved);
-        // Automatically sync Python & Java subjects if user has old storage cache
-        if (!parsed.subjects || parsed.subjects.length < 4 || !parsed.subjects.find(s => s.code === "CS101")) {
+        // Force refresh to load full DSA Beginning to Advanced & Study Materials
+        if (!parsed.subjects || parsed.subjects.length < 4 || !parsed.subjects.find(s => s.code === "CS202" && s.topics.length >= 6)) {
           localStorage.setItem("aistudytwin_data", JSON.stringify(DEFAULT_DATA));
           return DEFAULT_DATA;
         }
@@ -592,6 +697,7 @@
       const navItems = [
         { id: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
         { id: "subjects", label: "My Subjects", icon: "book-open" },
+        { id: "study-material", label: "Study Notes & Material", icon: "file-text" },
         { id: "study-plan", label: "Study Plan", icon: "calendar" },
         { id: "take-quiz", label: "Take Quiz", icon: "help-circle" },
         { id: "performance", label: "Performance", icon: "bar-chart-2" },
@@ -681,15 +787,15 @@
               <i data-lucide="book-open" className="w-5 h-5"></i>
               <span className="text-[10px]">Subjects</span>
             </button>
+            <button onClick={() => setActiveTab("study-material")} className={`flex flex-col items-center gap-1 ${activeTab === "study-material" ? "text-indigo-400" : "text-slate-400"}`}>
+              <i data-lucide="file-text" className="w-5 h-5"></i>
+              <span className="text-[10px]">Notes</span>
+            </button>
             <button onClick={() => setActiveTab("take-quiz")} className={`flex flex-col items-center gap-1 ${activeTab === "take-quiz" ? "text-indigo-400" : "text-slate-400"}`}>
               <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center -mt-3 shadow-lg shadow-indigo-500/30">
                 <i data-lucide="play" className="w-4 h-4 fill-white"></i>
               </div>
               <span className="text-[10px]">Quiz</span>
-            </button>
-            <button onClick={() => setActiveTab("performance")} className={`flex flex-col items-center gap-1 ${activeTab === "performance" ? "text-indigo-400" : "text-slate-400"}`}>
-              <i data-lucide="bar-chart-2" className="w-5 h-5"></i>
-              <span className="text-[10px]">Analytics</span>
             </button>
             <button onClick={() => setActiveTab("profile")} className={`flex flex-col items-center gap-1 ${activeTab === "profile" ? "text-indigo-400" : "text-slate-400"}`}>
               <i data-lucide="user" className="w-5 h-5"></i>
@@ -852,13 +958,22 @@
                 <p className="text-xs text-slate-300 mt-1">{topRec.reason}</p>
               </div>
             </div>
-            <button
-              onClick={() => setActiveTab("take-quiz")}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
-            >
-              <span>Start Diagnostic Quiz</span>
-              <i data-lucide="arrow-right" className="w-4 h-4"></i>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab("study-material")}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 shrink-0"
+              >
+                <i data-lucide="file-text" className="w-4 h-4 text-indigo-400"></i>
+                <span>Read Notes</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("take-quiz")}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
+              >
+                <span>Start Quiz</span>
+                <i data-lucide="arrow-right" className="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
 
           {/* Charts */}
@@ -880,7 +995,7 @@
     const SubjectsPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="My Enrolled Subjects (Python & Java Basic to Advanced)" subtitle="Explore complete curriculum topics from fundamental syntax to advanced frameworks" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="My Enrolled Subjects (Python, Java, DSA & DBMS)" subtitle="Explore complete curriculum topics from fundamental syntax to advanced algorithms" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-6">
             {state.subjects.map(sub => (
               <div key={sub.id} className="glass-card rounded-2xl p-6">
@@ -890,10 +1005,16 @@
                     <h3 className="font-heading font-bold text-xl text-slate-100 mt-2">{sub.name}</h3>
                     <p className="text-xs text-slate-400 mt-1">{sub.description}</p>
                   </div>
-                  <button onClick={() => setActiveTab("take-quiz")} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold flex items-center gap-2 self-start sm:self-auto shrink-0">
-                    <span>Take Quiz</span>
-                    <i data-lucide="arrow-right" className="w-3.5 h-3.5"></i>
-                  </button>
+                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    <button onClick={() => setActiveTab("study-material")} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5">
+                      <i data-lucide="file-text" className="w-3.5 h-3.5 text-indigo-400"></i>
+                      <span>Study Notes</span>
+                    </button>
+                    <button onClick={() => setActiveTab("take-quiz")} className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5">
+                      <span>Take Quiz</span>
+                      <i data-lucide="arrow-right" className="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sub.topics.map(top => (
@@ -919,6 +1040,171 @@
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      );
+    };
+
+    // STUDY NOTES & MATERIAL PAGE
+    const StudyMaterialPage = ({ state, setMobileMenuOpen, onLogout }) => {
+      const allTopics = state.subjects.flatMap(s => s.topics);
+      const [selectedTopicId, setSelectedTopicId] = React.useState(allTopics[0]?.id || 10101);
+      const [activeTab, setActiveTab] = React.useState("notes"); // 'notes', 'code', 'cheat', 'interview'
+
+      const currentTopic = allTopics.find(t => t.id === selectedTopicId) || allTopics[0];
+      const material = STUDY_MATERIALS_DB[selectedTopicId] || {
+        title: `${currentTopic?.name} — Study Material`,
+        markdown: `Comprehensive study notes and learning guide for ${currentTopic?.name}. Master fundamental concepts, syntax patterns, and memory layouts for academic exams and technical interviews.`,
+        code: `# Syntax & Code Pattern Demo\ndef solution():\n    # Core logic for ${currentTopic?.name}\n    pass`,
+        cheat_sheet: `• Core Concept: ${currentTopic?.name}\n• Difficulty Level: ${currentTopic?.difficulty}/5\n• Review Status: ${currentTopic?.status}`,
+        interview_tips: `Q: What are the key performance tradeoffs for ${currentTopic?.name}?\nA: Analyze time complexity vs space complexity depending on input size and memory bounds.`
+      };
+
+      React.useEffect(() => {
+        if (window.lucide) window.lucide.createIcons();
+      }, [selectedTopicId, activeTab]);
+
+      return (
+        <div className="pb-16 md:pb-0">
+          <Header title="Study Notes & Material Library" subtitle="Comprehensive learning guides, cheat sheets, and code snippets for Python, Java, DSA & DBMS" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Left Topic Selector */}
+            <div className="glass-card rounded-2xl p-4 space-y-3">
+              <h4 className="font-heading font-bold text-sm text-slate-200 pb-2 border-b border-slate-800">
+                Select Course Topic
+              </h4>
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
+                {state.subjects.map(sub => (
+                  <div key={sub.id}>
+                    <span className="text-[10px] font-bold tracking-wider text-indigo-400 uppercase block mb-1.5 px-1">{sub.code} — {sub.name.split(' ')[0]}</span>
+                    <div className="space-y-1">
+                      {sub.topics.map(t => {
+                        const isSel = t.id === selectedTopicId;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => setSelectedTopicId(t.id)}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
+                              isSel
+                                ? "bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 shadow-sm"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                            }`}
+                          >
+                            <span className="truncate">{t.name}</span>
+                            <span className="text-[10px] text-slate-500 ml-1">L{t.difficulty}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Material Viewer */}
+            <div className="lg:col-span-3 glass-card rounded-2xl p-6 flex flex-col justify-between">
+              <div>
+                {/* Material Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-800">
+                  <div>
+                    <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-xs font-bold border border-indigo-500/20">
+                      Topic Level {currentTopic?.difficulty}/5
+                    </span>
+                    <h3 className="font-heading font-bold text-xl sm:text-2xl text-slate-100 mt-2">{material.title}</h3>
+                  </div>
+                  <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
+                    <button
+                      onClick={() => setActiveTab("notes")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        activeTab === "notes" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      📖 Notes
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("code")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        activeTab === "code" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      💻 Code Examples
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("cheat")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        activeTab === "cheat" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      ⚡ Cheat Sheet
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("interview")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        activeTab === "interview" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      💡 Interview Q&A
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === "notes" && (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-sm text-slate-300 leading-relaxed">
+                      <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Core Summary & Theoretical Overview</h4>
+                      <p>{material.markdown}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                        <h5 className="font-semibold text-indigo-300 text-xs uppercase tracking-wider mb-1">Study Priority Recommendation</h5>
+                        <p className="text-xs text-slate-300">
+                          This topic has an accuracy of <strong className="text-indigo-300">{currentTopic?.accuracy}%</strong>. We recommend taking a 5-question diagnostic quiz after reading to reinforce memory retention.
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <h5 className="font-semibold text-emerald-300 text-xs uppercase tracking-wider mb-1">Academic Importance</h5>
+                        <p className="text-xs text-slate-300">
+                          Weight Factor: <strong className="text-emerald-300">{currentTopic?.importance}x</strong>. Commonly tested in college exams and technical placement rounds.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "code" && (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-xs text-slate-400">
+                      <span>Executable Syntax & Code Snippet</span>
+                      <span className="font-mono text-indigo-400">Language Standard</span>
+                    </div>
+                    <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-indigo-300 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
+                      <code>{material.code}</code>
+                    </pre>
+                  </div>
+                )}
+
+                {activeTab === "cheat" && (
+                  <div className="space-y-3">
+                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Quick Reference & Rules Cheat Sheet</h4>
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-mono text-xs leading-relaxed whitespace-pre-line">
+                      {material.cheat_sheet}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "interview" && (
+                  <div className="space-y-3">
+                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Technical Interview & Exam Focus</h4>
+                    <div className="p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30 text-xs text-slate-200 leading-relaxed whitespace-pre-line">
+                      {material.interview_tips}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -1082,7 +1368,7 @@
 
       return (
         <div className="max-w-2xl mx-auto pb-16 md:pb-0">
-          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics in Python & Java (Basic to Advanced) with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics in Python, Java & DSA (Beginning to Advanced) with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-2">Select Target Topic</label>
@@ -1381,6 +1667,7 @@
           <main className="md:ml-64 flex-1 p-4 sm:p-8 overflow-y-auto">
             {activeTab === "dashboard" && <DashboardPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
             {activeTab === "subjects" && <SubjectsPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "study-material" && <StudyMaterialPage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
             {activeTab === "take-quiz" && <TakeQuizPage state={state} setState={setState} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
             {activeTab === "recommendations" && <RecommendationsPage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
             {activeTab === "performance" && <PerformancePage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}

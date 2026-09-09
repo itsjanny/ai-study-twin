@@ -224,3 +224,18 @@ class UserSession(Base):
 
     user = relationship("User", back_populates="sessions")
 
+
+class StudyMaterial(Base):
+    __tablename__ = "study_materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    topic_id = Column(Integer, ForeignKey("topics.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    content_markdown = Column(Text, nullable=False)
+    code_snippet = Column(Text, nullable=True)
+    cheat_sheet_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    topic = relationship("Topic", backref="study_materials")
+
+
