@@ -42,10 +42,6 @@
               600: '#4f46e5',
               700: '#4338ca',
               900: '#312e81',
-            },
-            gfg: {
-              green: '#2f9e44',
-              bg: '#1e293b'
             }
           }
         }
@@ -72,11 +68,6 @@
     }
     .gradient-text {
       background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #e879f9 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .gfg-gradient-text {
-      background: linear-gradient(135deg, #4ea8de 0%, #48bb78 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -112,78 +103,84 @@
       }
     ];
 
-    // GEEKSFORGEEKS (GFG) STYLE COMPREHENSIVE STUDY MATERIALS FOR EVERY TOPIC
+    // LENGTHY & DETAILED STUDY MATERIALS WITH GFG REFERENCE SECTION
     const STUDY_MATERIALS_DB = {
       // PYTHON TOPICS
       10101: {
-        title: "Python Syntax, Variables & Data Mutability (GFG Standard)",
-        markdown: "Python is an interpreted, dynamically-typed high-level language. Variables are object references bound to heap memory objects. Memory allocation is managed automatically via CPython reference counting and a generational garbage collector.\n\nKey Concept: Immutable objects (int, float, tuple, str) cannot be altered after creation. Any modification instantiates a new object in memory.",
-        code: `# GeeksforGeeks Python Mutability & References Example\n\n# 1. Immutable Data Types\nx = 10\nprint(f"Initial ID of x: {id(x)}")\nx += 1\nprint(f"New ID of x after increment: {id(x)}")  # Rebound to new int object\n\n# 2. Mutable Collection Types\nnumbers = [10, 20, 30]\nprint(f"Original List ID: {id(numbers)}")\nnumbers.append(40)\nprint(f"Same List ID after append: {id(numbers)}")  # Modified in-place`,
-        complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(N)", space: "O(N)" },
-        cheat_sheet: "• Mutable: list, dict, set, bytearray\n• Immutable: int, float, str, tuple, frozenset, bytes\n• Reference Counting: sys.getrefcount(obj) inspects active pointer count\n• Copying: copy.copy() for shallow copy, copy.deepcopy() for recursive deep copy",
-        interview_tips: "Q: Why are Python tuples hashable while lists are not?\nA: Tuples are immutable, ensuring their hash value remains constant throughout execution, making them valid dictionary keys or set members.",
+        title: "Python Syntax, Variables & Data Types",
+        markdown: "Python is an interpreted, dynamically-typed, high-level programming language created by Guido van Rossum. In Python, variables do not hold raw values directly; instead, they serve as typed object references pointing to objects allocated on the heap.\n\nMemory Management & Garbage Collection:\nCPython utilizes a reference counting mechanism combined with a cyclic garbage collector. Whenever a variable reference count drops to zero, its heap memory is immediately freed. Immutable objects (integers, floats, strings, tuples) cannot be altered in-place; mutating an immutable object creates a new object in memory with a distinct memory address (id).\n\nBuilt-in Collection Categories:\n1. Sequence Types: list (mutable), tuple (immutable), range\n2. Mapping Types: dict (hash table key-value pairs)\n3. Set Types: set (unordered unique items), frozenset (immutable set)\n4. Boolean & None: bool (subclass of int), NoneType (singleton)",
+        code: `# Comprehensive Python Syntax, Mutability & Memory Reference Demo\n\nimport sys\nimport copy\n\n# 1. Inspecting Object Identity & Mutability\nx = 100\nprint(f"Value of x: {x} | Memory Address id(x): {id(x)}")\nx += 1\nprint(f"Value after x += 1: {x} | New Address id(x): {id(x)}") # Address changes!\n\n# 2. Mutable List Modification In-Place\nmy_list = [10, 20, 30]\ninitial_id = id(my_list)\nmy_list.append(40)\nprint(f"List after append: {my_list} | Same Address: {id(my_list) == initial_id}")\n\n# 3. Shallow vs Deep Copy\noriginal = [[1, 2], [3, 4]]\nshallow = copy.copy(original)\ndeep = copy.deepcopy(original)\noriginal[0][0] = 999\nprint(f"Shallow Copy (affected): {shallow[0][0]}") # Output: 999\nprint(f"Deep Copy (isolated): {deep[0][0]}")        # Output: 1`,
+        cheat_sheet: "• Mutable Objects: list, dict, set, bytearray\n• Immutable Objects: int, float, str, tuple, frozenset, bytes\n• Identity vs Equality: 'is' checks memory address (id), '==' checks structural equality\n• Reference Count Check: sys.getrefcount(obj) returns current reference count",
+        interview_tips: "Q: Why are tuples hashable in Python while lists are not?\nA: Tuples are immutable, ensuring their computed hash value never changes throughout program lifetime. This property allows tuples to be used as dictionary keys or stored inside sets.",
+        gfg_notes: "GeeksforGeeks Reference Note: Python Variable Types & Memory Architecture\nIn CPython, every variable is represented as a PyObject structure containing 'ob_refcnt' (reference count pointer) and 'ob_type' (pointer to type descriptor). Understanding variable references prevents subtle bugs when passing mutable lists into functions as default parameters. Always use 'None' as default value for mutable arguments (e.g. def func(data=None)).",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(N)", space: "O(N)" },
         gfg_problems: [
-          { name: "Check Mutability of Data Types", difficulty: "Easy" },
+          { name: "Python Data Mutability & Object Identity", difficulty: "Easy" },
           { name: "Shallow vs Deep Copy Implementation", difficulty: "Medium" }
         ]
       },
       10102: {
-        title: "Python Control Flow & First-Class Functions (GFG Standard)",
-        markdown: "In Python, functions are first-class objects: they can be stored in data structures, passed as parameters, and returned from higher-order functions. Loop structures feature an optional 'else' block executed when the loop completes without a 'break'.",
-        code: `# GeeksforGeeks Higher-Order Functions & Lambda Example\n\ndef apply_transformation(func, arr):\n    """Applies a function to elements satisfying a condition."""\n    return [func(x) for x in arr if x % 2 == 0]\n\nnumbers = [1, 2, 3, 4, 5, 6, 7, 8]\nsquare_evens = apply_transformation(lambda x: x ** 2, numbers)\nprint("Squared Evens:", square_evens)  # Output: [4, 16, 36, 64]`,
-        complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(N)" },
-        cheat_sheet: "• range(start, stop, step): Generates numbers in range [start, stop)\n• List Comprehension: [expression for item in iterable if condition]\n• Lambda Syntax: lambda arg1, arg2: expression",
-        interview_tips: "Q: What is the execution behavior of loop 'else' in Python?\nA: The 'else' block executes only if the loop runs to completion without encountering an explicit 'break' statement.",
+        title: "Control Flow, Loops & First-Class Functions",
+        markdown: "Control flow in Python relies on indentation-scoped blocks (PEP 8 standard). Functions are first-class objects, enabling functional programming paradigms such as higher-order functions, closures, and inline lambda expressions.\n\nControl Structures:\n• Conditional Branches: if, elif, else\n• Loops: for (iterates over any iterable object implementing __iter__) and while loops.\n• Loop Else Clause: Python loops support a unique 'else' block which executes if and only if the loop finishes naturally without encountering a 'break' statement.",
+        code: `# GeeksforGeeks First-Class Functions & Comprehensions\n\ndef apply_transformation(func, data):\n    """Higher-order function applying a transformation function to even elements."""\n    return [func(x) for x in data if x % 2 == 0]\n\nnumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nsquared_evens = apply_transformation(lambda x: x ** 2, numbers)\nprint("Squared Evens:", squared_evens) # [4, 16, 36, 64]\n\n# Loop Else Branch Demonstration\nfor n in range(2, 10):\n    for x in range(2, n):\n        if n % x == 0:\n            break\n    else:\n        # Loop completed without finding a factor\n        print(f"{n} is prime!")`,
+        cheat_sheet: "• range(start, stop, step): Half-open sequence generator [start, stop)\n• List Comprehension Syntax: [expression for item in iterable if condition]\n• Dict Comprehension: {key_expr: val_expr for item in iterable}",
+        interview_tips: "Q: What is the benefit of List Comprehensions over traditional for loops?\nA: List comprehensions execute at C-speed inside the CPython interpreter runtime, making them faster and more concise than iterative append() loops.",
+        gfg_notes: "GeeksforGeeks Reference Note: First-Class Functions & Closures\nIn Python, functions can be assigned to variables, stored in dictionaries, passed as arguments, and returned from other functions. A Closure is created when a nested function retains access to variables from its enclosing lexical scope even after the outer function has returned. Use 'nonlocal' to modify outer scope variables inside a closure.",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(N)" },
         gfg_problems: [
-          { name: "Implement Custom Map & Filter Functions", difficulty: "Easy" },
-          { name: "Prime Numbers in Range using Loop Else", difficulty: "Easy" }
+          { name: "Prime Number Range using Loop Else", difficulty: "Easy" },
+          { name: "Custom Map & Filter Implementation", difficulty: "Easy" }
         ]
       },
       10105: {
-        title: "Python Decorators, Generators & Context Managers (GFG Standard)",
-        markdown: "Decorators allow metaprogramming by wrapping functions to dynamically alter execution (@functools.wraps preserves docstrings and name). Generators use the 'yield' statement to lazily stream values one by one, reducing memory usage from O(N) to O(1). Context Managers ('with' statement) guarantee resource teardown via __enter__ and __exit__.",
-        code: `import time\nfrom functools import wraps\n\n# GFG Standard Timing Decorator Pattern\ndef execution_timer(func):\n    @wraps(func)\n    def wrapper(*args, **kwargs):\n        start_time = time.perf_counter()\n        result = func(*args, **kwargs)\n        end_time = time.perf_counter()\n        print(f"[{func.__name__}] Executed in {end_time - start_time:.6f}s")\n        return result\n    return wrapper\n\n# Lazy Generator for Fibonacci Series\ndef fibonacci_generator(limit):\n    a, b = 0, 1\n    for _ in range(limit):\n        yield a\n        a, b = b, a + b\n\n@execution_timer\ndef run_demo():\n    return list(fibonacci_generator(10))\n\nprint(run_demo())  # Output: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]`,
-        complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
-        cheat_sheet: "• Decorator Pattern: Wraps callable object dynamically\n• Generator: Uses 'yield' to suspend state lazily\n• Context Manager: Implements __enter__() and __exit__() for safe I/O cleanup",
-        interview_tips: "Q: How do generators prevent Out-Of-Memory (OOM) errors on large data streams?\nA: Generators produce values on-demand during iteration instead of instantiating all elements simultaneously in memory.",
+        title: "Decorators, Generators & Context Managers",
+        markdown: "Decorators allow dynamic metaprogramming by wrapping functions to inspect, modify, or enhance execution behavior without altering source code.\n\nGenerators & Lazy Evaluation:\nGenerators use the 'yield' statement to stream elements lazily. Instead of instantiating large arrays in RAM, generators compute items one at a time on demand, executing with O(1) auxiliary space.\n\nContext Managers & RAII:\nContext managers ('with' statement) enforce automatic resource management (opening files, acquiring locks, database connections), guaranteeing cleanup via __enter__() and __exit__() methods even if exceptions occur.",
+        code: `import time\nfrom functools import wraps\n\n# 1. Custom Metaprogramming Decorator\ndef execution_logger(func):\n    @wraps(func)\n    def wrapper(*args, **kwargs):\n        print(f"--> Invoking: {func.__name__}")\n        start = time.perf_counter()\n        result = func(*args, **kwargs)\n        duration = time.perf_counter() - start\n        print(f"<-- Finished {func.__name__} in {duration:.6f}s")\n        return result\n    return wrapper\n\n# 2. Generator Stream\ndef infinite_fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\n@execution_logger\ndef compute_fib(n):\n    gen = infinite_fibonacci()\n    return [next(gen) for _ in range(n)]\n\nprint(compute_fib(10))`,
+        cheat_sheet: "• Decorator Syntax: @my_decorator syntax wraps a target function\n• Generator Expression: (x**2 for x in range(1000000)) returns a memory-efficient generator\n• Context Manager: Implements __enter__() and __exit__() protocol",
+        interview_tips: "Q: Why is @functools.wraps important when writing decorators?\nA: @wraps copies the original function's name, docstring, and annotations to the wrapper function, preserving introspective metadata.",
+        gfg_notes: "GeeksforGeeks Reference Note: Memory Efficiency of Generators\nWhen processing large CSV datasets or web scraping streams, storing all data in a list causes Out-Of-Memory (OOM) crashes. Generators reduce RAM usage from O(N) down to O(1) by maintaining execution state pointers in the generator stack frame.",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
         gfg_problems: [
           { name: "Implement Custom Decorator with Arguments", difficulty: "Medium" },
-          { name: "Lazy Large File Reader using Generators", difficulty: "Medium" }
+          { name: "Lazy Large Dataset Reader using Generators", difficulty: "Medium" }
         ]
       },
 
       // JAVA TOPICS
       20101: {
-        title: "Java Syntax, Primitive Types & JVM Memory Layout (GFG Standard)",
-        markdown: "Java source code compiles into platform-independent bytecode (.class) executed by the Java Virtual Machine (JVM). Memory is partitioned into:\n1. Stack: Stores thread call frames, local variables, and primitive values.\n2. Heap: Stores instantiated objects, array structures, and string constant pools.\n3. Metaspace: Stores class definitions and static metadata.",
-        code: `// GeeksforGeeks Java Memory & Data Types Demo\npublic class MemoryDemo {\n    public static void main(String[] args) {\n        // Stack primitives\n        int count = 42;\n        long accountBalance = 9876543210L;\n        double accuracy = 99.45;\n        boolean isVerified = true;\n\n        // Heap object reference\n        String message = "GeeksforGeeks Java Standard";\n        \n        System.out.println("Balance: " + accountBalance + " | Status: " + isVerified);\n    }\n}`,
-        complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(1)", space: "O(1) Stack" },
-        cheat_sheet: "• Primitives: byte (8b), short (16b), int (32b), long (64b), float (32b), double (64b), char (16b), boolean\n• Stack: Thread-private fast memory\n• Heap: Shared object storage managed by Garbage Collector (GC)",
-        interview_tips: "Q: Why is Java considered platform independent?\nA: Java code compiles into universal bytecode (.class files) which can run on any OS that has a compatible JVM installed.",
+        title: "Java Syntax, Primitive Types & JVM Memory Architecture",
+        markdown: "Java is a statically-typed, compiled, object-oriented language. Source code (.java) compiles into bytecode (.class) executed on the Java Virtual Machine (JVM).\n\nJVM Memory Divisions:\n1. Heap Memory: Stores all object instances and arrays. Managed by Garbage Collectors (Serial, G1, ZGC).\n2. Stack Memory: Stores thread-private call frames, local variables, and primitive values.\n3. Metaspace: Stores class definitions, method metadata, and constant pool.\n\nPrimitives vs Reference Types:\nPrimitives (int, long, double, boolean) carry raw bit representations directly on the stack, providing optimal execution speed.",
+        code: `// Comprehensive Java Memory & Data Types Demo\npublic class MemoryArchitecture {\n    public static void main(String[] args) {\n        // Stack primitives\n        int age = 21;                     // 32-bit signed integer\n        long studentId = 9876543210L;     // 64-bit signed integer\n        double gpa = 3.92;                // 64-bit floating point\n        boolean isActive = true;           // boolean flag\n\n        // Heap object instantiation\n        String name = "Alex Mercer";       // String Constant Pool reference\n        int[] scores = new int[]{90, 85, 95}; // Array object on Heap\n\n        System.out.println("Student: " + name + " | ID: " + studentId);\n    }\n}`,
+        cheat_sheet: "• Primitives: byte (8b), short (16b), int (32b), long (64b), float (32b), double (64b), char (16b), boolean\n• Stack: Fast, thread-safe local variable memory\n• Heap: Shared object memory cleaned by Garbage Collector (GC)",
+        interview_tips: "Q: What is the difference between primitives and wrapper classes in Java?\nA: Primitives store unboxed raw values on the stack with zero object overhead. Wrapper classes (Integer, Long) are boxed object wrappers on the heap necessary for Generics and Collections.",
+        gfg_notes: "GeeksforGeeks Reference Note: Java Memory Management & Garbage Collection\nObjects created with 'new' are stored in the Heap's Young Generation (Eden space). Surviving objects after minor GC cycles transition to Old Generation. Understanding Heap allocation prevents Memory Leaks caused by unclosed resources or static collections holding object references.",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(1)", space: "O(1) Stack" },
         gfg_problems: [
-          { name: "Understand Stack vs Heap Memory Allocation", difficulty: "Easy" },
-          { name: "Primitive Data Type Ranges & Overflow", difficulty: "Easy" }
+          { name: "Understand Stack vs Heap Memory in Java", difficulty: "Easy" },
+          { name: "Primitive Data Type Ranges & Integer Overflow", difficulty: "Easy" }
         ]
       },
       20105: {
-        title: "Java Polymorphism, Overriding & Dynamic Dispatch (GFG Standard)",
-        markdown: "Polymorphism enables treating child class instances through a common parent reference. Method Overriding implements dynamic dispatch at runtime using a Virtual Method Table (VTABLE). The actual method invoked depends on the runtime object type, not the reference type.",
+        title: "Polymorphism, Overriding & Dynamic Dispatch",
+        markdown: "Polymorphism allows objects of different concrete classes to be accessed through a uniform superclass or interface reference.\n\nDynamic Method Dispatch (Late Binding):\nWhen an overridden method is called on a superclass reference, Java determines which implementation to run at runtime based on the actual object type residing in memory, using a Virtual Method Table (VTABLE).",
         code: `// GeeksforGeeks Dynamic Method Dispatch Example\nabstract class Vehicle {\n    abstract void startEngine();\n}\n\nclass Car extends Vehicle {\n    @Override\n    void startEngine() {\n        System.out.println("Car V6 Engine Started with Push Button.");\n    }\n}\n\nclass ElectricBike extends Vehicle {\n    @Override\n    void startEngine() {\n        System.out.println("Electric Bike Motor Silent Initialization.");\n    }\n}\n\npublic class TestPolymorphism {\n    public static void main(String[] args) {\n        Vehicle v1 = new Car();\n        Vehicle v2 = new ElectricBike();\n        \n        v1.startEngine(); // Dynamic Dispatch -> Car's method\n        v2.startEngine(); // Dynamic Dispatch -> ElectricBike's method\n    }\n}`,
-        complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(1)", space: "O(1)" },
-        cheat_sheet: "• Compile-Time Polymorphism: Method Overloading (same name, different params)\n• Runtime Polymorphism: Method Overriding (same signature in child class)\n• final keyword: Disallows class extension or method overriding",
-        interview_tips: "Q: What is Dynamic Method Dispatch in Java?\nA: It is the mechanism by which a call to an overridden method is resolved at runtime based on the actual object instance.",
+        cheat_sheet: "• Compile-Time Polymorphism: Method Overloading (same method name, different signatures)\n• Runtime Polymorphism: Method Overriding (same method signature in subclass)\n• final keyword: Prevents class inheritance or method overriding",
+        interview_tips: "Q: Can static methods be overridden in Java?\nA: No. Static methods are bound at compile-time (Static Binding) to the class type, not the object instance. Redefining a static method in a subclass is method hiding, not overriding.",
+        gfg_notes: "GeeksforGeeks Reference Note: Dynamic Dispatch & VTABLE\nIn Java, every class maintaining overridden methods maintains an internal VTABLE pointer. At runtime, when obj.method() is invoked, the JVM looks up the method offset in the runtime instance VTABLE, ensuring flexible O(1) polymorphic execution.",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(1)", space: "O(1)" },
         gfg_problems: [
-          { name: "Implement Bank Account Hierarchy using Polymorphism", difficulty: "Medium" },
-          { name: "Method Overloading vs Overriding Benchmarks", difficulty: "Easy" }
+          { name: "Bank Account Class Hierarchy using Polymorphism", difficulty: "Medium" },
+          { name: "Method Overloading vs Method Overriding", difficulty: "Easy" }
         ]
       },
       20108: {
-        title: "Java Multithreading & Stream API Pipeline (GFG Standard)",
-        markdown: "Java provides concurrency control via Threads, Runnable interfaces, Executors, and synchronized locks. Java 8 Stream API provides functional processing pipelines (filter, map, flatMap, reduce, collect) that can execute sequentially or in parallel.",
-        code: `import java.util.*;\nimport java.util.stream.*;\n\n// GeeksforGeeks Java Stream Pipeline Example\npublic class StreamDemo {\n    public static void main(String[] args) {\n        List<String> topics = List.of("Arrays", "Strings", "Stacks", "Queues", "Graphs", "Dynamic Programming");\n\n        List<String> processed = topics.stream()\n            .filter(t -> t.length() > 5)\n            .map(String::toUpperCase)\n            .sorted()\n            .collect(Collectors.toList());\n\n        System.out.println("Filtered Topics: " + processed); // [ARRAYS, DYNAMIC PROGRAMMING, GRAPHS, STRINGS]\n    }\n}`,
-        complexities: { best_time: "O(N)", avg_time: "O(N log N)", worst_time: "O(N log N)", space: "O(N)" },
-        cheat_sheet: "• Stream Operations: Intermediate (lazy: filter, map) & Terminal (eager: collect, reduce)\n• Thread Safety: AtomicInteger, ConcurrentHashMap, ReentrantLock\n• Thread Pool: Executors.newFixedThreadPool(int n)",
-        interview_tips: "Q: Difference between Collection and Stream in Java?\nA: Collections store data structures in memory; Streams are computational pipelines that iterate elements lazily without storing data.",
+        title: "Java Multithreading & Stream API Pipeline",
+        markdown: "Java supports concurrent execution via Threads, Runnable interfaces, Executors, and synchronized synchronization blocks.\n\nJava 8 Stream API:\nStreams process collections declaratively through intermediate operations (filter, map, flatMap, sorted) and terminal operations (collect, reduce, forEach). Streams evaluate lazily, iterating data only when a terminal operation is executed.",
+        code: `import java.util.*;\nimport java.util.stream.*;\n\n// GeeksforGeeks Stream API Pipeline Example\npublic class StreamDemo {\n    public static void main(String[] args) {\n        List<String> topics = List.of("Arrays", "Strings", "Stacks", "Queues", "Graphs", "Dynamic Programming");\n\n        List<String> processed = topics.stream()\n            .filter(t -> t.length() > 5)\n            .map(String::toUpperCase)\n            .sorted()\n            .collect(Collectors.toList());\n\n        System.out.println("Processed Topics: " + processed);\n    }\n}`,
+        cheat_sheet: "• Intermediate Operations: Lazy evaluation (filter, map, flatMap, sorted)\n• Terminal Operations: Triggers stream processing (collect, reduce, count)\n• Concurrency: Synchronized blocks, ReentrantLock, ConcurrentHashMap",
+        interview_tips: "Q: What is the difference between Collection and Stream in Java?\nA: Collections store data elements in memory structures; Streams are computational processing pipelines that iterate elements lazily without modifying source collections.",
+        gfg_notes: "GeeksforGeeks Reference Note: Java Thread Safety & Concurrency\nWhen multiple threads access shared mutable state, race conditions occur. Use java.util.concurrent primitives (AtomicInteger, ConcurrentHashMap, ReentrantLock) instead of heavy synchronized blocks for high-throughput concurrent applications.",
+        gfg_complexities: { best_time: "O(N)", avg_time: "O(N log N)", worst_time: "O(N log N)", space: "O(N)" },
         gfg_problems: [
           { name: "Filter & Group Data using Java Streams", difficulty: "Medium" },
           { name: "Producer-Consumer Problem using Threads", difficulty: "Hard" }
@@ -192,24 +189,26 @@
 
       // DSA TOPICS (BEGINNING TO ADVANCED)
       30101: {
-        title: "DSA Foundations: Time & Space Complexity Analysis (GFG Standard)",
-        markdown: "Asymptotic Analysis estimates algorithm growth rate as input size N approaches infinity.\n• Big-O (O): Upper bound worst-case execution time.\n• Big-Omega (Ω): Lower bound best-case execution time.\n• Big-Theta (Θ): Tight bound average-case execution time.\n\nMaster Theorem for Divide & Conquer: T(N) = aT(N/b) + O(N^d). Compare log_b(a) with d.",
-        code: `# GeeksforGeeks Binary Search Example — O(log N) Time, O(1) Space\n\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = left + (right - left) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\n# Benchmark Test\nnums = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]\nprint("Target Index:", binary_search(nums, 23))  # Index 5`,
-        complexities: { best_time: "O(1)", avg_time: "O(log N)", worst_time: "O(log N)", space: "O(1) Auxiliary" },
-        cheat_sheet: "• O(1): Constant array lookup\n• O(log N): Binary Search / Balanced Tree Search\n• O(N): Single loop linear scan\n• O(N log N): MergeSort / HeapSort / QuickSort avg\n• O(N^2): Double nested loops",
-        interview_tips: "Q: What is the space complexity of recursive algorithms?\nA: It is bounded by the maximum depth of the call stack (e.g. O(log N) for balanced trees, O(N) for linear recursion).",
+        title: "DSA Foundations: Time & Space Complexity Analysis",
+        markdown: "Asymptotic Analysis measures how an algorithm's execution time and memory consumption scale as input size N grows toward infinity.\n\nComplexity Notations:\n1. Big-O (O): Upper bound worst-case execution time.\n2. Big-Omega (Ω): Lower bound best-case execution time.\n3. Big-Theta (Θ): Tight bound average-case execution time.\n\nCommon Growth Rates:\nO(1) < O(log N) < O(N) < O(N log N) < O(N^2) < O(2^N) < O(N!)",
+        code: `# GeeksforGeeks Binary Search Example — O(log N) Time, O(1) Space\n\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = left + (right - left) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nnums = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]\nprint("Found at index:", binary_search(nums, 23)) # Index 5`,
+        cheat_sheet: "• O(1): Constant time (Array lookup by index)\n• O(log N): Logarithmic time (Binary Search, Balanced BST)\n• O(N): Linear time (Single pass array scan)\n• O(N log N): Linearithmic time (MergeSort, HeapSort, QuickSort avg)\n• O(N^2): Quadratic time (Nested loops, Bubble Sort)",
+        interview_tips: "Q: How do you determine the space complexity of recursive algorithms?\nA: Account for both auxiliary data structure memory AND maximum recursion stack depth frames residing on the execution call stack.",
+        gfg_notes: "GeeksforGeeks Reference Note: Asymptotic Recurrence Relations & Master Theorem\nFor Divide & Conquer algorithms defined by recurrence T(N) = aT(N/b) + f(N):\nCompare N^(log_b a) with f(N).\n• Case 1: If f(N) = O(N^(log_b(a) - ε)), T(N) = Θ(N^(log_b a))\n• Case 2: If f(N) = Θ(N^(log_b a)), T(N) = Θ(N^(log_b a) * log N)\n• Case 3: If f(N) = Ω(N^(log_b(a) + ε)), T(N) = Θ(f(N))",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(log N)", worst_time: "O(log N)", space: "O(1) Auxiliary" },
         gfg_problems: [
           { name: "Binary Search on Sorted Array", difficulty: "Easy" },
           { name: "Find Peak Element in Array", difficulty: "Medium" }
         ]
       },
       30102: {
-        title: "Arrays, Strings, Two-Pointers & Sliding Window (GFG Standard)",
-        markdown: "Arrays store elements in contiguous memory locations providing O(1) index access. Two-Pointer and Sliding Window techniques optimize brute-force O(N^2) subarray problems down to linear O(N) single pass.",
-        code: `# GeeksforGeeks Two-Pointer Pattern: Two Sum on Sorted Array\ndef two_sum_sorted(arr, target):\n    left, right = 0, len(arr) - 1\n    while left < right:\n        curr_sum = arr[left] + arr[right]\n        if curr_sum == target:\n            return [left, right]\n        elif curr_sum < target:\n            left += 1\n        else:\n            right -= 1\n    return []\n\n# Sliding Window: Max Subarray Sum of Size K\ndef max_subarray_sum(arr, k):\n    window_sum = sum(arr[:k])\n    max_sum = window_sum\n    for i in range(k, len(arr)):\n        window_sum += arr[i] - arr[i - k]\n        max_sum = max(max_sum, window_sum)\n    return max_sum`,
-        complexities: { best_time: "O(N)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
-        cheat_sheet: "• Two-Pointer Pattern: Opposite ends moving inward on sorted data\n• Sliding Window Pattern: Fixed or dynamic subsegment window bounds\n• Prefix Sum: Array where prefix[i] = sum(arr[0..i]) for fast range sum queries",
-        interview_tips: "Q: How do you identify when to apply the Sliding Window pattern?\nA: Look for problems asking for contiguous subarrays/substrings under specific sum, length, or character constraints.",
+        title: "Arrays, Strings, Two-Pointers & Sliding Window",
+        markdown: "Arrays store homogeneous elements in contiguous memory locations, offering O(1) random access via index offset math.\n\nTwo-Pointer & Sliding Window Paradigms:\nThese algorithmic patterns convert brute-force O(N^2) subarray or substring searches into linear O(N) single-pass traversals by dynamically adjusting left and right boundary pointers.",
+        code: `# GeeksforGeeks Two-Pointer & Sliding Window Patterns\n\n# 1. Two-Pointer Pattern: Target Sum on Sorted Array\ndef two_sum_sorted(arr, target):\n    left, right = 0, len(arr) - 1\n    while left < right:\n        curr_sum = arr[left] + arr[right]\n        if curr_sum == target:\n            return [left, right]\n        elif curr_sum < target:\n            left += 1\n        else:\n            right -= 1\n    return []\n\n# 2. Sliding Window: Max Subarray Sum of Size K\ndef max_subarray_sum(arr, k):\n    window_sum = sum(arr[:k])\n    max_sum = window_sum\n    for i in range(k, len(arr)):\n        window_sum += arr[i] - arr[i - k]\n        max_sum = max(max_sum, window_sum)\n    return max_sum`,
+        cheat_sheet: "• Two Pointers: Left & right pointers moving inward on sorted data\n• Sliding Window: Expand right pointer until constraint broken, then shrink left pointer\n• Prefix Sum Array: prefix[i] = sum(arr[0..i]) for O(1) subarray sum range queries",
+        interview_tips: "Q: How do you identify when to use Sliding Window?\nA: Use sliding window when the problem asks for contiguous subarrays/substrings satisfying min, max, or target sum constraints.",
+        gfg_notes: "GeeksforGeeks Reference Note: Memory Layout & Cache Locality of Arrays\nBecause array elements occupy contiguous RAM addresses, CPU cache prefetching loads neighboring array elements into high-speed L1/L2 cache lines, resulting in faster iteration than Linked Lists.",
+        gfg_complexities: { best_time: "O(N)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
         gfg_problems: [
           { name: "Two Sum II — Input Array Is Sorted", difficulty: "Easy" },
           { name: "Longest Substring Without Repeating Characters", difficulty: "Medium" },
@@ -217,25 +216,27 @@
         ]
       },
       30103: {
-        title: "Stacks, Queues, Linked Lists & Hash Tables (GFG Standard)",
-        markdown: "Linear data structures with distinct access semantics:\n• Stack: LIFO (Last-In-First-Out) — Used in function calls, expression parsing.\n• Queue: FIFO (First-In-First-Out) — Used in BFS and job scheduling.\n• Linked List: Non-contiguous nodes connected via memory pointers.\n• Hash Table: Maps keys to indices using hash functions for O(1) avg operations.",
-        code: `# GeeksforGeeks Stack Pattern: Valid Parentheses Matching\ndef is_valid_parentheses(s):\n    stack = []\n    mapping = {")": "(", "}": "{", "]": "["}\n    for char in s:\n        if char in mapping:\n            top_element = stack.pop() if stack else '#'\n            if mapping[char] != top_element:\n                return False\n        else:\n            stack.append(char)\n    return not stack\n\nprint("Valid:", is_valid_parentheses("{[()]}")) # True`,
-        complexities: { best_time: "O(1) Push/Pop", avg_time: "O(1)", worst_time: "O(N) Hash Collision", space: "O(N)" },
-        cheat_sheet: "• Stack Ops: push O(1), pop O(1), peek O(1)\n• Queue Ops: enqueue O(1), dequeue O(1)\n• Linked List: Insert/Delete O(1) given node pointer, Search O(N)\n• Hash Table Collision: Separate Chaining (LinkedList/Tree) or Open Addressing",
-        interview_tips: "Q: How do you detect a cycle in a Linked List in O(1) space?\nA: Use Floyd's Cycle Detection Algorithm (Slow pointer moves 1 step, Fast pointer moves 2 steps; if they meet, a cycle exists).",
+        title: "Stacks, Queues, Linked Lists & Hash Tables",
+        markdown: "Linear data structures with specialized operational access semantics:\n1. Stack: Last-In, First-Out (LIFO) access. Applications: Expression parsing, undo mechanisms, recursion call stacks.\n2. Queue: First-In, First-Out (FIFO) access. Applications: BFS traversal, CPU task scheduling, print queues.\n3. Linked List: Sequential node structure connected by memory pointers.\n4. Hash Table: Key-value map providing average O(1) lookup via hash functions.",
+        code: `# GeeksforGeeks Stack Pattern: Valid Parentheses Matching\ndef is_valid_parentheses(s):\n    stack = []\n    bracket_map = {")": "(", "}": "{", "]": "["}\n    for char in s:\n        if char in bracket_map:\n            top = stack.pop() if stack else '#'\n            if bracket_map[char] != top:\n                return False\n        else:\n            stack.append(char)\n    return not stack\n\nprint("Valid Bracket String:", is_valid_parentheses("{[()]}")) # True`,
+        cheat_sheet: "• Stack: LIFO (push O(1), pop O(1))\n• Queue: FIFO (enqueue O(1), dequeue O(1))\n• Linked List: O(1) insertion/deletion given pointer, O(N) search\n• Hash Table Collision Handling: Chaining (LinkedList/Tree) or Open Addressing",
+        interview_tips: "Q: How do you detect a cycle in a Linked List in O(1) space?\nA: Use Floyd's Cycle Detection Algorithm (Slow and Fast Pointers / Tortoise and Hare algorithm) where fast pointer moves 2 steps and slow pointer moves 1 step.",
+        gfg_notes: "GeeksforGeeks Reference Note: Hash Table Collisions & Java 8 HashMap Treeification\nWhen multiple keys produce the same hash index (collision), items are stored in a LinkedList bucket. In Java 8+, if a single bucket length exceeds 8 elements, the LinkedList automatically transforms into a Red-Black Tree, improving worst-case search from O(N) to O(log N).",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(1)", worst_time: "O(N) Hash Collision", space: "O(N)" },
         gfg_problems: [
-          { name: "Valid Parentheses String", difficulty: "Easy" },
+          { name: "Valid Parentheses", difficulty: "Easy" },
           { name: "Reverse a Linked List", difficulty: "Easy" },
           { name: "Detect Cycle in Linked List (Floyd's Algorithm)", difficulty: "Medium" }
         ]
       },
       30104: {
-        title: "Trees, Binary Search Trees (BST) & Heaps (GFG Standard)",
-        markdown: "Trees are non-linear hierarchical structures.\n• Binary Search Tree (BST): Left subtree values < Node value < Right subtree values. Inorder traversal yields sorted elements.\n• Heaps: Complete binary trees satisfying Heap Property (Min-Heap root is minimum, Max-Heap root is maximum). Efficient for Priority Queue implementations.",
+        title: "Trees, Binary Search Trees (BST) & Heaps",
+        markdown: "Hierarchical data structures:\n• Binary Search Tree (BST): Enforces left_child < parent < right_child property. Inorder traversal produces sorted order.\n• Heaps (Priority Queue): Complete binary trees satisfying Heap Property (Min-Heap root is minimum; Max-Heap root is maximum). Array index mapping: Left = 2i + 1, Right = 2i + 2, Parent = (i-1)//2.",
         code: `import heapq\n\n# GeeksforGeeks Priority Queue Pattern: Find Kth Largest Element\ndef find_kth_largest(nums, k):\n    min_heap = []\n    for num in nums:\n        heapq.heappush(min_heap, num)\n        if len(min_heap) > k:\n            heapq.heappop(min_heap)\n    return min_heap[0]\n\nnums = [3, 2, 1, 5, 6, 4]\nprint("3rd Largest Element:", find_kth_largest(nums, 3)) # Output: 4`,
-        complexities: { best_time: "O(1)", avg_time: "O(log N)", worst_time: "O(N) Unbalanced BST", space: "O(H) Height" },
-        cheat_sheet: "• BST Inorder Traversal: Left -> Node -> Right (Yields sorted sequence)\n• Heap Insert & Extract-Min: O(log N) via heapify up/down\n• Top-K Pattern: Maintain Min-Heap of size K (Time O(N log K))",
-        interview_tips: "Q: What happens if elements are inserted into a BST in sorted order?\nA: The tree degrades into a skewed single linked list with O(N) lookup. Self-balancing trees (AVL, Red-Black) prevent this by keeping height O(log N).",
+        cheat_sheet: "• BST Inorder Traversal: Left -> Node -> Right = Sorted order\n• Heap Push & Pop: O(log N) via bubble up/down heapify\n• Top-K Elements: Use Min-Heap of size K (Time complexity O(N log K))",
+        interview_tips: "Q: What happens to a BST if keys are inserted in pre-sorted order?\nA: The BST degrades into a skewed single linked list with O(N) search operations. Self-balancing trees (AVL, Red-Black) use rotations to keep height O(log N).",
+        gfg_notes: "GeeksforGeeks Reference Note: Self-Balancing Trees (AVL & Red-Black)\nAn AVL tree strictly enforces a height balance factor of at most 1 between left and right subtrees. Red-Black trees use node coloring (Red/Black) to relax balancing rules slightly, requiring fewer rotations during insertions making them preferred for Java TreeMap.",
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(log N)", worst_time: "O(N) Unbalanced BST", space: "O(H) Height" },
         gfg_problems: [
           { name: "Lowest Common Ancestor in BST", difficulty: "Easy" },
           { name: "Validate Binary Search Tree", difficulty: "Medium" },
@@ -243,12 +244,13 @@
         ]
       },
       30105: {
-        title: "Graph Algorithms: BFS, DFS & Shortest Path (GFG Standard)",
-        markdown: "Graphs consist of Vertices V and Edges E (Directed/Undirected, Weighted/Unweighted).\n• BFS: Explores neighbors level by level using a Queue. Finds shortest paths in unweighted graphs.\n• DFS: Explores deep paths using Recursion/Stack. Used for Topological Sort and Cycle Detection.\n• Dijkstra's Algorithm: Priority Queue greedy search for single-source shortest path in non-negative weighted graphs.",
-        code: `from collections import deque\n\n# GeeksforGeeks BFS Graph Traversal Example\ndef bfs_shortest_path(graph, start, target):\n    visited = {start}\n    queue = deque([(start, 0)])  # (node, distance)\n    while queue:\n        curr, dist = queue.popleft()\n        if curr == target:\n            return dist\n        for neighbor in graph.get(curr, []):\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append((neighbor, dist + 1))\n    return -1\n\ngraph = {0: [1, 2], 1: [2, 3], 2: [3], 3: []}\nprint("Shortest Distance 0->3:", bfs_shortest_path(graph, 0, 3)) # 2`,
-        complexities: { best_time: "O(V + E)", avg_time: "O(V + E)", worst_time: "O((V + E) log V) Dijkstra", space: "O(V)" },
-        cheat_sheet: "• BFS: Queue O(V + E) — Level order / Unweighted shortest path\n• DFS: Stack / Recursion O(V + E) — Connected components & topological sort\n• Dijkstra: Min-Heap O((V + E) log V) — Non-negative weighted graphs",
-        interview_tips: "Q: When is BFS strictly preferred over DFS?\nA: BFS guarantees finding the shortest path (minimum edge count) from a starting vertex in an unweighted graph.",
+        title: "Graph Algorithms: BFS, DFS & Shortest Path",
+        markdown: "Graphs consist of Vertices (V) and Edges (E):\n• Breadth-First Search (BFS): Explores nodes level by level using a Queue. Computes shortest path in unweighted graphs.\n• Depth-First Search (DFS): Explores deep paths using Recursion/Stack. Used for Topological Sort and Cycle Detection.\n• Dijkstra's Algorithm: Priority Queue greedy search computing single-source shortest path in non-negative weighted graphs.",
+        code: `from collections import deque\n\n# GeeksforGeeks BFS Shortest Path Traversal Example\ndef bfs_shortest_path(graph, start, target):\n    visited = {start}\n    queue = deque([(start, 0)])  # (node, distance)\n    while queue:\n        curr, dist = queue.popleft()\n        if curr == target:\n            return dist\n        for neighbor in graph.get(curr, []):\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append((neighbor, dist + 1))\n    return -1\n\ngraph = {0: [1, 2], 1: [2, 3], 2: [3], 3: []}\nprint("Shortest Distance 0->3:", bfs_shortest_path(graph, 0, 3)) # 2`,
+        cheat_sheet: "• BFS: Queue O(V + E) — Level order & shortest path in unweighted graph\n• DFS: Stack/Recursion O(V + E) — Cycle detection & topological sort\n• Dijkstra: Min-Heap O((V + E) log V) — Shortest path in weighted graph",
+        interview_tips: "Q: When is BFS strictly preferred over DFS?\nA: Use BFS when searching for the shortest path or minimum step transformation in an unweighted graph.",
+        gfg_notes: "GeeksforGeeks Reference Note: Topological Sorting & Kahn's Algorithm\nTopological sorting orders vertices in a Directed Acyclic Graph (DAG) such that for every directed edge u -> v, u comes before v. Kahn's Algorithm computes in-degrees of all vertices and processes nodes with 0 in-degree using a queue in O(V + E) time.",
+        gfg_complexities: { best_time: "O(V + E)", avg_time: "O(V + E)", worst_time: "O((V + E) log V) Dijkstra", space: "O(V)" },
         gfg_problems: [
           { name: "Number of Islands (Grid BFS/DFS)", difficulty: "Medium" },
           { name: "Course Schedule (Topological Sort / Cycle Detection)", difficulty: "Medium" },
@@ -256,12 +258,13 @@
         ]
       },
       30106: {
-        title: "Dynamic Programming (DP) & Backtracking (GFG Standard)",
-        markdown: "Dynamic Programming solves optimization problems with Overlapping Subproblems and Optimal Substructure by storing intermediate results:\n1. Top-Down Memoization: Recursive + HashMap/Array Cache.\n2. Bottom-Up Tabulation: Iterative table initialization.\n\nBacktracking systematically explores solution candidates using state-space recursion and pruning invalid paths.",
+        title: "Dynamic Programming (DP) & Backtracking",
+        markdown: "Dynamic Programming solves complex optimization problems by breaking them into overlapping subproblems with optimal substructure:\n1. Top-Down Memoization: Recursive approach + Lookup Cache.\n2. Bottom-Up Tabulation: Iterative matrix table initialization.\n\nBacktracking systematically searches state spaces by placing choices, recursing, and pruning invalid paths (undoing choices).",
         code: `# GeeksforGeeks 0/1 Knapsack DP Example (Bottom-Up Tabulation)\ndef knapsack_01(weights, values, capacity):\n    n = len(weights)\n    dp = [[0] * (capacity + 1) for _ in range(n + 1)]\n    \n    for i in range(1, n + 1):\n        for w in range(1, capacity + 1):\n            if weights[i - 1] <= w:\n                dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w])\n            else:\n                dp[i][w] = dp[i - 1][w]\n                \n    return dp[n][capacity]\n\nval = [60, 100, 120]; wt = [10, 20, 30]; W = 50\nprint("Max Knapsack Value:", knapsack_01(wt, val, W)) # Output: 220`,
-        complexities: { best_time: "O(N * W)", avg_time: "O(N * W)", worst_time: "O(N * W)", space: "O(N * W) or O(W) Space Optimized" },
-        cheat_sheet: "• DP Core Test: Overlapping Subproblems + Optimal Substructure\n• Top-Down: Recursion + Cache dict\n• Bottom-Up: Iterative DP matrix array\n• Backtracking: Choice -> Recurse -> Undo (Backtrack)",
-        interview_tips: "Q: Difference between Dynamic Programming and Greedy Choice?\nA: Greedy algorithms make locally optimal decisions without revising past choices, whereas DP considers all past subproblems before selecting optimal overall path.",
+        cheat_sheet: "• DP Core Test: Overlapping Subproblems + Optimal Substructure\n• Top-Down: Recursion + Dict/Array Cache\n• Bottom-Up: Iterative DP matrix array\n• Backtracking: Choice -> Recurse -> Undo (Backtrack)",
+        interview_tips: "Q: What is the difference between Greedy choice and Dynamic Programming?\nA: Greedy algorithms make locally optimal choices without re-evaluating past decisions. DP evaluates subproblem choices before identifying global optimum.",
+        gfg_notes: "GeeksforGeeks Reference Note: Space Optimization in DP\nWhen DP transition state depends only on previous row dp[i-1][w] (like 0/1 Knapsack or Longest Common Subsequence), space complexity can be reduced from 2D matrix O(N * W) down to 1D array O(W) by iterating backwards.",
+        gfg_complexities: { best_time: "O(N * W)", avg_time: "O(N * W)", worst_time: "O(N * W)", space: "O(N * W) or O(W) Space Optimized" },
         gfg_problems: [
           { name: "0/1 Knapsack Problem", difficulty: "Medium" },
           { name: "Longest Common Subsequence (LCS)", difficulty: "Medium" },
@@ -271,12 +274,13 @@
 
       // DBMS TOPICS
       40101: {
-        title: "SQL Joins, Aggregation & Query Execution (GFG Standard)",
-        markdown: "SQL queries join multiple relational tables on key relationships:\n• INNER JOIN: Returns matching records in both tables.\n• LEFT JOIN: Returns all left table records + matched right table records.\n• GROUP BY & HAVING: Aggregate calculations (SUM, AVG, COUNT) filtered after grouping.",
+        title: "SQL Joins, Aggregation & Query Execution",
+        markdown: "Relational database queries combine multi-table datasets via Joins (INNER, LEFT, RIGHT, FULL OUTER) and compute aggregate metrics (COUNT, SUM, AVG) grouped by dimensions.",
         code: `-- GeeksforGeeks Relational Query Example\nSELECT u.full_name, COUNT(q.id) AS total_quizzes, AVG(q.actual_score) AS avg_score\nFROM users u\nJOIN quiz_attempts q ON u.id = q.student_id\nWHERE q.completed_at >= NOW() - INTERVAL 30 DAY\nGROUP BY u.id, u.full_name\nHAVING AVG(q.actual_score) >= 75.0\nORDER BY avg_score DESC;`,
-        complexities: { best_time: "O(N log N) Indexed", avg_time: "O(N log N)", worst_time: "O(N * M) Cartesian", space: "O(N)" },
-        cheat_sheet: "• INNER JOIN: Intersection set\n• LEFT JOIN: Left set + matched right set\n• WHERE vs HAVING: WHERE filters rows BEFORE grouping; HAVING filters AFTER aggregation",
-        interview_tips: "Q: Why is indexing important on JOIN foreign keys?\nA: Indexing converts full table scans O(N * M) into binary tree / hash lookup O(N log M) during query execution.",
+        cheat_sheet: "• INNER JOIN: Exact matching rows in both tables\n• LEFT JOIN: All left table rows + matched right table rows\n• GROUP BY + HAVING: Filter aggregated metrics after grouping",
+        interview_tips: "Q: What is the difference between WHERE and HAVING in SQL?\nA: WHERE filters raw individual rows BEFORE grouping; HAVING filters aggregated metric results AFTER GROUP BY execution.",
+        gfg_notes: "GeeksforGeeks Reference Note: SQL Query Execution Order & B-Tree Indexes\nSQL execution order: FROM -> JOIN -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY. Indexing JOIN foreign key columns uses B-Trees to convert linear O(N * M) scans into O(N log M) index lookups.",
+        gfg_complexities: { best_time: "O(N log N) Indexed", avg_time: "O(N log N)", worst_time: "O(N * M) Cartesian", space: "O(N)" },
         gfg_problems: [
           { name: "Write Query for Second Highest Salary", difficulty: "Medium" },
           { name: "Group By & Having Clause Practice", difficulty: "Easy" }
@@ -785,7 +789,7 @@
       const navItems = [
         { id: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
         { id: "subjects", label: "My Subjects", icon: "book-open" },
-        { id: "study-material", label: "Study Notes & GFG Material", icon: "file-text" },
+        { id: "study-material", label: "Study Notes & Material", icon: "file-text" },
         { id: "study-plan", label: "Study Plan", icon: "calendar" },
         { id: "take-quiz", label: "Take Quiz", icon: "help-circle" },
         { id: "performance", label: "Performance", icon: "bar-chart-2" },
@@ -806,12 +810,12 @@
             <div>
               <div className="flex items-center justify-between px-3 py-4 mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/30">
                     AI
                   </div>
                   <div>
                     <h1 className="font-heading font-bold text-lg leading-none gradient-text">AI Study Twin</h1>
-                    <p className="text-xs text-emerald-400 mt-1 font-medium">GFG Edition Live</p>
+                    <p className="text-xs text-slate-400 mt-1">GitHub Pages Live App</p>
                   </div>
                 </div>
                 <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400 p-1">
@@ -831,11 +835,11 @@
                       }}
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
                         isActive
-                          ? "bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 shadow-md shadow-emerald-500/10"
+                          ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-md shadow-indigo-500/10"
                           : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                       }`}
                     >
-                      <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? "text-emerald-400" : "text-slate-400"}`}></i>
+                      <i data-lucide={item.icon} className={`w-4 h-4 ${isActive ? "text-indigo-400" : "text-slate-400"}`}></i>
                       <span>{item.label}</span>
                     </button>
                   );
@@ -846,7 +850,7 @@
             <div className="pt-4 border-t border-slate-800">
               <div className="flex items-center justify-between px-3 py-2 bg-slate-900/60 rounded-xl border border-slate-800">
                 <div className="flex items-center gap-2 truncate">
-                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 font-bold text-sm shrink-0">
                     {user?.full_name?.charAt(0) || "S"}
                   </div>
                   <div className="truncate">
@@ -867,25 +871,25 @@
 
           {/* Bottom Nav Bar for Mobile */}
           <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass-nav border-t border-slate-800 px-4 py-2 flex items-center justify-around">
-            <button onClick={() => setActiveTab("dashboard")} className={`flex flex-col items-center gap-1 ${activeTab === "dashboard" ? "text-emerald-400" : "text-slate-400"}`}>
+            <button onClick={() => setActiveTab("dashboard")} className={`flex flex-col items-center gap-1 ${activeTab === "dashboard" ? "text-indigo-400" : "text-slate-400"}`}>
               <i data-lucide="layout-dashboard" className="w-5 h-5"></i>
               <span className="text-[10px]">Home</span>
             </button>
-            <button onClick={() => setActiveTab("subjects")} className={`flex flex-col items-center gap-1 ${activeTab === "subjects" ? "text-emerald-400" : "text-slate-400"}`}>
+            <button onClick={() => setActiveTab("subjects")} className={`flex flex-col items-center gap-1 ${activeTab === "subjects" ? "text-indigo-400" : "text-slate-400"}`}>
               <i data-lucide="book-open" className="w-5 h-5"></i>
               <span className="text-[10px]">Subjects</span>
             </button>
-            <button onClick={() => setActiveTab("study-material")} className={`flex flex-col items-center gap-1 ${activeTab === "study-material" ? "text-emerald-400" : "text-slate-400"}`}>
+            <button onClick={() => setActiveTab("study-material")} className={`flex flex-col items-center gap-1 ${activeTab === "study-material" ? "text-indigo-400" : "text-slate-400"}`}>
               <i data-lucide="file-text" className="w-5 h-5"></i>
-              <span className="text-[10px]">GFG Notes</span>
+              <span className="text-[10px]">Notes</span>
             </button>
-            <button onClick={() => setActiveTab("take-quiz")} className={`flex flex-col items-center gap-1 ${activeTab === "take-quiz" ? "text-emerald-400" : "text-slate-400"}`}>
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center -mt-3 shadow-lg shadow-emerald-500/30">
+            <button onClick={() => setActiveTab("take-quiz")} className={`flex flex-col items-center gap-1 ${activeTab === "take-quiz" ? "text-indigo-400" : "text-slate-400"}`}>
+              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center -mt-3 shadow-lg shadow-indigo-500/30">
                 <i data-lucide="play" className="w-4 h-4 fill-white"></i>
               </div>
               <span className="text-[10px]">Quiz</span>
             </button>
-            <button onClick={() => setActiveTab("profile")} className={`flex flex-col items-center gap-1 ${activeTab === "profile" ? "text-emerald-400" : "text-slate-400"}`}>
+            <button onClick={() => setActiveTab("profile")} className={`flex flex-col items-center gap-1 ${activeTab === "profile" ? "text-indigo-400" : "text-slate-400"}`}>
               <i data-lucide="user" className="w-5 h-5"></i>
               <span className="text-[10px]">Profile</span>
             </button>
@@ -909,7 +913,7 @@
           <div className="hidden sm:flex items-center gap-3">
             <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              GFG Study Material Engine Active
+              Client AI Engine Ready (GitHub Pages)
             </div>
             <button
               onClick={onLogout}
@@ -952,8 +956,8 @@
                 {
                   label: "Actual %",
                   data: state.attempts.map(a => a.actual),
-                  borderColor: "#10b981",
-                  backgroundColor: "rgba(16, 185, 129, 0.15)",
+                  borderColor: "#6366f1",
+                  backgroundColor: "rgba(99, 102, 241, 0.15)",
                   fill: true,
                   tension: 0.4,
                 },
@@ -985,7 +989,7 @@
               datasets: [{
                 label: "Accuracy %",
                 data: state.subjects.map(s => Math.round(s.topics.reduce((acc, t) => acc + t.accuracy, 0) / s.topics.length)),
-                backgroundColor: ["#10b981", "#6366f1", "#06b6d4", "#f59e0b"],
+                backgroundColor: ["#6366f1", "#06b6d4", "#10b981", "#f59e0b"],
                 borderRadius: 6
               }]
             },
@@ -1003,7 +1007,7 @@
         <div className="pb-16 md:pb-0">
           <Header
             title={`Welcome back, ${state.user?.full_name || "Student"}!`}
-            subtitle="Personalized AI Learning Twin Dashboard with GeeksforGeeks Standard Notes"
+            subtitle="Personalized AI Learning Twin Dashboard running live on GitHub Pages"
             setMobileMenuOpen={setMobileMenuOpen}
             onLogout={onLogout}
           />
@@ -1033,15 +1037,15 @@
           </div>
 
           {/* AI Banner */}
-          <div className="glass-card rounded-2xl p-5 mb-6 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="glass-card rounded-2xl p-5 mb-6 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center shrink-0">
                 <i data-lucide="sparkles" className="w-5 h-5"></i>
               </div>
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Top Recommendation</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Top Recommendation</span>
                 <h4 className="font-heading font-bold text-base sm:text-lg text-slate-100 mt-0.5">
-                  Recommended Study Focus: <span className="text-emerald-300">{topRec.topic_name}</span>
+                  Recommended Study Focus: <span className="text-indigo-300">{topRec.topic_name}</span>
                 </h4>
                 <p className="text-xs text-slate-300 mt-1">{topRec.reason}</p>
               </div>
@@ -1051,12 +1055,12 @@
                 onClick={() => setActiveTab("study-material")}
                 className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 shrink-0"
               >
-                <i data-lucide="file-text" className="w-4 h-4 text-emerald-400"></i>
-                <span>GFG Notes</span>
+                <i data-lucide="file-text" className="w-4 h-4 text-indigo-400"></i>
+                <span>Read Notes</span>
               </button>
               <button
                 onClick={() => setActiveTab("take-quiz")}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
               >
                 <span>Start Quiz</span>
                 <i data-lucide="arrow-right" className="w-4 h-4"></i>
@@ -1083,22 +1087,22 @@
     const SubjectsPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="My Enrolled Subjects (Python, Java, DSA & DBMS)" subtitle="Explore complete curriculum topics with GeeksforGeeks benchmark notes" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="My Enrolled Subjects (Python, Java, DSA & DBMS)" subtitle="Explore complete curriculum topics from fundamental syntax to advanced algorithms" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-6">
             {state.subjects.map(sub => (
               <div key={sub.id} className="glass-card rounded-2xl p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-4 border-b border-slate-800">
                   <div>
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/20">{sub.code}</span>
+                    <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-xs font-bold border border-indigo-500/20">{sub.code}</span>
                     <h3 className="font-heading font-bold text-xl text-slate-100 mt-2">{sub.name}</h3>
                     <p className="text-xs text-slate-400 mt-1">{sub.description}</p>
                   </div>
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <button onClick={() => setActiveTab("study-material")} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5">
-                      <i data-lucide="file-text" className="w-3.5 h-3.5 text-emerald-400"></i>
-                      <span>GFG Notes</span>
+                      <i data-lucide="file-text" className="w-3.5 h-3.5 text-indigo-400"></i>
+                      <span>Study Notes</span>
                     </button>
-                    <button onClick={() => setActiveTab("take-quiz")} className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5">
+                    <button onClick={() => setActiveTab("take-quiz")} className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5">
                       <span>Take Quiz</span>
                       <i data-lucide="arrow-right" className="w-3.5 h-3.5"></i>
                     </button>
@@ -1117,10 +1121,10 @@
                       <div>
                         <div className="flex justify-between text-xs mb-1">
                           <span className="text-slate-400">Accuracy</span>
-                          <span className="font-semibold text-emerald-300">{top.accuracy}%</span>
+                          <span className="font-semibold text-indigo-300">{top.accuracy}%</span>
                         </div>
                         <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
-                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${top.accuracy}%` }}></div>
+                          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${top.accuracy}%` }}></div>
                         </div>
                       </div>
                     </div>
@@ -1133,20 +1137,21 @@
       );
     };
 
-    // STUDY NOTES & MATERIAL PAGE (GEEKSFORGEEKS EDITION)
+    // STUDY NOTES & MATERIAL PAGE (WITH LENGTHY GFG SECTION)
     const StudyMaterialPage = ({ state, setMobileMenuOpen, onLogout }) => {
       const allTopics = state.subjects.flatMap(s => s.topics);
       const [selectedTopicId, setSelectedTopicId] = React.useState(allTopics[0]?.id || 10101);
-      const [activeTab, setActiveTab] = React.useState("notes"); // 'notes', 'code', 'complexities', 'problems', 'cheat'
+      const [activeTab, setActiveTab] = React.useState("notes"); // 'notes', 'code', 'cheat', 'gfg', 'interview'
 
       const currentTopic = allTopics.find(t => t.id === selectedTopicId) || allTopics[0];
       const material = STUDY_MATERIALS_DB[selectedTopicId] || {
-        title: `${currentTopic?.name} (GeeksforGeeks Standard Note)`,
-        markdown: `Detailed GeeksforGeeks style concept guide for ${currentTopic?.name}. Covers problem formulation, memory constraints, and algorithm optimizations.`,
-        code: `# GeeksforGeeks Standard Implementation\ndef solution():\n    # Optimal approach for ${currentTopic?.name}\n    pass`,
-        complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
-        cheat_sheet: `• Topic Name: ${currentTopic?.name}\n• Difficulty: Level ${currentTopic?.difficulty}/5\n• Status: ${currentTopic?.status}`,
-        interview_tips: `Q: What are the core tradeoffs for ${currentTopic?.name}?\nA: Evaluate time complexity vs auxiliary space complexity depending on constraints.`,
+        title: `${currentTopic?.name} — Study Guide`,
+        markdown: `Detailed study notes and theoretical guide for ${currentTopic?.name}. Covers underlying data representations, memory management, and algorithmic analysis.`,
+        code: `# Syntax & Code Pattern Demo\ndef solution():\n    # Optimal implementation for ${currentTopic?.name}\n    pass`,
+        cheat_sheet: `• Core Concept: ${currentTopic?.name}\n• Difficulty Level: ${currentTopic?.difficulty}/5\n• Status: ${currentTopic?.status}`,
+        interview_tips: `Q: What are the key performance tradeoffs for ${currentTopic?.name}?\nA: Analyze time complexity vs space complexity depending on input size and memory bounds.`,
+        gfg_notes: `GeeksforGeeks Reference Note: ${currentTopic?.name}\nIn-depth technical breakdown covering asymptotic analysis, standard memory layouts, and interview problem patterns.`,
+        gfg_complexities: { best_time: "O(1)", avg_time: "O(N)", worst_time: "O(N)", space: "O(1) Auxiliary" },
         gfg_problems: [
           { name: `Practice ${currentTopic?.name} on GFG`, difficulty: "Medium" }
         ]
@@ -1158,24 +1163,18 @@
 
       return (
         <div className="pb-16 md:pb-0">
-          <Header
-            title="Study Notes & Material (GeeksforGeeks Edition)"
-            subtitle="GeeksforGeeks style concept breakdown, asymptotic time complexity tables, GFG code snippets, and benchmark practice problems"
-            setMobileMenuOpen={setMobileMenuOpen}
-            onLogout={onLogout}
-          />
+          <Header title="Study Notes & Material Library" subtitle="Comprehensive study notes with a dedicated GeeksforGeeks (GFG) technical reference section" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Topic Selector */}
             <div className="glass-card rounded-2xl p-4 space-y-3">
-              <h4 className="font-heading font-bold text-sm text-slate-200 pb-2 border-b border-slate-800 flex items-center justify-between">
-                <span>Select Course Topic</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">GFG</span>
+              <h4 className="font-heading font-bold text-sm text-slate-200 pb-2 border-b border-slate-800">
+                Select Course Topic
               </h4>
               <div className="space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
                 {state.subjects.map(sub => (
                   <div key={sub.id}>
-                    <span className="text-[10px] font-bold tracking-wider text-emerald-400 uppercase block mb-1.5 px-1">{sub.code} — {sub.name.split(' ')[0]}</span>
+                    <span className="text-[10px] font-bold tracking-wider text-indigo-400 uppercase block mb-1.5 px-1">{sub.code} — {sub.name.split(' ')[0]}</span>
                     <div className="space-y-1">
                       {sub.topics.map(t => {
                         const isSel = t.id === selectedTopicId;
@@ -1185,7 +1184,7 @@
                             onClick={() => setSelectedTopicId(t.id)}
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
                               isSel
-                                ? "bg-emerald-600/30 text-emerald-200 border border-emerald-500/40 shadow-sm"
+                                ? "bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 shadow-sm"
                                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
                             }`}
                           >
@@ -1200,143 +1199,190 @@
               </div>
             </div>
 
-            {/* Right GFG Material Viewer */}
-            <div className="lg:col-span-3 glass-card rounded-2xl p-6 flex flex-col justify-between border-t-4 border-t-emerald-500">
+            {/* Right Material Viewer */}
+            <div className="lg:col-span-3 glass-card rounded-2xl p-6 flex flex-col justify-between">
               <div>
-                {/* Header & Tabs */}
+                {/* Material Header & Navigation Tabs */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-800">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/30">
-                        GeeksforGeeks Standard
-                      </span>
-                      <span className="text-xs text-slate-400 font-semibold">Difficulty: Level {currentTopic?.difficulty}/5</span>
-                    </div>
+                    <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-xs font-bold border border-indigo-500/20">
+                      Topic Level {currentTopic?.difficulty}/5
+                    </span>
                     <h3 className="font-heading font-bold text-xl sm:text-2xl text-slate-100 mt-2">{material.title}</h3>
                   </div>
-
                   <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start sm:self-auto overflow-x-auto">
                     <button
                       onClick={() => setActiveTab("notes")}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                        activeTab === "notes" ? "bg-emerald-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                        activeTab === "notes" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      📖 Article
+                      📖 Detailed Notes
                     </button>
                     <button
                       onClick={() => setActiveTab("code")}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                        activeTab === "code" ? "bg-emerald-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                        activeTab === "code" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      💻 GFG Code
+                      💻 Code
                     </button>
                     <button
-                      onClick={() => setActiveTab("complexities")}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                        activeTab === "complexities" ? "bg-emerald-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      onClick={() => setActiveTab("gfg")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1 ${
+                        activeTab === "gfg" ? "bg-emerald-600 text-white shadow" : "text-emerald-400 hover:text-emerald-300"
                       }`}
                     >
-                      ⏱️ Complexities
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      GFG Reference Note
                     </button>
                     <button
-                      onClick={() => setActiveTab("problems")}
+                      onClick={() => setActiveTab("cheat")}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                        activeTab === "problems" ? "bg-emerald-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                        activeTab === "cheat" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      🎯 GFG Practice
+                      ⚡ Cheat Sheet
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("interview")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        activeTab === "interview" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      💡 Interview Q&A
                     </button>
                   </div>
                 </div>
 
-                {/* Tab 1: Notes Article */}
+                {/* Tab 1: Detailed Notes */}
                 {activeTab === "notes" && (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                      <h4 className="font-heading font-bold text-slate-100 text-base mb-2 flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
-                        GeeksforGeeks Detailed Explanation
+                    <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                      <h4 className="font-heading font-bold text-slate-100 text-base mb-3 flex items-center gap-2">
+                        <i data-lucide="book-open" className="w-5 h-5 text-indigo-400"></i>
+                        <span>Comprehensive Study Notes & Theoretical Framework</span>
                       </h4>
                       {material.markdown}
                     </div>
 
-                    <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-slate-300">
-                      <strong className="block text-indigo-300 font-semibold mb-1">Interview Strategy Tip:</strong>
-                      {material.interview_tips}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                        <h5 className="font-semibold text-indigo-300 text-xs uppercase tracking-wider mb-1">Study Priority Recommendation</h5>
+                        <p className="text-xs text-slate-300">
+                          Current Topic Accuracy: <strong className="text-indigo-300">{currentTopic?.accuracy}%</strong>. Take a diagnostic quiz after reading to solidify concepts.
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <h5 className="font-semibold text-emerald-300 text-xs uppercase tracking-wider mb-1">Academic Weight Factor</h5>
+                        <p className="text-xs text-slate-300">
+                          Weight: <strong className="text-emerald-300">{currentTopic?.importance}x</strong>. Essential core topic tested in technical interviews and college exams.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Tab 2: GFG Code */}
+                {/* Tab 2: Code Examples */}
                 {activeTab === "code" && (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-xs text-slate-400">
-                      <span>GeeksforGeeks Documented Code Implementation</span>
-                      <span className="font-mono text-emerald-400">Tested Output</span>
+                      <span>Executable Syntax & Code Snippet</span>
+                      <span className="font-mono text-indigo-400">Language Standard</span>
                     </div>
-                    <pre className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-emerald-300 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
+                    <pre className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-indigo-300 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
                       <code>{material.code}</code>
                     </pre>
                   </div>
                 )}
 
-                {/* Tab 3: Time & Space Complexities */}
-                {activeTab === "complexities" && (
+                {/* Tab 3: Dedicated GeeksforGeeks (GFG) Reference Section & Lengthy Note */}
+                {activeTab === "gfg" && (
                   <div className="space-y-4">
-                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Asymptotic Complexity Analysis Table</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                        <span className="text-[10px] text-slate-400 block uppercase">Best Case Time</span>
-                        <span className="text-lg font-bold font-mono text-emerald-400 mt-1 block">{material.complexities?.best_time || "O(1)"}</span>
+                    {/* GFG Header Card */}
+                    <div className="p-5 rounded-2xl bg-slate-900/90 border-l-4 border-l-emerald-500 border border-slate-800">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/30">
+                          GeeksforGeeks Standard Reference Note
+                        </span>
+                        <span className="text-xs text-emerald-400 font-medium">GFG Curated Content</span>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                        <span className="text-[10px] text-slate-400 block uppercase">Average Case Time</span>
-                        <span className="text-lg font-bold font-mono text-indigo-400 mt-1 block">{material.complexities?.avg_time || "O(N)"}</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                        <span className="text-[10px] text-slate-400 block uppercase">Worst Case Time</span>
-                        <span className="text-lg font-bold font-mono text-rose-400 mt-1 block">{material.complexities?.worst_time || "O(N)"}</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                        <span className="text-[10px] text-slate-400 block uppercase">Auxiliary Space</span>
-                        <span className="text-lg font-bold font-mono text-cyan-400 mt-1 block">{material.complexities?.space || "O(1)"}</span>
-                      </div>
+                      <h4 className="font-heading font-bold text-slate-100 text-lg mb-2">Lengthy Technical Explanation & Benchmark Notes</h4>
+                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                        {material.gfg_notes}
+                      </p>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
-                      <strong>Cheat Sheet Bullet Points:</strong>
-                      {"\n" + material.cheat_sheet}
+                    {/* Asymptotic Complexity Matrix */}
+                    {material.gfg_complexities && (
+                      <div className="glass-card rounded-2xl p-4">
+                        <h5 className="font-heading font-semibold text-xs text-slate-400 uppercase tracking-wider mb-3">GeeksforGeeks Asymptotic Complexity Matrix</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                            <span className="text-[10px] text-slate-400 block uppercase">Best Case Time</span>
+                            <span className="text-sm font-bold font-mono text-emerald-400 mt-1 block">{material.gfg_complexities.best_time}</span>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                            <span className="text-[10px] text-slate-400 block uppercase">Average Case Time</span>
+                            <span className="text-sm font-bold font-mono text-indigo-400 mt-1 block">{material.gfg_complexities.avg_time}</span>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                            <span className="text-[10px] text-slate-400 block uppercase">Worst Case Time</span>
+                            <span className="text-sm font-bold font-mono text-rose-400 mt-1 block">{material.gfg_complexities.worst_time}</span>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                            <span className="text-[10px] text-slate-400 block uppercase">Auxiliary Space</span>
+                            <span className="text-sm font-bold font-mono text-cyan-400 mt-1 block">{material.gfg_complexities.space}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Benchmark Practice Problems */}
+                    {material.gfg_problems && (
+                      <div className="space-y-2">
+                        <h5 className="font-heading font-semibold text-xs text-slate-400 uppercase tracking-wider mb-1">GeeksforGeeks Standard Benchmark Problems</h5>
+                        {material.gfg_problems.map((prob, idx) => (
+                          <div key={idx} className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center justify-center">#{idx + 1}</span>
+                              <span className="font-semibold text-slate-200 text-xs sm:text-sm">{prob.name}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge type={prob.difficulty} />
+                              <a
+                                href={`https://www.geeksforgeeks.org/search/?q=${encodeURIComponent(prob.name)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-semibold border border-emerald-500/30 transition-colors flex items-center gap-1"
+                              >
+                                <span>Solve on GFG</span>
+                                <i data-lucide="external-link" className="w-3 h-3"></i>
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab 4: Cheat Sheet */}
+                {activeTab === "cheat" && (
+                  <div className="space-y-3">
+                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Quick Reference & Rules Cheat Sheet</h4>
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-mono text-xs leading-relaxed whitespace-pre-line">
+                      {material.cheat_sheet}
                     </div>
                   </div>
                 )}
 
-                {/* Tab 4: GFG Practice Problems */}
-                {activeTab === "problems" && (
-                  <div className="space-y-4">
-                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Standard GeeksforGeeks Practice Benchmark Problems</h4>
-                    <div className="space-y-2">
-                      {(material.gfg_problems || []).map((prob, idx) => (
-                        <div key={idx} className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center justify-center">#{idx + 1}</span>
-                            <span className="font-semibold text-slate-200 text-sm">{prob.name}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge type={prob.difficulty} />
-                            <a
-                              href={`https://www.geeksforgeeks.org/search/?q=${encodeURIComponent(prob.name)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-3 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-semibold border border-emerald-500/30 transition-colors flex items-center gap-1"
-                            >
-                              <span>Solve on GFG</span>
-                              <i data-lucide="external-link" className="w-3 h-3"></i>
-                            </a>
-                          </div>
-                        </div>
-                      ))}
+                {/* Tab 5: Technical Interview Q&A */}
+                {activeTab === "interview" && (
+                  <div className="space-y-3">
+                    <h4 className="font-heading font-bold text-slate-200 text-base mb-2">Technical Interview & Exam Focus</h4>
+                    <div className="p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30 text-xs text-slate-200 leading-relaxed whitespace-pre-line">
+                      {material.interview_tips}
                     </div>
                   </div>
                 )}
@@ -1422,8 +1468,8 @@
       if (result) {
         return (
           <div className="max-w-3xl mx-auto space-y-6 pb-16 md:pb-0">
-            <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-emerald-500">
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Quiz Completed</span>
+            <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">Quiz Completed</span>
               <h2 className="font-heading font-bold text-3xl text-slate-100 mt-1">Predicted vs Actual Comparison</h2>
 
               <div className="grid grid-cols-3 gap-3 my-6">
@@ -1431,7 +1477,7 @@
                   <p className="text-[10px] text-slate-400">ML Predicted</p>
                   <p className="text-xl sm:text-2xl font-bold font-heading text-cyan-400 mt-1">{result.predicted}%</p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-800/60 border border-emerald-500/40">
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-indigo-500/40">
                   <p className="text-[10px] text-slate-400">Actual Score</p>
                   <p className="text-2xl sm:text-3xl font-bold font-heading text-emerald-400 mt-1">{result.actual}%</p>
                 </div>
@@ -1443,12 +1489,12 @@
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-left text-xs text-emerald-200">
-                <strong className="block text-emerald-300 font-semibold mb-1">AI Twin Feedback & Profile Auto-Sync:</strong>
+              <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-left text-xs text-indigo-200">
+                <strong className="block text-indigo-300 font-semibold mb-1">AI Twin Feedback & Profile Auto-Sync:</strong>
                 Your learning profile was updated! The weakness classifier re-scored {selectedTopic.name} and adjusted your study priority queue.
               </div>
 
-              <button onClick={() => setResult(null)} className="mt-6 px-6 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">
+              <button onClick={() => setResult(null)} className="mt-6 px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">
                 Take Another Quiz
               </button>
             </div>
@@ -1481,7 +1527,7 @@
                       key={optKey}
                       onClick={() => setSelectedAnswers({ ...selectedAnswers, [q.id]: optKey })}
                       className={`w-full text-left p-4 rounded-xl border text-sm font-medium transition-all ${
-                        isSel ? "bg-emerald-600/20 border-emerald-500 text-emerald-200" : "bg-slate-800/40 border-slate-700/60 text-slate-300"
+                        isSel ? "bg-indigo-600/20 border-indigo-500 text-indigo-200" : "bg-slate-800/40 border-slate-700/60 text-slate-300"
                       }`}
                     >
                       <span className="font-bold mr-3">{optKey}.</span> {optText}
@@ -1496,7 +1542,7 @@
               {isLast ? (
                 <button onClick={submitQuiz} className="px-6 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Submit Quiz</button>
               ) : (
-                <button onClick={() => setCurrentQIndex(c => c + 1)} className="px-6 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Next</button>
+                <button onClick={() => setCurrentQIndex(c => c + 1)} className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Next</button>
               )}
             </div>
           </div>
@@ -1512,7 +1558,7 @@
               <select
                 value={selectedTopicId}
                 onChange={e => setSelectedTopicId(parseInt(e.target.value))}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
               >
                 {state.subjects.map(s => (
                   <optgroup key={s.id} label={s.name}>
@@ -1523,10 +1569,10 @@
                 ))}
               </select>
             </div>
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200">
+            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200">
               <strong>ML Predicted Quiz Score:</strong> {predictedScore}%
             </div>
-            <button onClick={startQuiz} className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm">
+            <button onClick={startQuiz} className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm">
               Start Interactive Quiz
             </button>
           </div>
@@ -1542,14 +1588,14 @@
           <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-4">
             {recs.map(item => (
-              <div key={item.topic_id} className="glass-card rounded-2xl p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div key={item.topic_id} className="glass-card rounded-2xl p-5 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-emerald-600/20 text-emerald-400 text-xs font-bold flex items-center justify-center">#{item.priority_rank}</span>
+                    <span className="w-6 h-6 rounded-full bg-indigo-600/20 text-indigo-400 text-xs font-bold flex items-center justify-center">#{item.priority_rank}</span>
                     <h4 className="font-heading font-bold text-lg text-slate-100">{item.topic_name}</h4>
                     <Badge type={item.revision_required} />
                   </div>
-                  <p className="text-xs text-emerald-300 font-semibold mt-1">{item.subject_name}</p>
+                  <p className="text-xs text-indigo-300 font-semibold mt-1">{item.subject_name}</p>
                   <p className="text-xs text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800 mt-2">{item.reason}</p>
                 </div>
                 <div className="text-right shrink-0">
@@ -1586,7 +1632,7 @@
                   <tr key={t.id} className="hover:bg-slate-800/30">
                     <td className="py-3 font-semibold text-slate-200">{t.name}</td>
                     <td className="py-3 text-slate-300">{t.attempts}</td>
-                    <td className="py-3 font-bold text-emerald-300">{t.accuracy}%</td>
+                    <td className="py-3 font-bold text-indigo-300">{t.accuracy}%</td>
                     <td className="py-3 font-mono text-rose-400">{t.weakness_score}</td>
                     <td className="py-3 font-mono text-emerald-400">{t.confidence_score}</td>
                     <td className="py-3"><Badge type={t.status} /></td>
@@ -1635,12 +1681,12 @@
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Identity Card */}
-            <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-emerald-500">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-bold text-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+            <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-bold text-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30">
                 {fullName?.charAt(0) || "S"}
               </div>
               <h3 className="font-heading font-bold text-xl text-slate-100">{fullName}</h3>
-              <p className="text-xs text-emerald-300 font-medium mt-0.5">{user.email}</p>
+              <p className="text-xs text-indigo-300 font-medium mt-0.5">{user.email}</p>
               <div className="mt-4 pt-4 border-t border-slate-800 text-left space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Account Role:</span>
@@ -1686,7 +1732,7 @@
                       type="text"
                       value={fullName}
                       onChange={e => setFullName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1707,7 +1753,7 @@
                       type="text"
                       value={college}
                       onChange={e => setCollege(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -1716,7 +1762,7 @@
                       type="text"
                       value={course}
                       onChange={e => setCourse(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -1727,7 +1773,7 @@
                     <select
                       value={semester}
                       onChange={e => setSemester(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
                     >
                       <option value="Semester 1">Semester 1</option>
                       <option value="Semester 2">Semester 2</option>
@@ -1748,14 +1794,14 @@
                       max="4.0"
                       value={targetGpa}
                       onChange={e => setTargetGpa(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-colors"
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-colors"
                 >
                   Save Profile Changes
                 </button>
