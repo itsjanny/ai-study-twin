@@ -90,15 +90,21 @@
     // ==========================================
     // CLIENT-SIDE DATABASE & SEED DATA ENGINE
     // ==========================================
-    const DEFAULT_DATA = {
-      user: {
+    const SEED_ACCOUNTS = [
+      {
         email: "student@demo.edu",
+        password: "password123",
         full_name: "Alex Mercer",
         college: "MIT School of Computer Science",
         course: "B.Tech Computer Science",
         semester: "Semester 4",
+        target_gpa: 3.9,
         learning_goals: "Master Core Programming, Data Structures, and Database Systems for upcoming placement exams."
-      },
+      }
+    ];
+
+    const DEFAULT_DATA = {
+      user: SEED_ACCOUNTS[0],
       subjects: [
         {
           id: 1,
@@ -149,6 +155,37 @@
         { id: 2, topic_name: "Variables & Data Types", subject_name: "Object Oriented Programming", predicted: 88.0, actual: 92.0, diff: +4.0, date: "3 days ago" }
       ]
     };
+
+    function loadAccounts() {
+      const saved = localStorage.getItem("aistudytwin_accounts");
+      if (!saved) {
+        localStorage.setItem("aistudytwin_accounts", JSON.stringify(SEED_ACCOUNTS));
+        return SEED_ACCOUNTS;
+      }
+      return JSON.parse(saved);
+    }
+
+    function saveAccounts(accounts) {
+      localStorage.setItem("aistudytwin_accounts", JSON.stringify(accounts));
+    }
+
+    function loadSession() {
+      const session = localStorage.getItem("aistudytwin_session");
+      if (!session) return null;
+      try {
+        return JSON.parse(session);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveSession(user) {
+      if (user) {
+        localStorage.setItem("aistudytwin_session", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("aistudytwin_session");
+      }
+    }
 
     function loadState() {
       const saved = localStorage.getItem("aistudytwin_data");
@@ -258,7 +295,264 @@
       );
     };
 
-    const Sidebar = ({ activeTab, setActiveTab, user, mobileMenuOpen, setMobileMenuOpen }) => {
+    // AUTH / CREDENTIAL ENTRY SCREEN
+    const AuthPage = ({ onLoginSuccess }) => {
+      const [isRegistering, setIsRegistering] = React.useState(false);
+      const [email, setEmail] = React.useState("student@demo.edu");
+      const [password, setPassword] = React.useState("password123");
+      const [fullName, setFullName] = React.useState("Alex Mercer");
+      const [college, setCollege] = React.useState("MIT School of Computer Science");
+      const [course, setCourse] = React.useState("B.Tech Computer Science");
+      const [targetGpa, setTargetGpa] = React.useState("3.9");
+      const [errorMsg, setErrorMsg] = React.useState("");
+
+      React.useEffect(() => {
+        if (window.lucide) window.lucide.createIcons();
+      }, [isRegistering, errorMsg]);
+
+      const handleLoginSubmit = (e) => {
+        e.preventDefault();
+        setErrorMsg("");
+
+        const accounts = loadAccounts();
+        const found = accounts.find(a => a.email.toLowerCase() === email.toLowerCase().trim());
+
+        if (found) {
+          if (found.password && found.password !== password) {
+            setErrorMsg("Invalid password. Please check your credentials.");
+            return;
+          }
+          onLoginSuccess(found);
+        } else {
+          // If not found in seed, create account automatically for smooth user UX
+          const newAcc = {
+            email: email.trim(),
+            password: password,
+            full_name: fullName || email.split("@")[0],
+            college: college,
+            course: course,
+            semester: "Semester 4",
+            target_gpa: parseFloat(targetGpa) || 3.8
+          };
+          accounts.push(newAcc);
+          saveAccounts(accounts);
+          onLoginSuccess(newAcc);
+        }
+      };
+
+      const handleRegisterSubmit = (e) => {
+        e.preventDefault();
+        setErrorMsg("");
+
+        if (!email || !password || !fullName) {
+          setErrorMsg("Please fill in all required fields.");
+          return;
+        }
+
+        const accounts = loadAccounts();
+        const existing = accounts.find(a => a.email.toLowerCase() === email.toLowerCase().trim());
+        if (existing) {
+          setErrorMsg("An account with this email already exists. Please sign in.");
+          return;
+        }
+
+        const newAcc = {
+          email: email.trim(),
+          password: password,
+          full_name: fullName.trim(),
+          college: college || "State University",
+          course: course || "Computer Science",
+          semester: "Semester 4",
+          target_gpa: parseFloat(targetGpa) || 3.8
+        };
+
+        accounts.push(newAcc);
+        saveAccounts(accounts);
+        onLoginSuccess(newAcc);
+      };
+
+      const handleDemoLogin = () => {
+        const accounts = loadAccounts();
+        const demo = accounts[0] || SEED_ACCOUNTS[0];
+        onLoginSuccess(demo);
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
+          {/* Glowing Gradient Background Effects */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 border border-slate-800">
+            {/* Header / Logo */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/30 mx-auto mb-4">
+                AI
+              </div>
+              <h1 className="font-heading font-extrabold text-2xl sm:text-3xl gradient-text">AI Study Twin</h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">Student Portal & Credential Dashboard</p>
+            </div>
+
+            {/* Mode Switcher Tabs */}
+            <div className="grid grid-cols-2 p-1 bg-slate-900/80 rounded-2xl border border-slate-800 mb-6">
+              <button
+                type="button"
+                onClick={() => { setIsRegistering(false); setErrorMsg(""); }}
+                className={`py-2.5 text-xs font-bold rounded-xl transition-all ${
+                  !isRegistering ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsRegistering(true); setErrorMsg(""); }}
+                className={`py-2.5 text-xs font-bold rounded-xl transition-all ${
+                  isRegistering ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {/* Error Banner */}
+            {errorMsg && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <i data-lucide="alert-circle" className="w-4 h-4 text-rose-400 shrink-0"></i>
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {/* Form */}
+            {!isRegistering ? (
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Student Email Address</label>
+                  <div className="relative">
+                    <i data-lucide="mail" className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="student@demo.edu"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+                  <div className="relative">
+                    <i data-lucide="lock" className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"></i>
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-opacity"
+                >
+                  Enter Student Dashboard
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegisterSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Alex Mercer"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="student@demo.edu"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">College/University</label>
+                    <input
+                      type="text"
+                      value={college}
+                      onChange={(e) => setCollege(e.target.value)}
+                      placeholder="MIT CS"
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Target GPA</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="1.0"
+                      max="4.0"
+                      value={targetGpa}
+                      onChange={(e) => setTargetGpa(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-opacity"
+                >
+                  Create & Launch Dashboard
+                </button>
+              </form>
+            )}
+
+            {/* Quick 1-Click Demo Login Button */}
+            <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                className="w-full py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-slate-300 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="zap" className="w-4 h-4 text-amber-400"></i>
+                <span>Quick Demo 1-Click Login</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // SIDEBAR NAVIGATION
+    const Sidebar = ({ activeTab, setActiveTab, user, mobileMenuOpen, setMobileMenuOpen, onLogout }) => {
       const navItems = [
         { id: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
         { id: "subjects", label: "My Subjects", icon: "book-open" },
@@ -267,12 +561,12 @@
         { id: "performance", label: "Performance", icon: "bar-chart-2" },
         { id: "recommendations", label: "AI Recommendations", icon: "sparkles" },
         { id: "learning-profile", label: "Learning Profile", icon: "brain" },
-        { id: "profile", label: "Student Profile", icon: "user" },
+        { id: "profile", label: "Student Credentials", icon: "user" },
       ];
 
       React.useEffect(() => {
         if (window.lucide) window.lucide.createIcons();
-      }, [activeTab, mobileMenuOpen]);
+      }, [activeTab, mobileMenuOpen, user]);
 
       return (
         <React.Fragment>
@@ -287,7 +581,7 @@
                   </div>
                   <div>
                     <h1 className="font-heading font-bold text-lg leading-none gradient-text">AI Study Twin</h1>
-                    <p className="text-xs text-slate-400 mt-1">Live GitHub Pages App</p>
+                    <p className="text-xs text-slate-400 mt-1">GitHub Pages Live App</p>
                   </div>
                 </div>
                 <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400 p-1">
@@ -320,14 +614,23 @@
             </div>
 
             <div className="pt-4 border-t border-slate-800">
-              <div className="flex items-center gap-2 px-3 py-2">
-                <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 font-bold text-sm">
-                  {user?.full_name?.charAt(0) || "A"}
+              <div className="flex items-center justify-between px-3 py-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                <div className="flex items-center gap-2 truncate">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 font-bold text-sm shrink-0">
+                    {user?.full_name?.charAt(0) || "S"}
+                  </div>
+                  <div className="truncate">
+                    <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name || "Student"}</p>
+                    <p className="text-[10px] text-emerald-400 font-medium">Logged In</p>
+                  </div>
                 </div>
-                <div className="truncate">
-                  <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name}</p>
-                  <p className="text-[10px] text-emerald-400 font-medium">Online Mode</p>
-                </div>
+                <button
+                  onClick={onLogout}
+                  title="Log Out & Switch Credentials"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                >
+                  <i data-lucide="log-out" className="w-4 h-4"></i>
+                </button>
               </div>
             </div>
           </aside>
@@ -361,7 +664,7 @@
       );
     };
 
-    const Header = ({ title, subtitle, setMobileMenuOpen }) => {
+    const Header = ({ title, subtitle, setMobileMenuOpen, onLogout }) => {
       return (
         <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-800/80 gap-4">
           <div className="flex items-center gap-3">
@@ -378,13 +681,20 @@
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Client AI Engine Ready (GitHub Pages)
             </div>
+            <button
+              onClick={onLogout}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition-colors"
+            >
+              <i data-lucide="log-out" className="w-3.5 h-3.5"></i>
+              <span>Exit</span>
+            </button>
           </div>
         </header>
       );
     };
 
     // DASHBOARD PAGE
-    const DashboardPage = ({ state, setActiveTab, setMobileMenuOpen }) => {
+    const DashboardPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       const trendChartRef = React.useRef(null);
       const subjChartRef = React.useRef(null);
 
@@ -461,7 +771,12 @@
 
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="Learning Twin Dashboard" subtitle="Personalized AI Student Twin running live on GitHub Pages" setMobileMenuOpen={setMobileMenuOpen} />
+          <Header
+            title={`Welcome back, ${state.user?.full_name || "Student"}!`}
+            subtitle="Personalized AI Learning Twin Dashboard running live on GitHub Pages"
+            setMobileMenuOpen={setMobileMenuOpen}
+            onLogout={onLogout}
+          />
 
           {/* Top KPI Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -526,10 +841,10 @@
     };
 
     // SUBJECTS PAGE
-    const SubjectsPage = ({ state, setActiveTab, setMobileMenuOpen }) => {
+    const SubjectsPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="My Enrolled Subjects" subtitle="Explore curriculum topics and baseline strength" setMobileMenuOpen={setMobileMenuOpen} />
+          <Header title="My Enrolled Subjects" subtitle="Explore curriculum topics and baseline strength" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-6">
             {state.subjects.map(sub => (
               <div key={sub.id} className="glass-card rounded-2xl p-6">
@@ -569,7 +884,7 @@
     };
 
     // ADAPTIVE QUIZ PAGE
-    const TakeQuizPage = ({ state, setState, setMobileMenuOpen }) => {
+    const TakeQuizPage = ({ state, setState, setMobileMenuOpen, onLogout }) => {
       const [selectedTopicId, setSelectedTopicId] = React.useState(105);
       const [currentQIndex, setCurrentQIndex] = React.useState(0);
       const [selectedAnswers, setSelectedAnswers] = React.useState({});
@@ -726,7 +1041,7 @@
 
       return (
         <div className="max-w-2xl mx-auto pb-16 md:pb-0">
-          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} />
+          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-2">Select Target Topic</label>
@@ -752,11 +1067,11 @@
     };
 
     // AI RECOMMENDATIONS PAGE
-    const RecommendationsPage = ({ state, setMobileMenuOpen }) => {
+    const RecommendationsPage = ({ state, setMobileMenuOpen, onLogout }) => {
       const recs = ClientMLEngine.generateRecommendations(state);
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" setMobileMenuOpen={setMobileMenuOpen} />
+          <Header title="AI Recommendation Engine" subtitle="Priority-ranked study topics with explicit reasoning" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-4">
             {recs.map(item => (
               <div key={item.topic_id} className="glass-card rounded-2xl p-5 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -781,11 +1096,11 @@
     };
 
     // PERFORMANCE PAGE
-    const PerformancePage = ({ state, setMobileMenuOpen }) => {
+    const PerformancePage = ({ state, setMobileMenuOpen, onLogout }) => {
       const allTopics = state.subjects.flatMap(s => s.topics);
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="Performance Analytics" subtitle="Complete stored metrics per topic updated in real-time" setMobileMenuOpen={setMobileMenuOpen} />
+          <Header title="Performance Analytics" subtitle="Complete stored metrics per topic updated in real-time" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="glass-card rounded-2xl p-5 overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
@@ -816,30 +1131,218 @@
       );
     };
 
+    // STUDENT CREDENTIALS & PROFILE PAGE
+    const StudentProfilePage = ({ state, setState, setMobileMenuOpen, onLogout }) => {
+      const user = state.user || {};
+      const [fullName, setFullName] = React.useState(user.full_name || "");
+      const [college, setCollege] = React.useState(user.college || "");
+      const [course, setCourse] = React.useState(user.course || "");
+      const [semester, setSemester] = React.useState(user.semester || "Semester 4");
+      const [targetGpa, setTargetGpa] = React.useState(user.target_gpa || 3.9);
+      const [savedNotice, setSavedNotice] = React.useState(false);
+
+      const handleSave = (e) => {
+        e.preventDefault();
+        const updatedUser = {
+          ...user,
+          full_name: fullName,
+          college: college,
+          course: course,
+          semester: semester,
+          target_gpa: parseFloat(targetGpa) || 3.8
+        };
+
+        const updatedState = { ...state, user: updatedUser };
+        saveState(updatedState);
+        saveSession(updatedUser);
+        setState(updatedState);
+
+        setSavedNotice(true);
+        setTimeout(() => setSavedNotice(false), 3000);
+      };
+
+      return (
+        <div className="max-w-4xl mx-auto pb-16 md:pb-0">
+          <Header title="Student Profile & Credentials" subtitle="Manage your academic identity, target GPA, and credentials" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Identity Card */}
+            <div className="glass-card rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-bold text-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30">
+                {fullName?.charAt(0) || "S"}
+              </div>
+              <h3 className="font-heading font-bold text-xl text-slate-100">{fullName}</h3>
+              <p className="text-xs text-indigo-300 font-medium mt-0.5">{user.email}</p>
+              <div className="mt-4 pt-4 border-t border-slate-800 text-left space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Account Role:</span>
+                  <span className="text-emerald-400 font-semibold">Active Student</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Current Semester:</span>
+                  <span className="text-slate-200 font-semibold">{semester}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Target GPA:</span>
+                  <span className="text-cyan-400 font-bold">{targetGpa} / 4.0</span>
+                </div>
+              </div>
+
+              <button
+                onClick={onLogout}
+                className="w-full mt-6 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="log-out" className="w-4 h-4"></i>
+                <span>Log Out & Switch Credentials</span>
+              </button>
+            </div>
+
+            {/* Credentials & Details Form */}
+            <div className="md:col-span-2 glass-card rounded-2xl p-6">
+              <h4 className="font-heading font-bold text-lg text-slate-100 mb-4 pb-2 border-b border-slate-800">
+                Academic Profile Settings
+              </h4>
+
+              {savedNotice && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <i data-lucide="check-circle" className="w-4 h-4 text-emerald-400"></i>
+                  <span>Profile & credentials updated successfully!</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSave} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Full Name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                    <input
+                      type="email"
+                      disabled
+                      value={user.email || ""}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 text-sm cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">College / Institution</label>
+                    <input
+                      type="text"
+                      value={college}
+                      onChange={e => setCollege(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Course / Degree</label>
+                    <input
+                      type="text"
+                      value={course}
+                      onChange={e => setCourse(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Semester</label>
+                    <select
+                      value={semester}
+                      onChange={e => setSemester(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                      <option value="Semester 3">Semester 3</option>
+                      <option value="Semester 4">Semester 4</option>
+                      <option value="Semester 5">Semester 5</option>
+                      <option value="Semester 6">Semester 6</option>
+                      <option value="Semester 7">Semester 7</option>
+                      <option value="Semester 8">Semester 8</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Target GPA</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="1.0"
+                      max="4.0"
+                      value={targetGpa}
+                      onChange={e => setTargetGpa(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-colors"
+                >
+                  Save Profile Changes
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // MAIN ROOT COMPONENT
     const App = () => {
+      const [currentUser, setCurrentUser] = React.useState(loadSession());
       const [state, setState] = React.useState(loadState());
       const [activeTab, setActiveTab] = React.useState("dashboard");
       const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+      const handleLoginSuccess = (user) => {
+        saveSession(user);
+        setCurrentUser(user);
+
+        // Sync state user
+        const updatedState = { ...state, user: user };
+        saveState(updatedState);
+        setState(updatedState);
+      };
+
+      const handleLogout = () => {
+        saveSession(null);
+        setCurrentUser(null);
+      };
+
+      if (!currentUser) {
+        return <AuthPage onLoginSuccess={handleLoginSuccess} />;
+      }
 
       return (
         <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
           <Sidebar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            user={state.user}
+            user={currentUser}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
+            onLogout={handleLogout}
           />
           <main className="md:ml-64 flex-1 p-4 sm:p-8 overflow-y-auto">
-            {activeTab === "dashboard" && <DashboardPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "subjects" && <SubjectsPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "take-quiz" && <TakeQuizPage state={state} setState={setState} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "recommendations" && <RecommendationsPage state={state} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "performance" && <PerformancePage state={state} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "study-plan" && <RecommendationsPage state={state} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "learning-profile" && <PerformancePage state={state} setMobileMenuOpen={setMobileMenuOpen} />}
-            {activeTab === "profile" && <DashboardPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />}
+            {activeTab === "dashboard" && <DashboardPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "subjects" && <SubjectsPage state={state} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "take-quiz" && <TakeQuizPage state={state} setState={setState} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "recommendations" && <RecommendationsPage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "performance" && <PerformancePage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "study-plan" && <RecommendationsPage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "learning-profile" && <PerformancePage state={state} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
+            {activeTab === "profile" && <StudentProfilePage state={state} setState={setState} setMobileMenuOpen={setMobileMenuOpen} onLogout={handleLogout} />}
           </main>
         </div>
       );
