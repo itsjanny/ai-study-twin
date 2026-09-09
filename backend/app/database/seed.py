@@ -17,7 +17,7 @@ def seed_database():
             print("Database already seeded with subjects and questions.")
             return
 
-        print("Seeding subjects, topics, and MCQ diagnostic questions...")
+        print("Seeding Python & Java (Basic to Advanced) subjects, topics, and MCQ diagnostic questions...")
 
         # 1. Create Default Demo Student Account
         demo_user = User(
@@ -33,19 +33,117 @@ def seed_database():
             college="MIT School of Computer Science",
             course="B.Tech Computer Science",
             semester="Semester 4",
-            learning_goals="Master OOP in Java, Data Structures, and Database Systems for upcoming placement exams."
+            learning_goals="Master Python, Java Basic to Advanced, Data Structures, and Database Systems."
         )
         db.add(demo_profile)
 
         # 2. Subjects & Topics Data Definitions
         subjects_data = [
             {
-                "name": "Object Oriented Programming (Java)",
-                "code": "CS201",
-                "description": "Core OOP paradigms including encapsulation, inheritance, polymorphism, abstraction, and exception handling in Java.",
+                "name": "Python Programming (Basic to Advanced)",
+                "code": "CS101",
+                "description": "Comprehensive Python curriculum from basic syntax, data structures, and OOP to decorators, generators, context managers, and asyncio concurrency.",
                 "topics": [
                     {
-                        "name": "Variables & Data Types",
+                        "name": "Python Syntax, Variables & Data Types",
+                        "difficulty": 1,
+                        "importance": 1.0,
+                        "questions": [
+                            {
+                                "question": "Which of the following built-in data types in Python is MUTABLE?",
+                                "a": "tuple", "b": "str", "c": "list", "d": "int",
+                                "correct": "C",
+                                "explanation": "In Python, lists are mutable sequence types allowing elements to be modified in-place.",
+                                "sub_concept": "Data Mutability"
+                            },
+                            {
+                                "question": "What is the output of bool([]) in Python?",
+                                "a": "True", "b": "False", "c": "None", "d": "TypeError",
+                                "correct": "B",
+                                "explanation": "Empty containers such as empty lists [], tuples (), and strings '' evaluate to False in boolean context.",
+                                "sub_concept": "Truthy & Falsy Values"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Control Flow, Loops & Functions",
+                        "difficulty": 2,
+                        "importance": 1.1,
+                        "questions": [
+                            {
+                                "question": "What does range(1, 10, 2) generate in Python 3?",
+                                "a": "[1, 2, 3, 4, 5]", "b": "Sequence: 1, 3, 5, 7, 9", "c": "[2, 4, 6, 8, 10]", "d": "[1, 10, 2]",
+                                "correct": "B",
+                                "explanation": "range(start, stop, step) produces integers from start (1) up to stop (10 exclusive) in increments of step (2).",
+                                "sub_concept": "Range Function"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Lists, Tuples, Sets & Dictionaries",
+                        "difficulty": 2,
+                        "importance": 1.2,
+                        "questions": [
+                            {
+                                "question": "What is the average time complexity of looking up a key in a Python dictionary?",
+                                "a": "O(N)", "b": "O(log N)", "c": "O(1)", "d": "O(N^2)",
+                                "correct": "C",
+                                "explanation": "Python dictionaries use hash tables, providing average O(1) time complexity for key insertion and retrieval.",
+                                "sub_concept": "Hash Table Complexity"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Object-Oriented Python (Classes & Magic Methods)",
+                        "difficulty": 3,
+                        "importance": 1.4,
+                        "questions": [
+                            {
+                                "question": "Which magic (dunder) method is called when str(obj) or print(obj) is executed?",
+                                "a": "__init__", "b": "__repr__", "c": "__str__", "d": "__call__",
+                                "correct": "C",
+                                "explanation": "__str__ returns an informal user-friendly string representation of an object.",
+                                "sub_concept": "Dunder Methods"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Decorators, Generators & Context Managers",
+                        "difficulty": 4,
+                        "importance": 1.5,
+                        "questions": [
+                            {
+                                "question": "Which keyword is used inside a Python function to turn it into a lazy generator?",
+                                "a": "return", "b": "yield", "c": "await", "d": "emit",
+                                "correct": "B",
+                                "explanation": "The 'yield' statement suspends function execution and returns a value to the caller, resuming state on next iteration.",
+                                "sub_concept": "Generators"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Asynchronous Programming (asyncio & Concurrency)",
+                        "difficulty": 5,
+                        "importance": 1.5,
+                        "questions": [
+                            {
+                                "question": "Which Python standard library module provides event-loop-based async and await concurrency?",
+                                "a": "threading", "b": "multiprocessing", "c": "asyncio", "d": "concurrent.futures",
+                                "correct": "C",
+                                "explanation": "asyncio is Python's standard library for writing single-threaded concurrent code using async/await syntax.",
+                                "sub_concept": "Async I/O"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Java Programming (Basic to Advanced)",
+                "code": "CS201",
+                "description": "Master Java from syntax basics and OOP paradigms to advanced enterprise concepts: Collections Framework, Generics, Multithreading, and Stream API.",
+                "topics": [
+                    {
+                        "name": "Java Syntax, Variables & Primitive Types",
                         "difficulty": 1,
                         "importance": 1.0,
                         "questions": [
@@ -55,23 +153,16 @@ def seed_database():
                                 "correct": "B",
                                 "explanation": "In Java, 'long' is a 64-bit signed two's complement integer, while 'int' is 32-bit.",
                                 "sub_concept": "Primitive Types"
-                            },
-                            {
-                                "question": "What is the default value of a boolean instance variable in Java?",
-                                "a": "true", "b": "false", "c": "null", "d": "0",
-                                "correct": "B",
-                                "explanation": "Instance boolean variables in Java automatically default to 'false' if uninitialized.",
-                                "sub_concept": "Variable Initialization"
                             }
                         ]
                     },
                     {
-                        "name": "Control Loops & Logic",
+                        "name": "Control Loops, Methods & Logic",
                         "difficulty": 2,
                         "importance": 1.1,
                         "questions": [
                             {
-                                "question": "Which loop guarantees that the body executes at least once?",
+                                "question": "Which loop guarantees that the body executes at least once in Java?",
                                 "a": "for loop", "b": "while loop", "c": "do-while loop", "d": "for-each loop",
                                 "correct": "C",
                                 "explanation": "A do-while loop evaluates its condition at the bottom of the loop body, guaranteeing at least one execution.",
@@ -80,13 +171,13 @@ def seed_database():
                         ]
                     },
                     {
-                        "name": "Arrays & Strings",
+                        "name": "Arrays & String Immutability",
                         "difficulty": 2,
                         "importance": 1.2,
                         "questions": [
                             {
                                 "question": "Why are String objects in Java considered immutable?",
-                                "a": "To save memory via the String Constant Pool and ensure thread safety.",
+                                "a": "To save memory via String Constant Pool and ensure thread safety.",
                                 "b": "Because Java does not support string concatenation.",
                                 "c": "To prevent strings from being stored in heap memory.",
                                 "d": "Strings can actually be altered after creation.",
@@ -97,7 +188,7 @@ def seed_database():
                         ]
                     },
                     {
-                        "name": "Inheritance & Interfaces",
+                        "name": "OOP Inheritance, Interfaces & Abstract Classes",
                         "difficulty": 3,
                         "importance": 1.4,
                         "questions": [
@@ -107,26 +198,16 @@ def seed_database():
                                 "correct": "B",
                                 "explanation": "In Java, a class uses the 'implements' keyword to fulfill contracts defined by an interface.",
                                 "sub_concept": "Interface Inheritance"
-                            },
-                            {
-                                "question": "Does Java support multiple inheritance of classes directly?",
-                                "a": "Yes, using comma separators in extends.",
-                                "b": "No, Java avoids the Diamond Problem by restricting class inheritance to single parent.",
-                                "c": "Yes, but only for abstract classes.",
-                                "d": "Only when using final methods.",
-                                "correct": "B",
-                                "explanation": "Java disallows multiple class inheritance to avoid ambiguity (the Diamond Problem). Multiple interface implementation is supported.",
-                                "sub_concept": "Diamond Problem"
                             }
                         ]
                     },
                     {
-                        "name": "Polymorphism & Overriding",
+                        "name": "Polymorphism, Overriding & Dynamic Dispatch",
                         "difficulty": 4,
                         "importance": 1.5,
                         "questions": [
                             {
-                                "question": "What distinguishes Method Overriding from Method Overloading?",
+                                "question": "What distinguishes Method Overriding from Method Overloading in Java?",
                                 "a": "Overriding occurs in the same class; Overloading requires inheritance.",
                                 "b": "Overriding involves runtime dynamic dispatch with identical method signature in a subclass.",
                                 "c": "Overloading changes the return type only.",
@@ -134,18 +215,11 @@ def seed_database():
                                 "correct": "B",
                                 "explanation": "Method Overriding happens at runtime (Dynamic Binding) when a child class redefines a parent method with exact matching arguments.",
                                 "sub_concept": "Dynamic Binding & Overriding"
-                            },
-                            {
-                                "question": "What happens if you try to override a method marked as 'final' in Java?",
-                                "a": "Compiler error occurs.", "b": "Runtime exception is thrown.", "c": "Method is hidden.", "d": "Code executes normally.",
-                                "correct": "A",
-                                "explanation": "Methods marked 'final' cannot be overridden by subclasses; attempting to do so produces a compilation failure.",
-                                "sub_concept": "Final Specifier"
                             }
                         ]
                     },
                     {
-                        "name": "Exception Handling",
+                        "name": "Exception Handling & Custom Exceptions",
                         "difficulty": 3,
                         "importance": 1.3,
                         "questions": [
@@ -155,6 +229,34 @@ def seed_database():
                                 "correct": "C",
                                 "explanation": "The 'finally' block always executes after try/catch, making it ideal for cleanup like closing resource connections.",
                                 "sub_concept": "Try-Catch-Finally"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Java Collections Framework & Generics",
+                        "difficulty": 4,
+                        "importance": 1.4,
+                        "questions": [
+                            {
+                                "question": "Which Map implementation in Java Collections provides O(1) average time complexity and does NOT maintain insertion order?",
+                                "a": "TreeMap", "b": "HashMap", "c": "LinkedHashMap", "d": "ConcurrentSkipListMap",
+                                "correct": "B",
+                                "explanation": "HashMap relies on hashing for O(1) average lookup and does not guarantee element ordering.",
+                                "sub_concept": "HashMap Collections"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Multithreading, Concurrency & Stream API",
+                        "difficulty": 5,
+                        "importance": 1.5,
+                        "questions": [
+                            {
+                                "question": "Which Java 8 feature allows functional-style operations (map, filter, reduce) on element streams?",
+                                "a": "Reflection API", "b": "Java Streams API", "c": "Servlet API", "d": "JDBC API",
+                                "correct": "B",
+                                "explanation": "The Java 8 Stream API provides declarative processing pipeline primitives (map, filter, flatMap, reduce).",
+                                "sub_concept": "Stream API"
                             }
                         ]
                     }
@@ -171,11 +273,11 @@ def seed_database():
                         "importance": 1.5,
                         "questions": [
                             {
-                                "question": "What is the average time complexity of searching in a balanced Binary Search Tree (BST)?",
-                                "a": "O(1)", "b": "O(log N)", "c": "O(N)", "d": "O(N log N)",
+                                "question": "What is the time complexity of Binary Search on a sorted array of N elements?",
+                                "a": "O(N)", "b": "O(log N)", "c": "O(1)", "d": "O(N log N)",
                                 "correct": "B",
-                                "explanation": "Searching a balanced BST eliminates half the tree at each step, yielding O(log N) average time complexity.",
-                                "sub_concept": "Tree Search Complexity"
+                                "explanation": "Binary search halves the remaining search space with each comparison step, leading to logarithmic O(log N) time complexity.",
+                                "sub_concept": "Binary Search Complexity"
                             }
                         ]
                     },
@@ -185,11 +287,11 @@ def seed_database():
                         "importance": 1.2,
                         "questions": [
                             {
-                                "question": "Which data structure operates on a First-In, First-Out (FIFO) principle?",
-                                "a": "Stack", "b": "Queue", "c": "Array", "d": "Tree",
+                                "question": "Which data structure operates on a Last-In, First-Out (LIFO) principle?",
+                                "a": "Queue", "b": "Stack", "c": "LinkedList", "d": "PriorityQueue",
                                 "correct": "B",
-                                "explanation": "Queues strictly maintain FIFO ordering (items inserted first are removed first).",
-                                "sub_concept": "FIFO Operations"
+                                "explanation": "Stacks follow LIFO semantics where elements pushed last are popped first.",
+                                "sub_concept": "LIFO Semantics"
                             }
                         ]
                     },
@@ -279,42 +381,27 @@ def seed_database():
                 db.flush()
 
                 # Seed initial topic performance for demo user
-                # Give Java OOP topics varied initial scores to show weak vs strong topics
-                attempts_count = 0
-                acc = 0.0
-                recent = 0.0
+                attempts_count = 2
+                acc = 65.0
+                recent = 68.0
                 status = "Average"
-                weakness = 50.0
-                confidence = 50.0
+                weakness = 35.0
+                confidence = 65.0
 
-                if t_data["name"] == "Polymorphism & Overriding":
+                if "Advanced" in t_data["name"] or t_data["difficulty"] >= 4:
                     attempts_count = 3
-                    acc = 45.0
+                    acc = 42.0
                     recent = 40.0
                     status = "Weak"
                     weakness = 60.0
                     confidence = 40.0
-                elif t_data["name"] == "Exception Handling":
-                    attempts_count = 2
-                    acc = 50.0
-                    recent = 52.0
-                    status = "Weak"
-                    weakness = 50.0
-                    confidence = 50.0
-                elif t_data["name"] == "Variables & Data Types":
+                elif t_data["difficulty"] == 1:
                     attempts_count = 4
-                    acc = 90.0
-                    recent = 92.0
+                    acc = 92.0
+                    recent = 95.0
                     status = "Strong"
-                    weakness = 10.0
-                    confidence = 90.0
-                elif t_data["name"] == "Control Loops & Logic":
-                    attempts_count = 3
-                    acc = 82.0
-                    recent = 85.0
-                    status = "Strong"
-                    weakness = 18.0
-                    confidence = 82.0
+                    weakness = 8.0
+                    confidence = 92.0
 
                 t_perf = TopicPerformance(
                     student_id=demo_user.id,
@@ -350,7 +437,7 @@ def seed_database():
                 prev_topic_id = topic.id
 
         db.commit()
-        print("[OK] Database successfully seeded!")
+        print("[OK] Database successfully seeded with Python & Java Basic to Advanced courses!")
 
     except Exception as e:
         db.rollback()

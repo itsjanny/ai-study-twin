@@ -99,7 +99,7 @@
         course: "B.Tech Computer Science",
         semester: "Semester 4",
         target_gpa: 3.9,
-        learning_goals: "Master Core Programming, Data Structures, and Database Systems for upcoming placement exams."
+        learning_goals: "Master Python & Java Basic to Advanced, Data Structures, and Database Systems for upcoming placement exams."
       }
     ];
 
@@ -108,51 +108,84 @@
       subjects: [
         {
           id: 1,
-          name: "Object Oriented Programming (Java)",
-          code: "CS201",
-          description: "Core OOP paradigms including encapsulation, inheritance, polymorphism, abstraction, and exception handling in Java.",
+          name: "Python Programming (Basic to Advanced)",
+          code: "CS101",
+          description: "Complete Python curriculum from basic syntax, data structures, and OOP to decorators, generators, context managers, and asyncio concurrency.",
           topics: [
-            { id: 101, name: "Variables & Data Types", difficulty: 1, importance: 1.0, status: "Strong", accuracy: 90.0, attempts: 4, recent_score: 92.0, weakness_score: 10.0, confidence_score: 90.0, last_studied_days: 1 },
-            { id: 102, name: "Control Loops & Logic", difficulty: 2, importance: 1.1, status: "Strong", accuracy: 82.0, attempts: 3, recent_score: 85.0, weakness_score: 18.0, confidence_score: 82.0, last_studied_days: 2 },
-            { id: 103, name: "Arrays & Strings", difficulty: 2, importance: 1.2, status: "Average", accuracy: 65.0, attempts: 2, recent_score: 68.0, weakness_score: 35.0, confidence_score: 65.0, last_studied_days: 4 },
-            { id: 104, name: "Inheritance & Interfaces", difficulty: 3, importance: 1.4, status: "Average", accuracy: 60.0, attempts: 2, recent_score: 58.0, weakness_score: 40.0, confidence_score: 60.0, last_studied_days: 5 },
-            { id: 105, name: "Polymorphism & Overriding", difficulty: 4, importance: 1.5, status: "Weak", accuracy: 45.0, attempts: 3, recent_score: 40.0, weakness_score: 60.0, confidence_score: 40.0, last_studied_days: 8 },
-            { id: 106, name: "Exception Handling", difficulty: 3, importance: 1.3, status: "Weak", accuracy: 50.0, attempts: 2, recent_score: 52.0, weakness_score: 50.0, confidence_score: 50.0, last_studied_days: 7 }
+            { id: 10101, name: "Python Syntax, Variables & Data Types", difficulty: 1, importance: 1.0, status: "Strong", accuracy: 92.0, attempts: 4, recent_score: 95.0, weakness_score: 8.0, confidence_score: 92.0, last_studied_days: 1 },
+            { id: 10102, name: "Control Flow, Loops & Functions", difficulty: 2, importance: 1.1, status: "Strong", accuracy: 84.0, attempts: 3, recent_score: 88.0, weakness_score: 16.0, confidence_score: 84.0, last_studied_days: 2 },
+            { id: 10103, name: "Lists, Tuples, Sets & Dictionaries", difficulty: 2, importance: 1.2, status: "Average", accuracy: 70.0, attempts: 2, recent_score: 72.0, weakness_score: 30.0, confidence_score: 70.0, last_studied_days: 4 },
+            { id: 10104, name: "Object-Oriented Python (Classes & Magic Methods)", difficulty: 3, importance: 1.4, status: "Average", accuracy: 62.0, attempts: 2, recent_score: 60.0, weakness_score: 38.0, confidence_score: 62.0, last_studied_days: 5 },
+            { id: 10105, name: "Decorators, Generators & Context Managers", difficulty: 4, importance: 1.5, status: "Weak", accuracy: 48.0, attempts: 3, recent_score: 42.0, weakness_score: 55.0, confidence_score: 45.0, last_studied_days: 7 },
+            { id: 10106, name: "Asynchronous Programming (asyncio & Concurrency)", difficulty: 5, importance: 1.5, status: "Very Weak", accuracy: 38.0, attempts: 2, recent_score: 35.0, weakness_score: 65.0, confidence_score: 35.0, last_studied_days: 9 }
           ]
         },
         {
           id: 2,
-          name: "Data Structures & Algorithms",
-          code: "CS202",
-          description: "Fundamental algorithms, time/space complexity analysis, linear and non-linear data structures.",
+          name: "Java Programming (Basic to Advanced)",
+          code: "CS201",
+          description: "Master Java from syntax basics and OOP paradigms to advanced enterprise concepts: Collections Framework, Generics, Multithreading, and Stream API.",
           topics: [
-            { id: 201, name: "Big-O Time Complexity", difficulty: 2, importance: 1.5, status: "Average", accuracy: 70.0, attempts: 2, recent_score: 72.0, weakness_score: 30.0, confidence_score: 70.0, last_studied_days: 3 },
-            { id: 202, name: "Stacks & Queues", difficulty: 2, importance: 1.2, status: "Strong", accuracy: 85.0, attempts: 3, recent_score: 88.0, weakness_score: 15.0, confidence_score: 85.0, last_studied_days: 2 },
-            { id: 203, name: "Sorting Algorithms", difficulty: 4, importance: 1.4, status: "Very Weak", accuracy: 35.0, attempts: 1, recent_score: 30.0, weakness_score: 70.0, confidence_score: 30.0, last_studied_days: 10 }
+            { id: 20101, name: "Java Syntax, Variables & Primitive Types", difficulty: 1, importance: 1.0, status: "Strong", accuracy: 90.0, attempts: 4, recent_score: 92.0, weakness_score: 10.0, confidence_score: 90.0, last_studied_days: 1 },
+            { id: 20102, name: "Control Loops, Methods & Logic", difficulty: 2, importance: 1.1, status: "Strong", accuracy: 82.0, attempts: 3, recent_score: 85.0, weakness_score: 18.0, confidence_score: 82.0, last_studied_days: 2 },
+            { id: 20103, name: "Arrays & String Immutability", difficulty: 2, importance: 1.2, status: "Average", accuracy: 65.0, attempts: 2, recent_score: 68.0, weakness_score: 35.0, confidence_score: 65.0, last_studied_days: 4 },
+            { id: 20104, name: "OOP Inheritance, Interfaces & Abstract Classes", difficulty: 3, importance: 1.4, status: "Average", accuracy: 60.0, attempts: 2, recent_score: 58.0, weakness_score: 40.0, confidence_score: 60.0, last_studied_days: 5 },
+            { id: 20105, name: "Polymorphism, Overriding & Dynamic Dispatch", difficulty: 4, importance: 1.5, status: "Weak", accuracy: 45.0, attempts: 3, recent_score: 40.0, weakness_score: 60.0, confidence_score: 40.0, last_studied_days: 8 },
+            { id: 20106, name: "Exception Handling & Custom Exceptions", difficulty: 3, importance: 1.3, status: "Weak", accuracy: 50.0, attempts: 2, recent_score: 52.0, weakness_score: 50.0, confidence_score: 50.0, last_studied_days: 7 },
+            { id: 20107, name: "Java Collections Framework & Generics", difficulty: 4, importance: 1.4, status: "Weak", accuracy: 42.0, attempts: 2, recent_score: 40.0, weakness_score: 58.0, confidence_score: 42.0, last_studied_days: 6 },
+            { id: 20108, name: "Multithreading, Concurrency & Stream API", difficulty: 5, importance: 1.5, status: "Very Weak", accuracy: 35.0, attempts: 2, recent_score: 30.0, weakness_score: 70.0, confidence_score: 30.0, last_studied_days: 10 }
           ]
         },
         {
           id: 3,
+          name: "Data Structures & Algorithms",
+          code: "CS202",
+          description: "Fundamental algorithms, time/space complexity analysis, linear and non-linear data structures.",
+          topics: [
+            { id: 30101, name: "Big-O Time Complexity", difficulty: 2, importance: 1.5, status: "Average", accuracy: 70.0, attempts: 2, recent_score: 72.0, weakness_score: 30.0, confidence_score: 70.0, last_studied_days: 3 },
+            { id: 30102, name: "Stacks & Queues", difficulty: 2, importance: 1.2, status: "Strong", accuracy: 85.0, attempts: 3, recent_score: 88.0, weakness_score: 15.0, confidence_score: 85.0, last_studied_days: 2 },
+            { id: 30103, name: "Sorting Algorithms", difficulty: 4, importance: 1.4, status: "Very Weak", accuracy: 35.0, attempts: 1, recent_score: 30.0, weakness_score: 70.0, confidence_score: 30.0, last_studied_days: 10 }
+          ]
+        },
+        {
+          id: 4,
           name: "Database Management Systems",
           code: "CS301",
           description: "Relational algebra, SQL query optimization, normalization theory, and ACID transaction semantics.",
           topics: [
-            { id: 301, name: "SQL Joins & Subqueries", difficulty: 3, importance: 1.3, status: "Average", accuracy: 75.0, attempts: 3, recent_score: 78.0, weakness_score: 25.0, confidence_score: 75.0, last_studied_days: 2 },
-            { id: 302, name: "Database Normalization", difficulty: 4, importance: 1.4, status: "Weak", accuracy: 52.0, attempts: 2, recent_score: 48.0, weakness_score: 50.0, confidence_score: 50.0, last_studied_days: 6 },
-            { id: 303, name: "ACID Properties & Transactions", difficulty: 3, importance: 1.5, status: "Strong", accuracy: 88.0, attempts: 4, recent_score: 90.0, weakness_score: 12.0, confidence_score: 88.0, last_studied_days: 1 }
+            { id: 40101, name: "SQL Joins & Subqueries", difficulty: 3, importance: 1.3, status: "Average", accuracy: 75.0, attempts: 3, recent_score: 78.0, weakness_score: 25.0, confidence_score: 75.0, last_studied_days: 2 },
+            { id: 40102, name: "Database Normalization", difficulty: 4, importance: 1.4, status: "Weak", accuracy: 52.0, attempts: 2, recent_score: 48.0, weakness_score: 50.0, confidence_score: 50.0, last_studied_days: 6 },
+            { id: 40103, name: "ACID Properties & Transactions", difficulty: 3, importance: 1.5, status: "Strong", accuracy: 88.0, attempts: 4, recent_score: 90.0, weakness_score: 12.0, confidence_score: 88.0, last_studied_days: 1 }
           ]
         }
       ],
       questions: [
-        { id: 1, topic_id: 105, question: "What distinguishes Method Overriding from Method Overloading in Java?", a: "Overriding occurs in the same class; Overloading requires inheritance.", b: "Overriding involves runtime dynamic dispatch with identical method signature in a subclass.", c: "Overloading changes the return type only.", d: "There is no difference.", correct: "B", explanation: "Method Overriding happens at runtime (Dynamic Binding) when a child class redefines a parent method with exact matching arguments.", concept: "Dynamic Dispatch" },
-        { id: 2, topic_id: 105, question: "What happens if you try to override a method marked as 'final' in Java?", a: "Compiler error occurs.", b: "Runtime exception is thrown.", c: "Method is hidden.", d: "Code executes normally.", correct: "A", explanation: "Methods marked 'final' cannot be overridden by subclasses; attempting to do so produces a compilation failure.", concept: "Final Specifier" },
-        { id: 3, topic_id: 106, question: "Which block is guaranteed to execute regardless of whether an exception is caught or thrown?", a: "try", b: "catch", c: "finally", d: "throws", correct: "C", explanation: "The 'finally' block always executes after try/catch, making it ideal for cleanup like closing resource connections.", concept: "Try-Catch-Finally" },
-        { id: 4, topic_id: 101, question: "Which primitive data type in Java is used to store 64-bit signed integers?", a: "int", b: "long", c: "short", d: "double", correct: "B", explanation: "In Java, 'long' is a 64-bit signed two's complement integer, while 'int' is 32-bit.", concept: "Primitive Types" },
-        { id: 5, topic_id: 203, question: "What is the worst-case time complexity of QuickSort when a poor pivot is chosen repeatedly?", a: "O(N log N)", b: "O(N^2)", c: "O(N)", d: "O(log N)", correct: "B", explanation: "When an array is already sorted and the extreme element is selected as pivot, QuickSort degrades to O(N^2).", concept: "Sorting Complexity" }
+        // PYTHON QUESTIONS
+        { id: 101, topic_id: 10101, question: "Which of the following built-in data types in Python is MUTABLE?", a: "tuple", b: "str", c: "list", d: "int", correct: "C", explanation: "In Python, lists are mutable sequence types allowing elements to be modified in-place.", concept: "Data Mutability" },
+        { id: 102, topic_id: 10101, question: "What is the output of bool([]) in Python?", a: "True", b: "False", c: "None", d: "TypeError", correct: "B", explanation: "Empty containers such as empty lists [], tuples (), and strings '' evaluate to False in boolean context.", concept: "Truthy & Falsy Values" },
+        { id: 103, topic_id: 10102, question: "What does range(1, 10, 2) generate in Python 3?", a: "[1, 2, 3, 4, 5]", b: "Sequence: 1, 3, 5, 7, 9", c: "[2, 4, 6, 8, 10]", d: "[1, 10, 2]", correct: "B", explanation: "range(start, stop, step) produces integers from start (1) up to stop (10 exclusive) in increments of step (2).", concept: "Range Function" },
+        { id: 104, topic_id: 10103, question: "What is the average time complexity of looking up a key in a Python dictionary?", a: "O(N)", b: "O(log N)", c: "O(1)", d: "O(N^2)", correct: "C", explanation: "Python dictionaries use hash tables, providing average O(1) time complexity for key insertion and retrieval.", concept: "Hash Table Complexity" },
+        { id: 105, topic_id: 10104, question: "Which magic (dunder) method is called when str(obj) or print(obj) is executed?", a: "__init__", b: "__repr__", c: "__str__", d: "__call__", correct: "C", explanation: "__str__ returns an informal user-friendly string representation of an object.", concept: "Dunder Methods" },
+        { id: 106, topic_id: 10105, question: "Which keyword is used inside a Python function to turn it into a lazy generator?", a: "return", b: "yield", c: "await", d: "emit", correct: "B", explanation: "The 'yield' statement suspends function execution and returns a value to the caller, resuming state on next iteration.", concept: "Generators" },
+        { id: 107, topic_id: 10106, question: "Which Python standard library module provides event-loop-based async and await concurrency?", a: "threading", b: "multiprocessing", c: "asyncio", d: "concurrent.futures", correct: "C", explanation: "asyncio is Python's standard library for writing single-threaded concurrent code using async/await syntax.", concept: "Async I/O" },
+
+        // JAVA QUESTIONS
+        { id: 201, topic_id: 20101, question: "Which primitive data type in Java is used to store 64-bit signed integers?", a: "int", b: "long", c: "short", d: "double", correct: "B", explanation: "In Java, 'long' is a 64-bit signed two's complement integer, while 'int' is 32-bit.", concept: "Primitive Types" },
+        { id: 202, topic_id: 20102, question: "Which loop guarantees that the body executes at least once in Java?", a: "for loop", b: "while loop", c: "do-while loop", d: "for-each loop", correct: "C", explanation: "A do-while loop evaluates its condition at the bottom of the loop body, guaranteeing at least one execution.", concept: "Loop Execution" },
+        { id: 203, topic_id: 20103, question: "Why are String objects in Java considered immutable?", a: "To save memory via String Constant Pool and ensure thread safety.", b: "Because Java does not support string concatenation.", c: "To prevent strings from being stored in heap memory.", d: "Strings can actually be altered after creation.", correct: "A", explanation: "String immutability enables the Java String Constant Pool, preventing unintended side effects across shared references.", concept: "String Immutability" },
+        { id: 204, topic_id: 20104, question: "Which Java keyword is used by a class to inherit from an interface?", a: "extends", b: "implements", c: "inherits", d: "using", correct: "B", explanation: "In Java, a class uses the 'implements' keyword to fulfill contracts defined by an interface.", concept: "Interface Inheritance" },
+        { id: 205, topic_id: 20105, question: "What distinguishes Method Overriding from Method Overloading in Java?", a: "Overriding occurs in the same class; Overloading requires inheritance.", b: "Overriding involves runtime dynamic dispatch with identical method signature in a subclass.", c: "Overloading changes the return type only.", d: "There is no difference.", correct: "B", explanation: "Method Overriding happens at runtime (Dynamic Binding) when a child class redefines a parent method with exact matching arguments.", concept: "Dynamic Dispatch" },
+        { id: 206, topic_id: 20106, question: "Which block is guaranteed to execute regardless of whether an exception is caught or thrown?", a: "try", b: "catch", c: "finally", d: "throws", correct: "C", explanation: "The 'finally' block always executes after try/catch, making it ideal for cleanup like closing resource connections.", concept: "Try-Catch-Finally" },
+        { id: 207, topic_id: 20107, question: "Which Map implementation in Java Collections provides O(1) average time complexity and does NOT maintain insertion order?", a: "TreeMap", b: "HashMap", c: "LinkedHashMap", d: "ConcurrentSkipListMap", correct: "B", explanation: "HashMap relies on hashing for O(1) average lookup and does not guarantee element ordering.", concept: "HashMap Collections" },
+        { id: 208, topic_id: 20108, question: "Which Java 8 feature allows functional-style operations (map, filter, reduce) on element streams?", a: "Reflection API", b: "Java Streams API", c: "Servlet API", d: "JDBC API", correct: "B", explanation: "The Java 8 Stream API provides declarative processing pipeline primitives (map, filter, flatMap, reduce).", concept: "Stream API" },
+
+        // DSA & DBMS QUESTIONS
+        { id: 301, topic_id: 30101, question: "What is the time complexity of Binary Search on a sorted array of N elements?", a: "O(N)", b: "O(log N)", c: "O(1)", d: "O(N log N)", correct: "B", explanation: "Binary search halves the search space with each comparison step, leading to logarithmic O(log N) complexity.", concept: "Binary Search" },
+        { id: 302, topic_id: 30103, question: "What is the worst-case time complexity of QuickSort when a poor pivot is chosen repeatedly?", a: "O(N log N)", b: "O(N^2)", c: "O(N)", d: "O(log N)", correct: "B", explanation: "When an array is already sorted and the extreme element is selected as pivot, QuickSort degrades to O(N^2).", concept: "QuickSort Complexity" }
       ],
       attempts: [
-        { id: 1, topic_name: "Polymorphism & Overriding", subject_name: "Object Oriented Programming", predicted: 52.0, actual: 40.0, diff: -12.0, date: "Yesterday" },
-        { id: 2, topic_name: "Variables & Data Types", subject_name: "Object Oriented Programming", predicted: 88.0, actual: 92.0, diff: +4.0, date: "3 days ago" }
+        { id: 1, topic_name: "Polymorphism, Overriding & Dynamic Dispatch", subject_name: "Java Programming (Basic to Advanced)", predicted: 52.0, actual: 40.0, diff: -12.0, date: "Yesterday" },
+        { id: 2, topic_name: "Python Syntax, Variables & Data Types", subject_name: "Python Programming (Basic to Advanced)", predicted: 88.0, actual: 95.0, diff: +7.0, date: "3 days ago" }
       ]
     };
 
@@ -193,7 +226,17 @@
         localStorage.setItem("aistudytwin_data", JSON.stringify(DEFAULT_DATA));
         return DEFAULT_DATA;
       }
-      return JSON.parse(saved);
+      try {
+        const parsed = JSON.parse(saved);
+        // Automatically sync Python & Java subjects if user has old storage cache
+        if (!parsed.subjects || parsed.subjects.length < 4 || !parsed.subjects.find(s => s.code === "CS101")) {
+          localStorage.setItem("aistudytwin_data", JSON.stringify(DEFAULT_DATA));
+          return DEFAULT_DATA;
+        }
+        return parsed;
+      } catch (e) {
+        return DEFAULT_DATA;
+      }
     }
 
     function saveState(data) {
@@ -324,7 +367,6 @@
           }
           onLoginSuccess(found);
         } else {
-          // If not found in seed, create account automatically for smooth user UX
           const newAcc = {
             email: email.trim(),
             password: password,
@@ -379,12 +421,10 @@
 
       return (
         <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
-          {/* Glowing Gradient Background Effects */}
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 border border-slate-800">
-            {/* Header / Logo */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/30 mx-auto mb-4">
                 AI
@@ -393,7 +433,6 @@
               <p className="text-xs sm:text-sm text-slate-400 mt-1">Student Portal & Credential Dashboard</p>
             </div>
 
-            {/* Mode Switcher Tabs */}
             <div className="grid grid-cols-2 p-1 bg-slate-900/80 rounded-2xl border border-slate-800 mb-6">
               <button
                 type="button"
@@ -415,7 +454,6 @@
               </button>
             </div>
 
-            {/* Error Banner */}
             {errorMsg && (
               <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                 <i data-lucide="alert-circle" className="w-4 h-4 text-rose-400 shrink-0"></i>
@@ -423,7 +461,6 @@
               </div>
             )}
 
-            {/* Form */}
             {!isRegistering ? (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div>
@@ -535,7 +572,6 @@
               </form>
             )}
 
-            {/* Quick 1-Click Demo Login Button */}
             <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
               <button
                 type="button"
@@ -755,7 +791,7 @@
               datasets: [{
                 label: "Accuracy %",
                 data: state.subjects.map(s => Math.round(s.topics.reduce((acc, t) => acc + t.accuracy, 0) / s.topics.length)),
-                backgroundColor: ["#6366f1", "#06b6d4", "#10b981"],
+                backgroundColor: ["#6366f1", "#06b6d4", "#10b981", "#f59e0b"],
                 borderRadius: 6
               }]
             },
@@ -844,7 +880,7 @@
     const SubjectsPage = ({ state, setActiveTab, setMobileMenuOpen, onLogout }) => {
       return (
         <div className="pb-16 md:pb-0">
-          <Header title="My Enrolled Subjects" subtitle="Explore curriculum topics and baseline strength" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="My Enrolled Subjects (Python & Java Basic to Advanced)" subtitle="Explore complete curriculum topics from fundamental syntax to advanced frameworks" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="space-y-6">
             {state.subjects.map(sub => (
               <div key={sub.id} className="glass-card rounded-2xl p-6">
@@ -854,24 +890,29 @@
                     <h3 className="font-heading font-bold text-xl text-slate-100 mt-2">{sub.name}</h3>
                     <p className="text-xs text-slate-400 mt-1">{sub.description}</p>
                   </div>
-                  <button onClick={() => setActiveTab("take-quiz")} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold flex items-center gap-2 self-start sm:self-auto">
+                  <button onClick={() => setActiveTab("take-quiz")} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <span>Take Quiz</span>
                     <i data-lucide="arrow-right" className="w-3.5 h-3.5"></i>
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sub.topics.map(top => (
-                    <div key={top.id} className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h4 className="font-semibold text-sm text-slate-200">{top.name}</h4>
-                        <Badge type={top.status} />
+                    <div key={top.id} className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h4 className="font-semibold text-sm text-slate-200">{top.name}</h4>
+                          <Badge type={top.status} />
+                        </div>
+                        <span className="text-[10px] text-slate-400 block mb-2">Difficulty Level {top.difficulty}/5</span>
                       </div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-400">Accuracy</span>
-                        <span className="font-semibold text-indigo-300">{top.accuracy}%</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
-                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${top.accuracy}%` }}></div>
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-slate-400">Accuracy</span>
+                          <span className="font-semibold text-indigo-300">{top.accuracy}%</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-slate-700 overflow-hidden">
+                          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${top.accuracy}%` }}></div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -885,13 +926,13 @@
 
     // ADAPTIVE QUIZ PAGE
     const TakeQuizPage = ({ state, setState, setMobileMenuOpen, onLogout }) => {
-      const [selectedTopicId, setSelectedTopicId] = React.useState(105);
+      const allTopics = state.subjects.flatMap(s => s.topics);
+      const [selectedTopicId, setSelectedTopicId] = React.useState(allTopics[0]?.id || 10101);
       const [currentQIndex, setCurrentQIndex] = React.useState(0);
       const [selectedAnswers, setSelectedAnswers] = React.useState({});
       const [quizActive, setQuizActive] = React.useState(false);
       const [result, setResult] = React.useState(null);
 
-      const allTopics = state.subjects.flatMap(s => s.topics);
       const selectedTopic = allTopics.find(t => t.id === selectedTopicId) || allTopics[0];
       const predictedScore = ClientMLEngine.predictQuizScore(selectedTopic);
 
@@ -1041,7 +1082,7 @@
 
       return (
         <div className="max-w-2xl mx-auto pb-16 md:pb-0">
-          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
+          <Header title="AI Adaptive Quiz Generator" subtitle="Target your weak topics in Python & Java (Basic to Advanced) with live ML score prediction" setMobileMenuOpen={setMobileMenuOpen} onLogout={onLogout} />
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-2">Select Target Topic</label>
@@ -1050,8 +1091,12 @@
                 onChange={e => setSelectedTopicId(parseInt(e.target.value))}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
               >
-                {allTopics.map(t => (
-                  <option key={t.id} value={t.id}>{t.name} ({t.status})</option>
+                {state.subjects.map(s => (
+                  <optgroup key={s.id} label={s.name}>
+                    {s.topics.map(t => (
+                      <option key={t.id} value={t.id}>{t.name} ({t.status})</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
@@ -1309,7 +1354,6 @@
         saveSession(user);
         setCurrentUser(user);
 
-        // Sync state user
         const updatedState = { ...state, user: user };
         saveState(updatedState);
         setState(updatedState);
