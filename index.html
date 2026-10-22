@@ -759,7 +759,9 @@ const AuthPage=({onLogin})=>{
   const [loading,setLoading]=React.useState(false);
   const [showPw,setShowPw]=React.useState(false);
 
- 
+ React.useEffect(() => {
+  if (window.lucide) lucide.createIcons();
+}, [mode, err, showPw]);
 
   const ferr=code=>({
     'auth/user-not-found':'No account found. Please register.',
