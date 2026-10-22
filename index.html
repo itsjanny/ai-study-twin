@@ -803,16 +803,20 @@ const AuthPage=({onLogin})=>{
     if(!name.trim()){setErr("Please enter your full name.");setLoading(false);return;}
     if(pw.length<6){setErr("Password must be at least 6 characters.");setLoading(false);return;}
     try{
-      // 1. Create Firebase Auth account
-      const c=await fbAuth.createUserWithEmailAndPassword(email.trim(),pw);
-      // 2. Set display name on auth profile
-      await c.user.updateProfile({displayName:name.trim()});
-      // 3. Save extra profile to Firestore
+      // Step 1: Create account
+      const cred=await fbAuth.createUserWithEmailAndPassword(email.trim(),pw);
+      // Step 2: Set display name
+      try{await cred.user.updateProfile({displayName:name.trim()});}catch(e){}
+      // Step 3: Save profile to Firestore (don't let Firestore failure block login)
       const profile={full_name:name.trim(),email:email.trim(),college:college||'University',course:'B.Tech CS',createdAt:new Date().toISOString()};
-      await fbDb.collection('users').doc(c.user.uid).set({profile},{merge:true});
-      // 4. Use fbAuth.currentUser so displayName is fresh after updateProfile
-      onLogin(fbAuth.currentUser||c.user,profile);
-    }catch(e){setErr(ferr(e.code));setLoading(false);}
+      try{await fbDb.collection('users').doc(cred.user.uid).set({profile},{merge:true});}catch(e){console.warn('Profile Firestore save:',e.message);}
+      // Step 4: Login — use fbAuth.currentUser for fresh displayName
+      onLogin(fbAuth.currentUser||cred.user,profile);
+    }catch(e){
+      // Show exact Firebase error code so user knows what's wrong
+      setErr(ferr(e.code)+'  [code: '+e.code+']');
+      setLoading(false);
+    }
   };
 
   const googleLogin=async()=>{
@@ -1651,53 +1655,59 @@ const Account=({state,setState,user,profile,setProfile,fbUser,setMOpen,onLogout}
 
 // ── ROOT APP ─────────────────────────────────────────────────────────────────
 const App=()=>{
-  const [fbUser,setFbUser]=React.useState(undefined); // undefined=loading
+  const [fbUser,setFbUser]=React.useState(undefined);
   const [profile,setProfile]=React.useState(null);
   const [state,setState]=React.useState(null);
   const [tab,setTab]=React.useState("dashboard");
   const [mOpen,setMOpen]=React.useState(false);
+  // Ref flag: prevents onAuthStateChanged from double-loading when handleLogin already ran
+  const loginHandled=React.useRef(false);
 
-  // Core: load everything for a user and update state cleanly
-  const initUser=React.useCallback(async(u,profileOverride)=>{
+  const initUser=async(u,profileOverride)=>{
     if(!u)return;
     setFbUser(u);
-    // Load profile
+    // Load profile: use override first, then Firestore, then fallback
     let prof=profileOverride||null;
     if(!prof){
       try{
         const doc=await fbDb.collection('users').doc(u.uid).get();
-        prof=(doc.exists&&doc.data()&&doc.data().profile)?doc.data().profile:null;
-      }catch(e){}
+        if(doc.exists&&doc.data()&&doc.data().profile)prof=doc.data().profile;
+      }catch(e){}  // Firestore unavailable — use fallback
     }
     if(!prof)prof={full_name:u.displayName||u.email?.split('@')[0]||'Student',email:u.email};
     setProfile(prof);
-    // Load study data (cloud -> local -> default)
+    // Load study data: Firestore -> localStorage -> default
     let data=null;
     try{data=await fsLoad(u.uid);}catch(e){}
     if(!data)data=lsLoad(u.email||'demo');
-    // Apply streak on loaded data directly (avoids stale closure)
+    // Apply streak directly on loaded data object (no stale closure)
     const withStreak=updStreak(data);
     setState(withStreak);
     lsSave(u.email||'demo',withStreak);
+    // Firestore sync (don't await — non-blocking background save)
     dbSave(u.uid,withStreak);
-  },[]);
+  };
 
   React.useEffect(()=>{
     const unsub=fbAuth.onAuthStateChanged(async u=>{
       if(u){
-        // Skip if handleLogin already set state (avoids double load)
-        setState(prev=>{
-          if(!prev){initUser(u,null);}
-          return prev;
-        });
+        if(loginHandled.current){
+          // handleLogin already ran — just ensure fbUser is set, skip double-load
+          loginHandled.current=false;
+          return;
+        }
+        // Page refresh / returning user — load everything
+        await initUser(u,null);
       }else{
+        loginHandled.current=false;
         setFbUser(null);setState(null);setProfile(null);
       }
     });
     return unsub;
-  },[initUser]);
+  },[]);
 
   const handleLogin=async(u,p)=>{
+    loginHandled.current=true;  // Tell onAuthStateChanged to skip
     await initUser(u,p);
   };
 
