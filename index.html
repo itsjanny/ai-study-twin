@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="AI Study Twin — Intelligent personalized learning with Firebase backend">
+  <title>AI Study Twin — Intelligent Learning Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoql-Jt-wHvGcEVKp0WtsJXeNP1HKbups",
+      authDomain: "ai-study-twin-98f30.firebaseapp.com",
+      projectId: "ai-study-twin-98f30",
+      storageBucket: "ai-study-twin-98f30.firebasestorage.app",
+      messagingSenderId: "849315841732",
+      appId: "1:849315841732:web:b11df6d9d7344479cdab91",
+      measurementId: "G-T36CVJ2R94"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const fbAuth = firebase.auth();
+    const fbDb = firebase.firestore();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+  </script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], heading: ['Outfit','sans-serif'] } } }
+    };
+  </script>
+
+  <style>
+    body { font-family:'Inter',sans-serif; background:#0f172a; color:#f8fafc; -webkit-tap-highlight-color:transparent; }
+    .glass { background:rgba(30,41,59,.7); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.08); }
+    .glass-nav { background:rgba(15,23,42,.95); backdrop-filter:blur(16px); border-right:1px solid rgba(255,255,255,.08); }
+    .grad-text { background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#e879f9 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .scroll::-webkit-scrollbar { width:5px; height:5px; }
+    .scroll::-webkit-scrollbar-track { background:rgba(15,23,42,.5); }
+    .scroll::-webkit-scrollbar-thumb { background:rgba(99,102,241,.4); border-radius:4px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp .35s ease forwards; }
+    @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)} 50%{box-shadow:0 0 0 8px rgba(99,102,241,0)} }
+    .pulse-glow { animation:glow 2s infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spin { animation:spin .7s linear infinite; }
+  </style>
+</head>
+<body class="scroll antialiased">
+<div id="root"></div>
+<script type="text/babel">
+// ── Firebase helpers ─────────────────────────────────────────────────────────
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+async function fsSave(uid,data){
+  if(!uid)return;
+  try{
+    const clean=JSON.parse(JSON.stringify(data));
+    await fbDb.collection('users').doc(uid).set({data:clean,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+  }catch(e){console.warn('Firestore write:',e.code,e.message);}
+}
+async function fsLoad(uid){
+  if(!uid)return null;
+  try{
+    const d=await fbDb.collection('users').doc(uid).get();
+    if(d.exists&&d.data()&&d.data().data)return d.data().data;
+  }catch(e){console.warn('Firestore read:',e.code,e.message);}
+  return null;
+}
+const dbSave=debounce(fsSave,1500);
+
+// ── Seed data ────────────────────────────────────────────────────────────────
+const QUESTIONS=[
+  // Python
+  {id:101,tid:10101,q:"Which Python type is MUTABLE?",a:"tuple",b:"str",c:"list",d:"int",ans:"C",exp:"Lists allow in-place modification. Tuples, strings, and ints are immutable.",concept:"Mutability"},
+  {id:102,tid:10101,q:"What does id() return in Python?",a:"Value",b:"Memory address",c:"Length",d:"Type",ans:"B",exp:"id() returns the CPython memory address of the object.",concept:"Object Identity"},
+  {id:103,tid:10102,q:"When does a for-loop's 'else' block run?",a:"On error",b:"If iterable empty",c:"Only if no break hit",d:"Always",ans:"C",exp:"The else clause runs only if the loop completed without a break statement.",concept:"Loop Else"},
+  {id:104,tid:10103,q:"Average time complexity of dict key lookup?",a:"O(N)",b:"O(log N)",c:"O(1)",d:"O(N²)",ans:"C",exp:"Python dicts use hash tables: O(1) average lookup, O(N) worst case (collision).",concept:"Hash Table"},
+  {id:105,tid:10104,q:"Which dunder method is called by print(obj)?",a:"__init__",b:"__repr__",c:"__str__",d:"__format__",ans:"C",exp:"__str__ defines the human-readable string representation used by print().",concept:"Dunder Methods"},
+  {id:106,tid:10105,q:"Which keyword creates a Python generator?",a:"return",b:"yield",c:"async",d:"generate",ans:"B",exp:"yield suspends execution and emits values lazily — turns function into generator.",concept:"Generators"},
+  {id:107,tid:10106,q:"Which module provides async/await event loop?",a:"threading",b:"multiprocessing",c:"asyncio",d:"concurrent",ans:"C",exp:"asyncio is Python's standard library for writing concurrent code using async/await.",concept:"Asyncio"},
+  // Java
+  {id:201,tid:20101,q:"Which Java primitive stores 64-bit signed integer?",a:"int",b:"long",c:"double",d:"byte",ans:"B",exp:"long is 64-bit signed. int is 32-bit.",concept:"Primitives"},
+  {id:202,tid:20101,q:"What does autoboxing do in Java?",a:"Converts arrays to lists",b:"Wraps primitives into wrapper objects",c:"Converts String to chars",d:"Converts int to long",ans:"B",exp:"Autoboxing: int→Integer, double→Double automatically by compiler.",concept:"Autoboxing"},
+  {id:203,tid:20102,q:"Which loop always executes body at least once?",a:"for",b:"while",c:"do-while",d:"for-each",ans:"C",exp:"do-while evaluates condition AFTER body — guaranteed one execution.",concept:"Loops"},
+  {id:204,tid:20103,q:"Why are Java Strings immutable?",a:"Syntax restriction",b:"Security, String pool caching, thread safety",c:"Stored on stack",d:"Save memory",ans:"B",exp:"Immutability enables the String Constant Pool and makes Strings thread-safe.",concept:"String Immutability"},
+  {id:205,tid:20104,q:"Keyword to implement an interface in Java?",a:"extends",b:"inherits",c:"implements",d:"uses",ans:"C",exp:"Classes use 'implements' for interfaces; 'extends' for class inheritance.",concept:"Interfaces"},
+  {id:206,tid:20105,q:"Can static methods be overridden?",a:"Yes with @Override",b:"No — they are hidden (method hiding)",c:"Yes if public",d:"Only in abstract classes",ans:"B",exp:"Static methods use static binding (compile-time). Redefining = hiding, not overriding.",concept:"Static Binding"},
+  {id:207,tid:20106,q:"Which block ALWAYS executes after try/catch?",a:"try",b:"catch",c:"finally",d:"throws",ans:"C",exp:"finally always runs — ideal for resource cleanup.",concept:"Finally"},
+  {id:208,tid:20107,q:"Which Map gives O(1) average lookup with no ordering?",a:"TreeMap",b:"LinkedHashMap",c:"HashMap",d:"WeakHashMap",ans:"C",exp:"HashMap uses hashing for O(1) average ops; no ordering guarantee.",concept:"HashMap"},
+  {id:209,tid:20108,q:"Difference between volatile and synchronized?",a:"No difference",b:"volatile=visibility; synchronized=visibility+atomicity",c:"synchronized is faster",d:"volatile locks",ans:"B",exp:"volatile prevents CPU caching. synchronized also ensures mutual exclusion.",concept:"Thread Safety"},
+  // DSA
+  {id:301,tid:30101,q:"Time complexity of Binary Search?",a:"O(N)",b:"O(log N)",c:"O(1)",d:"O(N²)",ans:"B",exp:"Each step halves search space: k steps → 2^k≥N → k=log₂N.",concept:"Binary Search"},
+  {id:302,tid:30101,q:"Amortized time of dynamic array append?",a:"O(N)",b:"O(log N)",c:"O(1) amortized",d:"O(N²)",ans:"C",exp:"Rare O(N) doublings amortize to O(1) over N operations.",concept:"Amortized"},
+  {id:303,tid:30102,q:"Two-pointer pair-sum complexity on sorted array?",a:"O(N²)",b:"O(N log N)",c:"O(N)",d:"O(log N)",ans:"C",exp:"Pointers from both ends, max N moves total.",concept:"Two Pointers"},
+  {id:304,tid:30103,q:"Which structure is LIFO?",a:"Queue",b:"Stack",c:"Heap",d:"Deque",ans:"B",exp:"Stack: Last In First Out. push/pop both O(1).",concept:"Stack LIFO"},
+  {id:305,tid:30103,q:"Floyd's Cycle Detection is used for?",a:"Sorting",b:"Finding cycle in linked list",c:"Merging lists",d:"Reversing list",ans:"B",exp:"Slow(1 step)+Fast(2 steps) pointers meet inside cycle if one exists.",concept:"Floyd's"},
+  {id:306,tid:30104,q:"Worst-case search in unbalanced BST?",a:"O(1)",b:"O(log N)",c:"O(N)",d:"O(N log N)",ans:"C",exp:"Skewed BST degrades to linked list → O(N) search.",concept:"BST"},
+  {id:307,tid:30104,q:"Why is buildHeap O(N) not O(N log N)?",a:"Special array property",b:"Most nodes at bottom do less work",c:"Heaps use binary search",d:"It IS O(N log N)",ans:"B",exp:"Summation of work: N/2 nodes do O(1), N/4 do O(2)... = O(N) total.",concept:"BuildHeap"},
+  {id:308,tid:30105,q:"Which finds shortest path in unweighted graphs?",a:"DFS",b:"Dijkstra",c:"BFS",d:"Bellman-Ford",ans:"C",exp:"BFS explores level-by-level — first reach = shortest path.",concept:"BFS"},
+  {id:309,tid:30105,q:"Why can't Dijkstra handle negative weights?",a:"Overflow",b:"Greedy assumption breaks with negatives",c:"Too slow",d:"Negatives don't exist",ans:"B",exp:"Dijkstra assumes finalized nodes can't be improved — negatives violate this.",concept:"Dijkstra"},
+  {id:310,tid:30106,q:"Two DP prerequisites?",a:"Greedy+Sorting",b:"Overlapping Subproblems + Optimal Substructure",c:"Recursion+Memoization",d:"D&C+Merging",ans:"B",exp:"DP needs overlapping subproblems and optimal substructure.",concept:"DP"},
+  {id:311,tid:30106,q:"Time complexity of 0/1 Knapsack DP?",a:"O(N²)",b:"O(N log N)",c:"O(N×W)",d:"O(2^N)",ans:"C",exp:"DP table N×W, each cell O(1). Total O(N×W).",concept:"Knapsack"},
+  // DBMS
+  {id:401,tid:40101,q:"Correct SQL execution order?",a:"SELECT→FROM→WHERE",b:"FROM→JOIN→WHERE→GROUP BY→HAVING→SELECT",c:"WHERE→FROM→SELECT",d:"GROUP BY→WHERE→FROM",ans:"B",exp:"Standard SQL logical execution order is FROM→JOIN→WHERE→GROUP BY→HAVING→SELECT→ORDER BY→LIMIT.",concept:"Query Order"},
+  {id:402,tid:40101,q:"Which JOIN returns all left table rows?",a:"INNER JOIN",b:"LEFT OUTER JOIN",c:"CROSS JOIN",d:"RIGHT JOIN",ans:"B",exp:"LEFT JOIN returns ALL rows from left + matched from right (NULL where no match).",concept:"LEFT JOIN"},
+  {id:403,tid:40102,q:"What does 3NF eliminate?",a:"Duplicate rows",b:"Partial dependencies",c:"Transitive dependencies",d:"Multi-valued deps",ans:"C",exp:"3NF eliminates transitive deps. 2NF eliminates partial deps.",concept:"3NF"},
+  {id:404,tid:40103,q:"What does 'A' in ACID stand for?",a:"Availability",b:"Atomicity",c:"Aggregation",d:"Authorization",ans:"B",exp:"ACID = Atomicity, Consistency, Isolation, Durability.",concept:"ACID"}
+];
+
+const MATERIALS = {
+  10101:{title:"Python Syntax, Variables & Data Types",notes:`Python is an interpreted, dynamically-typed language. Every value is an object.
+
+Memory Management:
+CPython uses reference counting + cyclic garbage collector. When refcount drops to 0, memory is freed immediately.
+
+Data Types:
+• Mutable: list, dict, set, bytearray
+• Immutable: int, float, str, tuple, frozenset, bytes, bool
+• None: singleton NoneType
+
+Identity vs Equality:
+  'is' → checks same memory address (id())
+  '==' → checks value equality
+
+Integer Caching: CPython pre-caches ints -5 to 256. Outside this range, new objects are created each time.`,
+    code:`import sys, copy
+
+# Mutability demo
+x = [1, 2, 3]
+y = x          # Same reference!
+y.append(4)
+print(x)       # [1, 2, 3, 4]
+
+# Deep copy
+a = [[1,2],[3,4]]
+b = copy.deepcopy(a)
+a[0][0] = 99
+print(b[0][0]) # 1 - independent
+
+# id() = memory address
+n = 256
+m = 256
+print(n is m)  # True (cached)
+n = 1000
+m = 1000
+print(n is m)  # False (not cached)`,
+    cheat:`• Mutable: list, dict, set
+• Immutable: int, float, str, tuple
+• id(x) → memory address
+• sys.getrefcount(x) → reference count (always +1)
+• is vs ==: use == for values, is only for None/True/False`,
+    interview:`Q: Why are tuples hashable but lists not?
+A: Tuples are immutable — hash value never changes. Mutable objects have undefined hash behavior.
+
+Q: Explain Python's GIL.
+A: CPython GIL allows only one thread to execute bytecode at a time. Use multiprocessing or asyncio for true parallelism.`,
+    gfg:`GeeksforGeeks Reference: Python CPython Memory Model
+
+Every Python object is a C struct (PyObject) with:
+  ob_refcnt → reference count (freed when 0)
+  ob_type → pointer to type descriptor
+
+Classic Bug — Mutable Default Argument:
+  def bad(data=[]):    # Evaluated ONCE at definition!
+      data.append(1)
+      return data
+  bad()  # [1]
+  bad()  # [1,1]  ← BUG!
+  
+  Fix: use None as default, create inside function.
+
+String Interning: Short strings & identifiers cached in string pool.
+  sys.intern("my_string") to manually intern.`,
+    cx:{b:"O(1)",a:"O(1)",w:"O(N) hash collision",s:"O(N)"},
+    probs:[{n:"Find the Duplicate Number",d:"Medium"},{n:"Shallow vs Deep Copy",d:"Easy"}]
+  },
+  10102:{title:"Control Flow, Loops & First-Class Functions",notes:`Control flow uses indentation-based blocks (PEP 8: 4 spaces).
+
+Functions are First-Class Objects:
+  • Assign to variables
+  • Store in data structures
+  • Pass as arguments
+  • Return from functions (closures)
+
+Closures: Nested function retains access to outer scope variables even after outer function returns. Use 'nonlocal' to modify.
+
+Comprehensions (C-speed):
+  List:  [x**2 for x in range(10)]
+  Dict:  {k:v for k,v in d.items()}
+  Gen:   (x**2 for x in range(10**6))  ← O(1) memory!`,
+    code:`# Higher-order function + closure
+def make_power(exp):
+    return lambda x: x ** exp   # closure captures 'exp'
+
+square = make_power(2)
+cube   = make_power(3)
+print(square(5), cube(3))   # 25, 27
+
+# Loop else
+for n in range(2, 20):
+    for d in range(2, int(n**0.5)+1):
+        if n % d == 0: break
+    else:
+        print(f"{n} is prime", end=" ")
+# 2 3 5 7 11 13 17 19
+
+# Generator pipeline
+def read_lines(n):
+    for i in range(n):
+        yield f"line {i}"
+
+lines = read_lines(10**6)  # O(1) memory!`,
+    cheat:`• enumerate(it) → (index, value) pairs
+• zip(a,b) → pairs, stops at shortest
+• map/filter → lazy iterables
+• sorted(it, key=fn, reverse=False)
+• any(), all() → short-circuit boolean`,
+    interview:`Q: Lambda vs def?
+A: lambda restricted to single expression, anonymous. def allows full body, has name.
+
+Q: When does for-else execute?
+A: Only when loop exhausts iterator naturally WITHOUT a break.`,
+    gfg:`GeeksforGeeks: Iterator Protocol
+
+for loop internally calls:
+  iter(obj)    → __iter__()
+  next(iter)   → __next__()
+  StopIteration → loop ends
+
+Performance: List comprehensions 30-50% faster than append() loops because they execute in C.
+
+Generator vs List:
+  [x**2 for x in range(10**6)] → O(N) RAM (all at once)
+  (x**2 for x in range(10**6)) → O(1) RAM (lazy)`,
+    cx:{b:"O(1)",a:"O(N)",w:"O(N)",s:"O(N) list / O(1) gen"},
+    probs:[{n:"Custom Map & Filter",d:"Easy"},{n:"Prime Sieve of Eratosthenes",d:"Medium"}]
+  },
+  30101:{title:"DSA Foundations: Time & Space Complexity",notes:`Asymptotic analysis measures performance as N → ∞.
+
+Notations:
+  O(f(N))  → Upper bound (worst case)
+  Ω(f(N))  → Lower bound (best case)
+  Θ(f(N))  → Tight bound (avg case)
+
+Hierarchy (slowest growth first):
+  O(1) < O(log N) < O(√N) < O(N) < O(N log N) < O(N²) < O(2ᴺ) < O(N!)
+
+Rules:
+  1. Drop constants: 3N → O(N)
+  2. Drop lower terms: N²+N → O(N²)
+  3. Nested loops multiply: O(N)×O(N) = O(N²)
+
+Master Theorem T(N)=aT(N/b)+f(N):
+  f(N)=O(N^(log_b a - ε)) → O(N^log_b a)
+  f(N)=Θ(N^log_b a)       → O(N^log_b a · log N)
+  f(N)=Ω(N^(log_b a + ε)) → O(f(N))`,
+    code:`# Binary Search O(log N) — O(1) space
+def binary_search(arr, target):
+    lo, hi = 0, len(arr)-1
+    steps = 0
+    while lo <= hi:
+        steps += 1
+        mid = lo + (hi-lo)//2
+        if arr[mid] == target: return mid, steps
+        elif arr[mid] < target: lo = mid+1
+        else: hi = mid-1
+    return -1, steps
+
+# 1M elements → ~20 steps
+arr = list(range(1, 1_000_001))
+idx, steps = binary_search(arr, 750_000)
+print(f"Found at {idx} in {steps} steps")  # ~20 steps
+
+# Merge Sort O(N log N)
+def merge_sort(a):
+    if len(a)<=1: return a
+    m=len(a)//2
+    L=merge_sort(a[:m]); R=merge_sort(a[m:])
+    return sorted(L+R)`,
+    cheat:`O(1): Array index, hash lookup
+O(log N): Binary search, balanced BST
+O(N): Linear scan
+O(N log N): Merge sort (optimal comparison sort)
+O(N²): Nested loops, bubble sort
+
+Common Recurrences:
+  T(N)=T(N/2)+O(1)  → O(log N)   [Binary Search]
+  T(N)=2T(N/2)+O(N) → O(N log N) [Merge Sort]
+  T(N)=T(N-1)+O(N)  → O(N²)      [Insertion Sort]`,
+    interview:`Q: What is amortized analysis?
+A: Average cost per operation over a sequence. Dynamic array append is O(1) amortized despite occasional O(N) resize.
+
+Q: Best/average/worst for QuickSort?
+A: Best/avg O(N log N) with balanced partitions. Worst O(N²) on sorted input with naive pivot. Use randomized pivot to avoid.`,
+    gfg:`GeeksforGeeks: Comparison Sort Lower Bound
+
+Proof via Decision Tree:
+  N! possible orderings → tree needs N! leaves
+  Height ≥ log₂(N!) ≈ N log N (Stirling)
+  → No comparison sort can beat O(N log N) worst case
+
+Dynamic Array Amortized O(1) Proof:
+  Size doubles: 1→2→4→8...N
+  Total copies = 1+2+4+...+N = 2N-1 = O(N)
+  Amortized per insert = O(N)/N = O(1) ✓
+
+Space Complexity Note:
+  Total space = Input + Auxiliary
+  Recursion stack depth counts as auxiliary space!`,
+    cx:{b:"O(1)",a:"O(log N)",w:"O(N log N)",s:"O(N)"},
+    probs:[{n:"Binary Search",d:"Easy"},{n:"Find Peak Element",d:"Medium"},{n:"Median of Two Sorted Arrays",d:"Hard"}]
+  },
+  30103:{title:"Stacks, Queues, Linked Lists & Hash Tables",notes:`Linear data structures with specialized access semantics.
+
+Stack (LIFO — Last In First Out):
+  push/pop/peek → all O(1)
+  Uses: expression evaluation, DFS, undo/redo, call stack
+
+Queue (FIFO — First In First Out):
+  enqueue/dequeue → O(1)
+  Uses: BFS, task scheduling, print queue
+
+Linked List:
+  Insert/delete at pointer → O(1)
+  Search → O(N)
+  Doubly linked: O(1) deletion with node reference
+
+Hash Table:
+  Average O(1) insert/delete/lookup
+  Load factor α = n/m; resize when α > 0.75
+  Java 8: chains become Red-Black Tree when bucket > 8 items`,
+    code:`# Monotonic Stack: Next Greater Element O(N)
+def next_greater(arr):
+    res = [-1]*len(arr)
+    stack = []  # stores indices
+    for i, val in enumerate(arr):
+        while stack and arr[stack[-1]] < val:
+            res[stack.pop()] = val
+        stack.append(i)
+    return res
+
+print(next_greater([4,1,3,2,5]))  # [5,3,5,5,-1]
+
+# Valid Parentheses O(N)
+def is_valid(s):
+    stack = []
+    pairs = {')':'(','}':'{',']':'['}
+    for c in s:
+        if c in pairs:
+            if not stack or stack[-1]!=pairs[c]:
+                return False
+            stack.pop()
+        else:
+            stack.append(c)
+    return not stack
+
+# Floyd's Cycle Detection
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast: return True
+    return False`,
+    cheat:`Stack with min: maintain auxiliary min-stack
+Queue from 2 stacks: amortized O(1) dequeue
+Monotonic increasing stack: pop when current > stack top (Next Greater)
+Floyd's: slow+1, fast+2 — O(N) time, O(1) space
+Hash set: O(1) membership check`,
+    interview:`Q: How to detect cycle in linked list?
+A: Floyd's: fast(2 steps)+slow(1 step). If they meet → cycle. O(N) time, O(1) space.
+
+Q: How to reverse linked list in-place?
+A: prev=None, curr=head. Each step: next=curr.next; curr.next=prev; prev=curr; curr=next. Return prev.`,
+    gfg:`GeeksforGeeks: Java 8 HashMap Treeification
+
+When bucket size > 8 AND total size > 64 → LinkedList becomes Red-Black Tree
+  Worst case: O(log N) per bucket instead of O(N)
+  Reverts at < 6 elements (untreeify)
+
+Hash Function Java String.hashCode():
+  s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+  31 is prime; computed as (i<<5)-i (fast multiply)
+
+Hash Collision DoS Attack:
+  Java 7 HashMap vulnerable to O(N) attack via hash flooding
+  Java 8+ treeification limits worst case to O(log N)`,
+    cx:{b:"O(1)",a:"O(1)",w:"O(N)/O(log N) tree",s:"O(N)"},
+    probs:[{n:"Valid Parentheses",d:"Easy"},{n:"LRU Cache",d:"Medium"},{n:"Next Greater Element II",d:"Medium"}]
+  },
+  30105:{title:"Graph Algorithms: BFS, DFS & Shortest Paths",notes:`Graph G=(V,E). V=vertices, E=edges.
+
+Representations:
+  Adjacency Matrix: O(V²) space, O(1) edge check
+  Adjacency List: O(V+E) space, O(degree) neighbor iteration
+
+BFS (Breadth-First Search):
+  Queue-based, level-by-level
+  Shortest path in unweighted graphs O(V+E)
+
+DFS (Depth-First Search):
+  Stack/Recursion, explores deep paths
+  Cycle detection, topological sort, SCCs
+
+Shortest Path:
+  BFS → unweighted O(V+E)
+  Dijkstra → non-negative weights O((V+E) log V)
+  Bellman-Ford → negative weights O(V·E), detects neg cycles
+  Floyd-Warshall → all-pairs O(V³)`,
+    code:`from collections import deque
+import heapq
+
+# BFS Shortest Path O(V+E)
+def bfs(adj, start, target):
+    dist = {start: 0}
+    q = deque([start])
+    while q:
+        u = q.popleft()
+        if u == target: return dist[u]
+        for v in adj.get(u, []):
+            if v not in dist:
+                dist[v] = dist[u]+1
+                q.append(v)
+    return -1
+
+# Dijkstra O((V+E) log V)
+def dijkstra(adj, src, n):
+    dist = [float('inf')]*n
+    dist[src] = 0
+    heap = [(0, src)]
+    while heap:
+        d, u = heapq.heappop(heap)
+        if d > dist[u]: continue
+        for v, w in adj.get(u, []):
+            if dist[u]+w < dist[v]:
+                dist[v] = dist[u]+w
+                heapq.heappush(heap, (dist[v], v))
+    return dist`,
+    cheat:`BFS template: queue=deque([s]); visited={s}; while q: u=q.popleft()...
+DFS template: stack=[s]; while stack: u=stack.pop(); if visited: continue...
+Union-Find: path compression + rank → O(α(N)) ≈ O(1)
+Topological Sort: Kahn's BFS with in-degrees → O(V+E)`,
+    interview:`Q: When BFS over DFS?
+A: BFS: shortest path, level-order, reachability.
+DFS: topological sort, cycle detection, SCCs, backtracking.
+
+Q: Why can't Dijkstra handle negative edges?
+A: Greedy assumption "finalized node can't improve" breaks with negatives. Use Bellman-Ford.`,
+    gfg:`GeeksforGeeks: Minimum Spanning Trees
+
+Kruskal's: Sort edges O(E log E), add if no cycle via Union-Find.
+Prim's: O((V+E) log V) — greedily add min-cost edge to unvisited.
+
+A* Search: f(n) = g(n) + h(n)
+  g(n) = actual cost from start
+  h(n) = heuristic estimate to goal (must be admissible)
+  Used in: GPS navigation, game AI pathfinding
+
+Strongly Connected Components:
+  Tarjan's: DFS with disc[]+low[] arrays, O(V+E)
+  Kosaraju's: Two DFS passes, O(V+E)`,
+    cx:{b:"O(V+E)",a:"O(V+E)",w:"O((V+E)log V) Dijkstra",s:"O(V+E)"},
+    probs:[{n:"Number of Islands",d:"Medium"},{n:"Course Schedule",d:"Medium"},{n:"Network Delay Time",d:"Medium"}]
+  },
+  30106:{title:"Dynamic Programming & Backtracking",notes:`DP solves overlapping subproblems with optimal substructure.
+
+Two Approaches:
+  Top-Down (Memoization): Recursive + cache dict/array
+  Bottom-Up (Tabulation): Iterative, fill table from base cases
+
+Common Patterns:
+  Linear DP: Fibonacci, Climbing Stairs
+  Knapsack: 0/1, Unbounded, Partition
+  String DP: LCS, Edit Distance
+  Grid DP: Unique Paths, Min Path Sum
+  Interval DP: Matrix Chain, Burst Balloons
+
+Backtracking:
+  Choose → Explore → Unchoose (undo)
+  Prune invalid branches early`,
+    code:`# 0/1 Knapsack O(N×W), space O(W)
+def knapsack(W, wt, val):
+    dp = [0]*(W+1)
+    for w,v in zip(wt,val):
+        for c in range(W, w-1, -1):  # reverse!
+            dp[c] = max(dp[c], v+dp[c-w])
+    return dp[W]
+
+print(knapsack(50,[10,20,30],[60,100,120]))  # 220
+
+# LCS O(N×M)
+def lcs(s1, s2):
+    m,n = len(s1),len(s2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1,m+1):
+        for j in range(1,n+1):
+            if s1[i-1]==s2[j-1]: dp[i][j]=dp[i-1][j-1]+1
+            else: dp[i][j]=max(dp[i-1][j],dp[i][j-1])
+    return dp[m][n]
+
+# N-Queens Backtracking
+def n_queens(n):
+    res=[]; queens=[]
+    def bt(row):
+        if row==n: res.append(queens[:])
+        for col in range(n):
+            if all(c!=col and abs(r-row)!=abs(c-col) for r,c in enumerate(queens)):
+                queens.append(col); bt(row+1); queens.pop()
+    bt(0); return len(res)
+print(n_queens(8))  # 92`,
+    cheat:`DP recognition: "count ways", "min/max", "is it possible"
+Space opt: 2D→1D when dp[i] depends only on dp[i-1]
+Backtracking template:
+  def bt(state):
+      if done: record(); return
+      for choice in choices:
+          if valid: make(); bt(state); undo()`,
+    interview:`Q: DP vs Greedy?
+A: Greedy makes local optimal choice, never reconsiders. DP evaluates all choices for global optimum. Greedy faster but works only for special structures.
+
+Q: Memoization vs Tabulation?
+A: Memo: top-down, only computes needed states. Tabulation: bottom-up, all states, better cache performance.`,
+    gfg:`GeeksforGeeks: Advanced DP
+
+Bitmask DP: O(2^N × N) for subsets
+  dp[mask][i] = optimal over vertices in mask ending at i
+  Classic: Travelling Salesman O(2^N × N²)
+
+Digit DP: Count numbers [L,R] satisfying digit constraints
+  State: (position, tight, digit_sum)
+
+Space Optimization:
+  0/1 Knapsack: O(N×W) → O(W) using 1D array (iterate reverse)
+  LCS: O(N×M) → O(M) using 2 rows`,
+    cx:{b:"O(N×W)",a:"O(N×M)",w:"O(2^N) bitmask",s:"O(W) optimized"},
+    probs:[{n:"0/1 Knapsack",d:"Medium"},{n:"Longest Common Subsequence",d:"Medium"},{n:"N-Queens",d:"Hard"}]
+  },
+  40101:{title:"SQL Joins, Aggregation & Query Optimization",notes:`Relational DBs store data in tables (rows+columns).
+
+SQL Execution Order (memorize!):
+  FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT
+
+JOIN Types:
+  INNER JOIN: rows matching in BOTH tables
+  LEFT JOIN: all left + matching right (NULL for unmatched)
+  RIGHT JOIN: all right + matching left
+  FULL OUTER: all rows from both
+  CROSS JOIN: Cartesian product (m×n) — dangerous!
+
+WHERE vs HAVING:
+  WHERE: filters rows BEFORE grouping
+  HAVING: filters aggregated groups AFTER GROUP BY
+
+Window Functions (no row collapse):
+  ROW_NUMBER(), RANK(), DENSE_RANK()
+  LAG(col, offset), LEAD(col, offset)
+  SUM/AVG OVER (PARTITION BY col ORDER BY col)`,
+    code:`-- Window functions: rank students per subject
+SELECT student, subject, score,
+  RANK() OVER (PARTITION BY subject ORDER BY score DESC) AS rank_in_subj,
+  AVG(score) OVER (PARTITION BY subject) AS subj_avg,
+  score - AVG(score) OVER (PARTITION BY subject) AS vs_avg
+FROM quiz_results;
+
+-- Recursive CTE: org hierarchy
+WITH RECURSIVE org AS (
+  SELECT id, name, manager_id, 1 AS lvl
+  FROM employees WHERE manager_id IS NULL
+  UNION ALL
+  SELECT e.id, e.name, e.manager_id, o.lvl+1
+  FROM employees e JOIN org o ON e.manager_id=o.id
+)
+SELECT * FROM org ORDER BY lvl;
+
+-- Top performers (30 days)
+SELECT u.name, COUNT(q.id) as quizzes,
+  ROUND(AVG(q.score),1) as avg_score
+FROM users u LEFT JOIN quiz_attempts q ON u.id=q.uid
+WHERE q.date >= NOW()-INTERVAL 30 DAY
+GROUP BY u.id HAVING COUNT(q.id)>=3
+ORDER BY avg_score DESC LIMIT 10;`,
+    cheat:`DELETE vs TRUNCATE vs DROP:
+  DELETE: DML, logged, rollback possible
+  TRUNCATE: DDL, faster, no rollback
+  DROP: removes table structure entirely
+
+UNION vs UNION ALL:
+  UNION: removes duplicates (sorts)
+  UNION ALL: keeps all rows (faster)
+
+Index Types:
+  B-Tree: range queries, sorted output (default)
+  Hash: equality only, no range support
+  Composite: (col1,col2) used for col1 OR (col1+col2) queries`,
+    interview:`Q: WHERE vs HAVING?
+A: WHERE filters rows BEFORE GROUP BY. HAVING filters aggregates AFTER GROUP BY. Can't use aggregates in WHERE.
+
+Q: What is a correlated subquery?
+A: References outer query columns — re-executes for EVERY outer row. O(N×M) vs O(N+M) for JOIN. Avoid when possible.`,
+    gfg:`GeeksforGeeks: Query Optimization & Indexes
+
+EXPLAIN ANALYZE shows:
+  seq_scan → no index used (slow for large tables)
+  index_scan → index used (fast)
+  rows estimate vs actual → check if stats are fresh
+
+B-Tree Index Internals:
+  Leaf nodes store indexed values + row pointers
+  Height: O(log_m(N)), m≈400 for 8KB pages
+  Range scan: O(log N + K) results
+
+Optimization Tips:
+  1. Index WHERE, JOIN, ORDER BY columns
+  2. Avoid SELECT * — fetch only needed columns
+  3. JOINs > correlated subqueries
+  4. Partition large tables
+  5. Materialized views for expensive aggregations`,
+    cx:{b:"O(log N) indexed",a:"O(N log N)",w:"O(N×M) cartesian",s:"O(N) index"},
+    probs:[{n:"Second Highest Salary",d:"Medium"},{n:"Department Top 3 Salaries",d:"Hard"},{n:"Consecutive Available Seats",d:"Easy"}]
+  }
+};
+
+const DEFAULT_STATE={
+  subjects:[
+    {id:1,name:"Python Programming (Basic to Advanced)",code:"CS101",desc:"Complete Python: syntax, OOP, decorators, generators, asyncio.",topics:[
+      {id:10101,name:"Python Syntax, Variables & Data Types",diff:1,imp:1.0,status:"Strong",acc:92,att:4,rs:95,ws:8,cs:92,lsd:1},
+      {id:10102,name:"Control Flow, Loops & Functions",diff:2,imp:1.1,status:"Strong",acc:84,att:3,rs:88,ws:16,cs:84,lsd:2},
+      {id:10103,name:"Lists, Tuples, Sets & Dictionaries",diff:2,imp:1.2,status:"Average",acc:70,att:2,rs:72,ws:30,cs:70,lsd:4},
+      {id:10104,name:"Object-Oriented Python",diff:3,imp:1.4,status:"Average",acc:62,att:2,rs:60,ws:38,cs:62,lsd:5},
+      {id:10105,name:"Decorators, Generators & Context Managers",diff:4,imp:1.5,status:"Weak",acc:48,att:3,rs:42,ws:55,cs:45,lsd:7},
+      {id:10106,name:"Async Programming (asyncio)",diff:5,imp:1.5,status:"Very Weak",acc:38,att:2,rs:35,ws:65,cs:35,lsd:9}
+    ]},
+    {id:2,name:"Java Programming (Basic to Advanced)",code:"CS201",desc:"Java: OOP, Collections, Multithreading, Stream API.",topics:[
+      {id:20101,name:"Java Syntax & Primitive Types",diff:1,imp:1.0,status:"Strong",acc:90,att:4,rs:92,ws:10,cs:90,lsd:1},
+      {id:20102,name:"Control Flow & Methods",diff:2,imp:1.1,status:"Strong",acc:82,att:3,rs:85,ws:18,cs:82,lsd:2},
+      {id:20103,name:"Arrays & String Immutability",diff:2,imp:1.2,status:"Average",acc:65,att:2,rs:68,ws:35,cs:65,lsd:4},
+      {id:20104,name:"OOP: Inheritance & Interfaces",diff:3,imp:1.4,status:"Average",acc:60,att:2,rs:58,ws:40,cs:60,lsd:5},
+      {id:20105,name:"Polymorphism & Dynamic Dispatch",diff:4,imp:1.5,status:"Weak",acc:45,att:3,rs:40,ws:60,cs:40,lsd:8},
+      {id:20106,name:"Exception Handling",diff:3,imp:1.3,status:"Weak",acc:50,att:2,rs:52,ws:50,cs:50,lsd:7},
+      {id:20107,name:"Collections Framework & Generics",diff:4,imp:1.4,status:"Weak",acc:42,att:2,rs:40,ws:58,cs:42,lsd:6},
+      {id:20108,name:"Multithreading & Stream API",diff:5,imp:1.5,status:"Very Weak",acc:35,att:2,rs:30,ws:70,cs:30,lsd:10}
+    ]},
+    {id:3,name:"Data Structures & Algorithms",code:"CS202",desc:"DSA: complexity analysis, arrays, trees, graphs, DP.",topics:[
+      {id:30101,name:"Time & Space Complexity Analysis",diff:1,imp:1.0,status:"Strong",acc:88,att:4,rs:90,ws:12,cs:88,lsd:1},
+      {id:30102,name:"Arrays, Two-Pointers & Sliding Window",diff:2,imp:1.2,status:"Average",acc:72,att:3,rs:75,ws:28,cs:72,lsd:2},
+      {id:30103,name:"Stacks, Queues, Linked Lists & Hash Tables",diff:3,imp:1.3,status:"Average",acc:68,att:2,rs:70,ws:32,cs:68,lsd:3},
+      {id:30104,name:"Trees, BST & Heaps",diff:4,imp:1.4,status:"Weak",acc:50,att:2,rs:48,ws:50,cs:50,lsd:5},
+      {id:30105,name:"Graph Algorithms (BFS, DFS, Dijkstra)",diff:5,imp:1.5,status:"Very Weak",acc:38,att:2,rs:35,ws:65,cs:35,lsd:8},
+      {id:30106,name:"Dynamic Programming & Backtracking",diff:5,imp:1.5,status:"Very Weak",acc:30,att:1,rs:28,ws:72,cs:28,lsd:10}
+    ]},
+    {id:4,name:"Database Management Systems",code:"CS301",desc:"SQL, normalization, ACID, query optimization.",topics:[
+      {id:40101,name:"SQL Joins & Aggregation",diff:3,imp:1.3,status:"Average",acc:75,att:3,rs:78,ws:25,cs:75,lsd:2},
+      {id:40102,name:"Database Normalization (1NF-BCNF)",diff:4,imp:1.4,status:"Weak",acc:52,att:2,rs:48,ws:50,cs:50,lsd:6},
+      {id:40103,name:"ACID Properties & Transactions",diff:3,imp:1.5,status:"Strong",acc:88,att:4,rs:90,ws:12,cs:88,lsd:1}
+    ]}
+  ],
+  attempts:[],streak:0,lastStudyDate:null
+};
+
+// ── Local storage helpers ────────────────────────────────────────────────────
+function lsLoad(email){
+  const k="ast_v3_"+(email||"demo");
+  try{const d=JSON.parse(localStorage.getItem(k));
+    if(d&&d.subjects&&d.subjects.length>=4){
+      if(!d.streak)d.streak=0;
+      if(!d.lastStudyDate)d.lastStudyDate=null;
+      if(!d.attempts)d.attempts=[];
+      return d;
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+function lsSave(email,data){
+  localStorage.setItem("ast_v3_"+(email||"demo"),JSON.stringify(data));
+}
+
+// Streak update
+function updStreak(s){
+  const today=new Date().toISOString().slice(0,10);
+  if(s.lastStudyDate===today)return s;
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const ydStr=yd.toISOString().slice(0,10);
+  const newStreak=s.lastStudyDate===ydStr?(s.streak||0)+1:1;
+  return {...s,streak:newStreak,lastStudyDate:today};
+}
+
+// Achievements
+function getAchievements(s){
+  const all=s.subjects.flatMap(x=>x.topics);
+  const totalAtt=all.reduce((a,t)=>a+t.att,0);
+  const res=[];
+  if(s.attempts.length>=1)res.push({id:"fq",name:"First Quiz 🎯",desc:"Completed first quiz"});
+  if((s.streak||0)>=3)res.push({id:"s3",name:"3-Day Streak 🔥",desc:"3 consecutive days"});
+  if((s.streak||0)>=7)res.push({id:"s7",name:"Week Warrior 🏆",desc:"7 consecutive days"});
+  if(totalAtt>=10)res.push({id:"dl",name:"Dedicated Learner 📚",desc:"10+ quiz attempts"});
+  if(totalAtt>=25)res.push({id:"sc",name:"Scholar 🎓",desc:"25+ completions"});
+  const py=s.subjects.find(x=>x.id===1)?.topics||[];
+  if(py.length&&py.every(t=>t.acc>=75))res.push({id:"pp",name:"Python Pro 🐍",desc:"All Python topics 75%+"});
+  const dsa=s.subjects.find(x=>x.id===3)?.topics||[];
+  if(dsa.length&&dsa.every(t=>t.acc>=70))res.push({id:"de",name:"DSA Expert ⚡",desc:"All DSA topics 70%+"});
+  const java=s.subjects.find(x=>x.id===2)?.topics||[];
+  if(java.length&&java.every(t=>t.acc>=70))res.push({id:"jd",name:"Java Dev ☕",desc:"All Java topics 70%+"});
+  return res;
+}
+
+// ── AI Engine ────────────────────────────────────────────────────────────────
+const ML={
+  classify(acc,att,rs,diff){
+    const ea=att>0?(rs*.6+acc*.4):50;
+    const adj=ea+(diff-3)*2;
+    const label=adj>=80?"Strong":adj>=60?"Average":adj>=40?"Weak":"Very Weak";
+    return{label,ws:Math.round(Math.max(0,100-adj)),cs:Math.round(Math.min(100,Math.max(10,adj)))};
+  },
+  predict(t){
+    if(!t)return 72;
+    const base=t.rs*.45+t.acc*.4+t.cs*.15;
+    const decay=Math.min(15,(t.lsd||3)*.8);
+    const dp=(t.diff-3)*2.5;
+    return Math.round(Math.max(15,Math.min(98,base-decay-dp))*10)/10;
+  },
+  recs(state,sid="all"){
+    const subs=sid!=="all"?state.subjects.filter(s=>s.id===parseInt(sid)):state.subjects;
+    const r=[];
+    subs.forEach(sub=>sub.topics.forEach(t=>{
+      const tf=Math.min(30,(t.lsd||1)*1.5);
+      const ps=(t.ws*.45)+tf+(t.diff*3)+(t.imp*10);
+      const dur=t.status==="Very Weak"||t.lsd>10?45:t.status==="Weak"||t.lsd>6?30:t.status==="Average"?20:10;
+      const rev=t.status==="Very Weak"||t.lsd>10?"High (Intensive)":t.status==="Weak"||t.lsd>6?"Medium (Focused)":t.status==="Average"?"Moderate":"Light";
+      r.push({tid:t.id,name:t.name,sid:sub.id,scode:sub.code,sname:sub.name,ps:Math.round(ps*10)/10,reason:`${sub.code} — ${t.name}: accuracy ${t.rs}%${t.lsd>7?`. Not studied in ${t.lsd} days!`:""}`,rev,dur});
+    }));
+    r.sort((a,b)=>b.ps-a.ps);
+    return r.map((x,i)=>({...x,rank:i+1}));
+  }
+};
+
+// ── UI Components ─────────────────────────────────────────────────────────────
+const Badge=({type,text})=>{
+  const m={Strong:"bg-emerald-500/10 text-emerald-400 border-emerald-500/20",Average:"bg-blue-500/10 text-blue-400 border-blue-500/20",Weak:"bg-amber-500/10 text-amber-400 border-amber-500/20","Very Weak":"bg-rose-500/10 text-rose-400 border-rose-500/20","High (Intensive)":"bg-rose-500/10 text-rose-400 border-rose-500/20","Medium (Focused)":"bg-amber-500/10 text-amber-400 border-amber-500/20",Moderate:"bg-blue-500/10 text-blue-400 border-blue-500/20",Light:"bg-emerald-500/10 text-emerald-400 border-emerald-500/20",Easy:"bg-emerald-500/10 text-emerald-400 border-emerald-500/20",Medium:"bg-amber-500/10 text-amber-400 border-amber-500/20",Hard:"bg-rose-500/10 text-rose-400 border-rose-500/20"};
+  return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${m[type]||"bg-indigo-500/10 text-indigo-400 border-indigo-500/20"}`}>{text||type}</span>;
+};
+
+const Splash=()=>(
+  <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-6">
+    <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-3xl pulse-glow">AI</div>
+    <div className="text-center"><h1 className="font-heading font-extrabold text-2xl grad-text">AI Study Twin</h1><p className="text-slate-400 text-sm mt-1">Connecting to Firebase...</p></div>
+    <div className="flex gap-2">
+      {[0,150,300].map(d=><div key={d} className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-bounce" style={{animationDelay:`${d}ms`}}/>)}
+    </div>
+  </div>
+);
+
+// AUTH PAGE
+const AuthPage=({onLogin})=>{
+  const [mode,setMode]=React.useState("in");
+  const [email,setEmail]=React.useState("");
+  const [pw,setPw]=React.useState("");
+  const [name,setName]=React.useState("");
+  const [college,setCollege]=React.useState("");
+  const [err,setErr]=React.useState("");
+  const [loading,setLoading]=React.useState(false);
+  const [showPw,setShowPw]=React.useState(false);
+
+ React.useEffect(() => {
+  if (window.lucide) lucide.createIcons();
+}, [mode, err, showPw]);
+
+  const ferr=code=>({
+    'auth/user-not-found':'No account found with this email. Please register.',
+    'auth/wrong-password':'Incorrect password. Try again.',
+    'auth/email-already-in-use':'Email already registered. Sign in instead.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/invalid-email':'Enter a valid email address.',
+    'auth/too-many-requests':'Too many attempts. Please wait a moment.',
+    'auth/popup-closed-by-user':'Popup closed. Try again.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+    'auth/invalid-credential':'Email or password is incorrect.',
+    'auth/operation-not-allowed':'Enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method.',
+  }[code]||`Firebase error: ${code}`);
+
+  const signIn=async e=>{
+    e.preventDefault();setErr("");setLoading(true);
+    try{
+      const c=await fbAuth.signInWithEmailAndPassword(email.trim(),pw);
+      onLogin(c.user,{full_name:c.user.displayName||email.split('@')[0],email:c.user.email});
+      // don't setLoading(false) — page will navigate away
+    }catch(e){setErr(ferr(e.code));setLoading(false);}
+  };
+
+  const signUp=async e=>{
+    e.preventDefault();setErr("");setLoading(true);
+    if(!name.trim()){setErr("Please enter your full name.");setLoading(false);return;}
+    if(pw.length<6){setErr("Password must be at least 6 characters.");setLoading(false);return;}
+    try{
+      // Step 1: Create account
+      const cred=await fbAuth.createUserWithEmailAndPassword(email.trim(),pw);
+      // Step 2: Set display name
+      try{await cred.user.updateProfile({displayName:name.trim()});}catch(e){}
+      // Step 3: Save profile to Firestore (don't let Firestore failure block login)
+      const profile={full_name:name.trim(),email:email.trim(),college:college||'University',course:'B.Tech CS',createdAt:new Date().toISOString()};
+      try{await fbDb.collection('users').doc(cred.user.uid).set({profile},{merge:true});}catch(e){console.warn('Profile Firestore save:',e.message);}
+      // Step 4: Login — use fbAuth.currentUser for fresh displayName
+      onLogin(fbAuth.currentUser||cred.user,profile);
+    }catch(e){
+      // Show exact Firebase error code so user knows what's wrong
+      setErr(ferr(e.code)+'  [code: '+e.code+']');
+      setLoading(false);
+    }
+  };
+
+  const googleLogin=async()=>{
+    setErr("");setLoading(true);
+    try{const r=await fbAuth.signInWithPopup(googleProvider);onLogin(r.user,{full_name:r.user.displayName,email:r.user.email,photoURL:r.user.photoURL});}
+    catch(e){setErr(ferr(e.code));}finally{setLoading(false);}
+  };
+
+  return(
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"/>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"/>
+      <div className="w-full max-w-md glass rounded-3xl p-7 shadow-2xl relative z-10 fade-up">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3 pulse-glow">AI</div>
+          <h1 className="font-heading font-extrabold text-3xl grad-text">AI Study Twin</h1>
+          <p className="text-xs text-slate-400 mt-1">🔥 Firebase Backend — Data syncs everywhere</p>
+        </div>
+
+        <div className="grid grid-cols-2 p-1 bg-slate-900/80 rounded-2xl border border-slate-800 mb-5">
+          {["in","up"].map(m=><button key={m} type="button" onClick={()=>{setMode(m);setErr("");}}
+            className={`py-2.5 text-xs font-bold rounded-xl transition-all ${mode===m?"bg-indigo-600 text-white":"text-slate-400 hover:text-slate-200"}`}>
+            {m==="in"?"Sign In":"Create Account"}
+          </button>)}
+        </div>
+
+        {err&&<div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex gap-2"><i data-lucide="alert-circle" className="w-4 h-4 shrink-0 mt-0.5"/>{err}</div>}
+
+        <button onClick={googleLogin} disabled={loading}
+          className="w-full flex items-center justify-center gap-3 py-2.5 mb-4 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-sm transition-all disabled:opacity-50">
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M5.27 9.76C6.2 6.94 8.85 4.91 12 4.91c1.69 0 3.22.6 4.42 1.58L19.91 3C17.78 1.15 15.05 0 12 0 7.27 0 3.2 2.7 1.24 6.65l4.03 3.11z"/>
+            <path fill="#0F9D58" d="M16.04 18.01C14.95 18.72 13.57 19.09 12 19.09c-3.13 0-5.78-2.01-6.72-4.82L1.24 17.33C3.19 21.3 7.27 24 12 24c2.93 0 5.74-1.04 7.83-3l-3.79-2.99z"/>
+            <path fill="#4A90D9" d="M19.83 21c2.2-2.05 3.62-5.1 3.62-9 0-.71-.09-1.47-.25-2.18H12v4.64h6.44c-.28 1.56-1.13 2.77-2.4 3.55L19.83 21z"/>
+            <path fill="#FBBC05" d="M5.28 14.27C5.03 13.56 4.91 12.8 4.91 12c0-.78.13-1.53.36-2.24L1.24 6.65C.44 8.26 0 10.08 0 12s.44 3.73 1.24 5.33l4.04-3.06z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div className="flex items-center gap-3 mb-4"><div className="flex-1 h-px bg-slate-800"/><span className="text-xs text-slate-500">or email</span><div className="flex-1 h-px bg-slate-800"/></div>
+
+        {mode==="in"?(
+          <form onSubmit={signIn} className="space-y-4">
+            <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">Email</label>
+              <div className="relative"><i data-lucide="mail" className="w-4 h-4 text-slate-500 absolute left-3.5 top-3"/>
+                <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/></div></div>
+            <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+              <div className="relative"><i data-lucide="lock" className="w-4 h-4 text-slate-500 absolute left-3.5 top-3"/>
+                <input type={showPw?"text":"password"} required value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/>
+                <button type="button" onClick={()=>setShowPw(!showPw)} className="absolute right-3 top-3 text-slate-500"><i data-lucide={showPw?"eye-off":"eye"} className="w-4 h-4"/></button></div></div>
+            <button type="submit" disabled={loading}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading?<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Signing in...</>:"Sign In to Dashboard"}
+            </button>
+          </form>
+        ):(
+          <form onSubmit={signUp} className="space-y-3">
+            {[{lbl:"Full Name *",val:name,set:setName,type:"text",ph:"Your Name"},{lbl:"Email *",val:email,set:setEmail,type:"email",ph:"you@email.com"},{lbl:"College",val:college,set:setCollege,type:"text",ph:"University Name"}].map(f=>(
+              <div key={f.lbl}><label className="block text-xs font-semibold text-slate-300 mb-1">{f.lbl}</label>
+                <input type={f.type} value={f.val} onChange={e=>f.set(e.target.value)} placeholder={f.ph} required={f.lbl.includes("*")}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/></div>
+            ))}
+            <div><label className="block text-xs font-semibold text-slate-300 mb-1">Password * (min 6)</label>
+              <div className="relative"><input type={showPw?"text":"password"} required value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••••"
+                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/>
+                <button type="button" onClick={()=>setShowPw(!showPw)} className="absolute right-3 top-2.5 text-slate-500"><i data-lucide={showPw?"eye-off":"eye"} className="w-4 h-4"/></button></div></div>
+            <button type="submit" disabled={loading}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading?<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin"/>Creating...</>:"Create Account & Start"}
+            </button>
+          </form>
+        )}
+        <p className="text-center text-xs text-slate-600 mt-4">🔒 Secured by Firebase Authentication</p>
+      </div>
+    </div>
+  );
+};
+
+// SIDEBAR
+const Sidebar=({active,setActive,user,profile,streak,mOpen,setMOpen,onLogout})=>{
+  const nav=[
+    {id:"dashboard",icon:"layout-dashboard",lbl:"Dashboard"},
+    {id:"subjects",icon:"book-open",lbl:"My Subjects"},
+    {id:"notes",icon:"file-text",lbl:"Study Notes"},
+    {id:"plan",icon:"calendar",lbl:"Study Plan"},
+    {id:"quiz",icon:"help-circle",lbl:"Take Quiz"},
+    {id:"perf",icon:"bar-chart-2",lbl:"Performance"},
+    {id:"recs",icon:"sparkles",lbl:"AI Recommendations"},
+    {id:"profile",icon:"brain",lbl:"Learning Profile"},
+    {id:"account",icon:"user",lbl:"My Account"},
+  ];
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[active,mOpen]);
+  const name=profile?.full_name||user?.displayName||"Student";
+  return(
+    <React.Fragment>
+      {mOpen&&<div className="md:hidden fixed inset-0 bg-black/60 z-30 backdrop-blur-sm" onClick={()=>setMOpen(false)}/>}
+      <aside className={`w-64 glass-nav h-screen fixed left-0 top-0 z-40 flex flex-col justify-between p-4 transition-transform duration-300 ${mOpen?"translate-x-0":"-translate-x-full md:translate-x-0"}`}>
+        <div>
+          <div className="flex items-center justify-between px-2 py-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl">AI</div>
+              <div><p className="font-heading font-bold text-lg leading-none grad-text">Study Twin</p><p className="text-[10px] text-indigo-400 mt-0.5">Firebase ✦</p></div>
+            </div>
+            <button onClick={()=>setMOpen(false)} className="md:hidden text-slate-400"><i data-lucide="x" className="w-5 h-5"/></button>
+          </div>
+          <nav className="space-y-0.5">
+            {nav.map(item=>{
+              const on=active===item.id;
+              return(
+                <button key={item.id} onClick={()=>{setActive(item.id);setMOpen(false);}}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${on?"bg-indigo-600/20 text-indigo-300 border border-indigo-500/30":"text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                  <i data-lucide={item.icon} className={`w-4 h-4 ${on?"text-indigo-400":"text-slate-500"}`}/>
+                  {item.lbl}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+        <div className="pt-3 border-t border-slate-800">
+          {streak>0&&<div className="px-3 py-1.5 mb-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-semibold flex items-center gap-2">🔥 {streak} day streak!</div>}
+          <div className="flex items-center justify-between px-3 py-2 bg-slate-900/60 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-2 truncate">
+              {profile?.photoURL?<img src={profile.photoURL} className="w-7 h-7 rounded-full" alt=""/>:
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-sm">{name[0]}</div>}
+              <div className="truncate"><p className="text-xs font-semibold text-slate-200 truncate">{name}</p><p className="text-[10px] text-emerald-400">● Online</p></div>
+            </div>
+            <button onClick={onLogout} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"><i data-lucide="log-out" className="w-4 h-4"/></button>
+          </div>
+        </div>
+      </aside>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass-nav border-t border-slate-800 px-2 py-1.5 flex items-center justify-around">
+        {[{id:"dashboard",icon:"layout-dashboard",lbl:"Home"},{id:"subjects",icon:"book-open",lbl:"Subjects"},{id:"quiz",icon:"play",lbl:"Quiz",sp:true},{id:"recs",icon:"sparkles",lbl:"AI"},{id:"account",icon:"user",lbl:"Profile"}].map(item=>(
+          <button key={item.id} onClick={()=>setActive(item.id)} className={`flex flex-col items-center gap-0.5 ${active===item.id?"text-indigo-400":"text-slate-500"}`}>
+            {item.sp?<div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center -mt-3 shadow-lg"><i data-lucide={item.icon} className="w-4 h-4 fill-white"/></div>:<i data-lucide={item.icon} className="w-5 h-5"/>}
+            <span className="text-[9px]">{item.lbl}</span>
+          </button>
+        ))}
+      </div>
+    </React.Fragment>
+  );
+};
+
+const Hdr=({title,sub,setMOpen,onLogout,streak})=>{
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[]);
+  return(
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-800 gap-3">
+      <div className="flex items-center gap-3">
+        <button onClick={()=>setMOpen(true)} className="md:hidden p-2 rounded-xl bg-slate-800 text-slate-200"><i data-lucide="menu" className="w-5 h-5"/></button>
+        <div><h2 className="font-heading font-bold text-xl text-slate-100">{title}</h2>{sub&&<p className="text-xs text-slate-400 mt-0.5">{sub}</p>}</div>
+      </div>
+      <div className="hidden sm:flex items-center gap-2">
+        {streak>0&&<div className="px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-bold">🔥 {streak} day streak</div>}
+        <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"/>AI Active</div>
+        <button onClick={onLogout} className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 flex items-center gap-1"><i data-lucide="log-out" className="w-3.5 h-3.5"/>Sign Out</button>
+      </div>
+    </header>
+  );
+};
+
+// DASHBOARD
+const Dashboard=({state,profile,setTab,setMOpen,onLogout})=>{
+  const [sid,setSid]=React.useState("all");
+  const tc=React.useRef(null);const sc=React.useRef(null);
+  const tsub=sid!=="all"?state.subjects.find(s=>s.id===parseInt(sid)):null;
+  const topics=tsub?tsub.topics:state.subjects.flatMap(s=>s.topics);
+  const avg=topics.length?Math.round(topics.reduce((a,t)=>a+t.acc,0)/topics.length*10)/10:0;
+  const strong=topics.filter(t=>t.status==="Strong").length;
+  const weak=topics.filter(t=>t.status==="Weak"||t.status==="Very Weak").length;
+  const recs=ML.recs(state,sid);
+  const top=recs[0]||{name:"Take a Quiz",reason:"Complete quizzes for AI recommendations",scode:""};
+  const pred=ML.predict(topics[0]);
+
+  React.useEffect(()=>{
+    if(!window.Chart)return;
+    // Trend chart
+    const ct=document.getElementById("tc");
+    if(ct){if(tc.current){tc.current.destroy();tc.current=null;}
+      const atts=(state.attempts||[]).slice(0,8).reverse();
+      tc.current=new Chart(ct,{type:"line",
+        data:{labels:atts.length?atts.map((_,i)=>`Quiz #${i+1}`):["Q1","Q2","Q3"],
+          datasets:atts.length?[{label:"Actual %",data:atts.map(a=>a.actual),borderColor:"#6366f1",backgroundColor:"rgba(99,102,241,.15)",fill:true,tension:.4},{label:"Predicted %",data:atts.map(a=>a.pred),borderColor:"#06b6d4",borderDash:[5,5],fill:false}]
+            :[{label:"Score %",data:[65,70,75],borderColor:"rgba(99,102,241,.3)",backgroundColor:"rgba(99,102,241,.05)",fill:true,tension:.4,borderDash:[5,5]}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cbd5e1",boxWidth:14}}},scales:{y:{min:0,max:100,ticks:{color:"#94a3b8"}},x:{ticks:{color:"#94a3b8"}}}}});
+    }
+    // Subject chart
+    const cs=document.getElementById("sc");
+    if(cs){if(sc.current){sc.current.destroy();sc.current=null;}
+      const lbs=tsub?tsub.topics.map(t=>t.name.length>14?t.name.slice(0,12)+"…":t.name):state.subjects.map(s=>s.code);
+      const dat=tsub?tsub.topics.map(t=>Math.round(t.acc)):state.subjects.map(s=>Math.round(s.topics.reduce((a,t)=>a+t.acc,0)/s.topics.length));
+      const clr=tsub?tsub.topics.map((_,i)=>["#6366f1","#06b6d4","#10b981","#f59e0b","#ec4899","#8b5cf6","#14b8a6","#f97316"][i%8]):["#6366f1","#06b6d4","#10b981","#f59e0b"];
+      sc.current=new Chart(cs,{type:"bar",data:{labels:lbs,datasets:[{label:"Accuracy %",data:dat,backgroundColor:clr,borderRadius:6}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{color:"#94a3b8"}},x:{ticks:{color:"#94a3b8",font:{size:10}}}}}});
+    }
+  },[state,sid]);
+
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[sid]);
+
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title={`Welcome back, ${profile?.full_name||"Student"}! 👋`} sub="AI-powered personalized learning dashboard" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      {/* Subject filter */}
+      <div className="glass rounded-2xl p-4 mb-5 border-l-4 border-l-indigo-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div><p className="text-[10px] font-bold tracking-wider text-indigo-400 uppercase">Subject Focus</p>
+          <h3 className="font-heading font-bold text-base text-slate-100 mt-0.5">{tsub?`📊 ${tsub.name}`:"📊 All Subjects Combined"}</h3></div>
+        <select value={sid} onChange={e=>setSid(e.target.value)} className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-indigo-300 font-bold text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+          <option value="all">🌟 All Subjects</option>
+          {state.subjects.map(s=><option key={s.id} value={s.id}>{s.code} — {s.name.split(" ").slice(0,2).join(" ")}</option>)}
+        </select>
+      </div>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        {[{lbl:"Accuracy",val:`${avg}%`,sub:avg>=80?"Advanced ✅":avg>=60?"Intermediate":"Beginner",c:"text-indigo-400"},
+          {lbl:"Mastered",val:`${strong}/${topics.length}`,sub:"Score 80%+",c:"text-emerald-400"},
+          {lbl:"Needs Revision",val:weak,sub:"Focus Areas 🎯",c:"text-rose-400"},
+          {lbl:"Next Quiz Pred.",val:`${pred}%`,sub:"AI Predictor",c:"text-cyan-400"}
+        ].map((k,i)=>(
+          <div key={i} className="glass rounded-2xl p-4">
+            <p className="text-[10px] font-semibold text-slate-400">{k.lbl}</p>
+            <p className={`text-xl sm:text-2xl font-bold font-heading ${k.c} mt-1`}>{k.val}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{k.sub}</p>
+          </div>
+        ))}
+      </div>
+      {/* AI Banner */}
+      <div className="glass rounded-2xl p-5 mb-5 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex gap-4">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 flex items-center justify-center shrink-0"><i data-lucide="sparkles" className="w-5 h-5 text-indigo-400"/></div>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">{tsub?`AI for ${tsub.code}`:"Top AI Recommendation"}</span>
+            <h4 className="font-heading font-bold text-base text-slate-100 mt-0.5">Focus: <span className="text-indigo-300">{top.name}</span></h4>
+            <p className="text-xs text-slate-400 mt-0.5">{top.reason}</p>
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <button onClick={()=>setTab("notes")} className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700">📖 Notes</button>
+          <button onClick={()=>setTab("quiz")} className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-lg">Start Quiz →</button>
+        </div>
+      </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="glass rounded-2xl p-5"><h4 className="font-heading font-semibold text-slate-200 mb-1 text-sm">Quiz Performance Trend</h4><p className="text-[10px] text-slate-500 mb-3">{!(state.attempts||[]).length?"Take quizzes to see your trend":"Predicted vs actual scores"}</p><div className="h-52"><canvas id="tc"/></div></div>
+        <div className="glass rounded-2xl p-5"><h4 className="font-heading font-semibold text-slate-200 mb-1 text-sm">{tsub?`${tsub.code} Topic Accuracy`:"Subject Performance"}</h4><p className="text-[10px] text-slate-500 mb-3">Accuracy % breakdown</p><div className="h-52"><canvas id="sc"/></div></div>
+      </div>
+    </div>
+  );
+};
+
+// SUBJECTS
+const Subjects=({state,setTab,setMOpen,onLogout})=>{
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[]);
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="My Enrolled Subjects" sub="Python, Java, DSA & DBMS — Basic to Advanced" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="space-y-6">
+        {state.subjects.map(sub=>{
+          const avg=Math.round(sub.topics.reduce((a,t)=>a+t.acc,0)/sub.topics.length);
+          return(
+            <div key={sub.id} className="glass rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-4 border-b border-slate-800">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-bold border border-indigo-500/20">{sub.code}</span>
+                    <span className="text-xs text-slate-400">Avg: <strong className="text-indigo-300">{avg}%</strong></span>
+                  </div>
+                  <h3 className="font-heading font-bold text-xl text-slate-100">{sub.name}</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">{sub.desc}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={()=>setTab("notes")} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700">Notes</button>
+                  <button onClick={()=>setTab("quiz")} className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">Quiz →</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sub.topics.map(t=>(
+                  <div key={t.id} className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/40">
+                    <div className="flex items-start justify-between gap-1 mb-1"><p className="text-xs font-semibold text-slate-200 leading-snug">{t.name}</p><Badge type={t.status}/></div>
+                    <p className="text-[10px] text-slate-500 mb-2">L{t.diff}/5 · {t.att} attempts</p>
+                    <div className="flex justify-between text-[10px] mb-1"><span className="text-slate-400">Accuracy</span><span className="font-bold text-indigo-300">{t.acc}%</span></div>
+                    <div className="w-full h-1.5 rounded-full bg-slate-700"><div className={`h-full rounded-full ${t.acc>=80?"bg-emerald-500":t.acc>=60?"bg-indigo-500":t.acc>=40?"bg-amber-500":"bg-rose-500"}`} style={{width:`${t.acc}%`}}/></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// STUDY NOTES
+const Notes=({state,setMOpen,onLogout})=>{
+  const all=state.subjects.flatMap(s=>s.topics);
+  const [sel,setSel]=React.useState(all[0]?.id||10101);
+  const [ntab,setNtab]=React.useState("notes");
+  const cur=all.find(t=>t.id===sel)||all[0];
+  const mat=MATERIALS[sel]||{title:cur?.name,notes:`Study notes for ${cur?.name}. Review core concepts, algorithms and interview patterns.`,code:`# Code for ${cur?.name}\npass`,cheat:`• Topic: ${cur?.name}\n• Difficulty: ${cur?.diff}/5`,interview:`Q: Key concept?\nA: Review the topic fundamentals.`,gfg:`GFG Reference for ${cur?.name}`,cx:{b:"O(1)",a:"O(N)",w:"O(N)",s:"O(N)"},probs:[{n:`Practice ${cur?.name}`,d:"Medium"}]};
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[sel,ntab]);
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="Study Notes & Material" sub="Comprehensive notes with GFG reference sections" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+        {/* Sidebar */}
+        <div className="glass rounded-2xl p-4">
+          <h4 className="font-heading font-bold text-sm text-slate-200 pb-2 border-b border-slate-800 mb-3">Select Topic</h4>
+          <div className="space-y-3 max-h-[65vh] overflow-y-auto scroll pr-1">
+            {state.subjects.map(sub=>(
+              <div key={sub.id}>
+                <span className="text-[10px] font-bold tracking-wider text-indigo-400 uppercase block mb-1 px-1">{sub.code}</span>
+                {sub.topics.map(t=>(
+                  <button key={t.id} onClick={()=>{setSel(t.id);setNtab("notes");}}
+                    className={`w-full text-left px-2.5 py-2 rounded-xl text-xs font-medium mb-0.5 flex items-center justify-between transition-all ${sel===t.id?"bg-indigo-600/30 text-indigo-200 border border-indigo-500/40":"text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"}`}>
+                    <span className="truncate">{t.name}</span><span className="text-[9px] text-slate-600 ml-1">L{t.diff}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Viewer */}
+        <div className="lg:col-span-3 glass rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs border border-indigo-500/20">Level {cur?.diff}/5</span>
+            <Badge type={cur?.status}/><span className="text-xs text-slate-400">{cur?.acc}% accuracy</span>
+          </div>
+          <h3 className="font-heading font-bold text-xl text-slate-100 mb-4">{mat.title}</h3>
+          {/* Tabs */}
+          <div className="flex gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 mb-5 overflow-x-auto">
+            {[{id:"notes",lbl:"📖 Notes"},{id:"code",lbl:"💻 Code"},{id:"gfg",lbl:"🟢 GFG"},{id:"cheat",lbl:"⚡ Cheat"},{id:"qa",lbl:"💡 Q&A"}].map(tab=>(
+              <button key={tab.id} onClick={()=>setNtab(tab.id)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-all ${ntab===tab.id?(tab.id==="gfg"?"bg-emerald-600 text-white":"bg-indigo-600 text-white"):"text-slate-400 hover:text-slate-200"}`}>
+                {tab.lbl}
+              </button>
+            ))}
+          </div>
+          {ntab==="notes"&&<div className="p-5 rounded-xl bg-slate-900/80 border border-slate-800 text-sm text-slate-300 leading-relaxed whitespace-pre-line max-h-[55vh] overflow-y-auto scroll">{mat.notes}</div>}
+          {ntab==="code"&&<pre className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-emerald-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-[55vh] overflow-y-auto scroll"><code>{mat.code}</code></pre>}
+          {ntab==="gfg"&&(
+            <div className="space-y-4">
+              <div className="p-5 rounded-xl bg-slate-900/90 border-l-4 border-l-emerald-500 border border-slate-800">
+                <div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs border border-emerald-500/30">GeeksforGeeks Reference</span></div>
+                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">{mat.gfg}</p>
+              </div>
+              {mat.cx&&<div className="glass rounded-xl p-4"><p className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-3">Complexity Matrix</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[{l:"Best",v:mat.cx.b,c:"text-emerald-400"},{l:"Average",v:mat.cx.a,c:"text-indigo-400"},{l:"Worst",v:mat.cx.w,c:"text-rose-400"},{l:"Space",v:mat.cx.s,c:"text-cyan-400"}].map(x=>(
+                    <div key={x.l} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-center"><span className="text-[10px] text-slate-500 block uppercase">{x.l}</span><span className={`text-sm font-bold font-mono ${x.c} mt-0.5 block`}>{x.v}</span></div>
+                  ))}
+                </div>
+              </div>}
+              {mat.probs&&<div className="space-y-2"><p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Practice Problems</p>
+                {mat.probs.map((p,i)=>(
+                  <div key={i} className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center justify-center">#{i+1}</span><span className="text-sm font-semibold text-slate-200">{p.n}</span></div>
+                    <div className="flex items-center gap-2"><Badge type={p.d}/>
+                      <a href={`https://www.geeksforgeeks.org/search/?q=${encodeURIComponent(p.n)}`} target="_blank" rel="noopener noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-semibold border border-emerald-500/30 flex items-center gap-1">
+                        Solve <i data-lucide="external-link" className="w-3 h-3"/>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>}
+            </div>
+          )}
+          {ntab==="cheat"&&<pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-mono text-xs leading-relaxed whitespace-pre-line max-h-[55vh] overflow-y-auto scroll">{mat.cheat}</pre>}
+          {ntab==="qa"&&<div className="p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30 text-sm text-slate-200 leading-relaxed whitespace-pre-line max-h-[55vh] overflow-y-auto scroll">{mat.interview}</div>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// QUIZ TIMER
+const Timer=({secs,maxSecs,onExpire})=>{
+  const [left,setLeft]=React.useState(secs);
+  React.useEffect(()=>{setLeft(secs);},[secs]);
+  React.useEffect(()=>{
+    const t=setInterval(()=>setLeft(p=>{if(p<=1){clearInterval(t);onExpire();return 0;}return p-1;}),1000);
+    return()=>clearInterval(t);
+  },[secs]);
+  const pct=left/maxSecs;const r=20;const circ=2*Math.PI*r;
+  const col=pct>.5?"#10b981":pct>.25?"#f59e0b":"#ef4444";
+  return(
+    <div className="flex items-center gap-1.5">
+      <svg width="48" height="48" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="4"/>
+        <circle cx="24" cy="24" r={r} fill="none" stroke={col} strokeWidth="4"
+          strokeDasharray={circ} strokeDashoffset={circ*(1-pct)} strokeLinecap="round"
+          style={{transform:"rotate(-90deg)",transformOrigin:"50% 50%",transition:"stroke-dashoffset 1s linear,stroke .3s"}}/>
+        <text x="24" y="29" textAnchor="middle" fill={col} fontSize="11" fontWeight="bold">{left}</text>
+      </svg>
+      <span className="text-[10px] text-slate-500">sec</span>
+    </div>
+  );
+};
+
+// QUIZ PAGE
+const Quiz=({state,setState,setMOpen,onLogout,fbUser})=>{
+  const all=state.subjects.flatMap(s=>s.topics);
+  const [selId,setSelId]=React.useState(all[0]?.id||10101);
+  const [qi,setQi]=React.useState(0);
+  const [ans,setAns]=React.useState({});
+  const [active,setActive]=React.useState(false);
+  const [result,setResult]=React.useState(null);
+  const [showExp,setShowExp]=React.useState(false);
+  const [tkey,setTkey]=React.useState(0);
+
+  const topic=all.find(t=>t.id===selId)||all[0];
+  const pred=ML.predict(topic);
+  const qs=QUESTIONS.filter(q=>q.tid===selId);
+  const hasQ=qs.length>0;
+
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[active,result,qi,showExp]);
+
+  const start=()=>{if(!hasQ)return;setResult(null);setAns({});setQi(0);setTkey(k=>k+1);setActive(true);};
+
+  const expire=()=>{if(qi<qs.length-1){setQi(c=>c+1);setTkey(k=>k+1);}else submit();};
+
+  const submit=()=>{
+    let correct=0;
+    qs.forEach(q=>{if(ans[q.id]===q.ans)correct++;});
+    const actual=Math.round(correct/qs.length*100);
+    const diff=Math.round((actual-pred)*10)/10;
+    const ns=JSON.parse(JSON.stringify(state));
+    let subName="";
+    ns.subjects.forEach(sub=>sub.topics.forEach(t=>{
+      if(t.id===selId){
+        t.att+=1;t.rs=actual;
+        t.acc=Math.round(((t.acc*(t.att-1))+actual)/t.att*10)/10;
+        const c=ML.classify(t.acc,t.att,t.rs,t.diff);
+        t.status=c.label;t.ws=c.ws;t.cs=c.cs;t.lsd=0;
+        subName=sub.name;
+      }
+    }));
+    ns.attempts.unshift({id:Date.now(),name:topic.name,sub:subName,pred,actual,diff,date:"Just Now"});
+    const streaked=updStreak(ns);
+    lsSave(fbUser?.email,streaked);
+    dbSave(fbUser?.uid,streaked);
+    setState(streaked);setActive(false);
+    setResult({pred,actual,diff,correct,total:qs.length,myAns:{...ans}});
+  };
+
+  if(result)return(
+    <div className="max-w-3xl mx-auto space-y-4 pb-20 md:pb-0 fade-up">
+      <div className="glass rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+        <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Quiz Complete ✓</span>
+        <h2 className="font-heading font-bold text-2xl text-slate-100 mt-1">{topic.name}</h2>
+        <div className="grid grid-cols-3 gap-3 my-5">
+          {[{l:"ML Predicted",v:`${result.pred}%`,c:"text-cyan-400"},{l:"Actual Score",v:`${result.actual}%`,c:"text-emerald-400"},{l:"Correct/Total",v:`${result.correct}/${result.total}`,c:"text-slate-200"}].map((k,i)=>(
+            <div key={i} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700"><p className="text-[10px] text-slate-400">{k.l}</p><p className={`text-2xl font-bold ${k.c} mt-0.5`}>{k.v}</p></div>
+          ))}
+        </div>
+        <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200 text-left mb-4">
+          <strong className="text-indigo-300">🤖 AI Feedback: </strong>
+          {result.actual>=85?"Excellent! You're mastering this topic. Move to harder content.":result.actual>=65?"Good progress! Review weak areas and revisit in 2 days.":"This topic needs intensive revision. Study notes carefully before retaking."}
+          {" "}Profile auto-synced to Firebase.
+        </div>
+        <div className="flex gap-3 justify-center">
+          <button onClick={()=>setShowExp(!showExp)} className="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold">{showExp?"Hide":"Show"} Explanations</button>
+          <button onClick={()=>setResult(null)} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold">Take Another Quiz</button>
+        </div>
+      </div>
+      {showExp&&<div className="space-y-3">
+        {qs.map((q,i)=>{const ua=result.myAns[q.id];const ok=ua===q.ans;return(
+          <div key={q.id} className={`glass rounded-xl p-4 border-l-4 ${ok?"border-l-emerald-500":"border-l-rose-500"}`}>
+            <p className="text-[10px] text-slate-500 mb-0.5">Q{i+1} · {q.concept}</p>
+            <p className="text-sm font-semibold text-slate-200 mb-2">{q.q}</p>
+            <p className="text-xs text-emerald-300 mb-0.5">✓ Correct: <strong>{q.ans}. {q[q.ans.toLowerCase()]}</strong></p>
+            {!ok&&ua&&<p className="text-xs text-rose-300 mb-1">✗ Your answer: <strong>{ua}. {q[ua.toLowerCase()]}</strong></p>}
+            {!ua&&<p className="text-xs text-amber-300 mb-1">⏱ Time expired</p>}
+            <p className="text-xs text-slate-400 bg-slate-900/60 p-2 rounded-lg">{q.exp}</p>
+          </div>
+        );})}
+      </div>}
+    </div>
+  );
+
+  if(active&&qs.length>0){
+    const q=qs[qi];const last=qi===qs.length-1;
+    return(
+      <div className="max-w-3xl mx-auto pb-20 md:pb-0 fade-up">
+        <div className="glass rounded-2xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-400">Question <strong className="text-slate-200">{qi+1}</strong> of <strong>{qs.length}</strong> · <span className="text-cyan-400">Pred: {pred}%</span></span>
+            <Timer key={tkey} secs={30} maxSecs={30} onExpire={expire}/>
+          </div>
+          <div className="w-full h-1.5 rounded-full bg-slate-800"><div className="h-full bg-indigo-500 rounded-full transition-all" style={{width:`${((qi+1)/qs.length)*100}%`}}/></div>
+        </div>
+        <div className="glass rounded-2xl p-6 mb-4">
+          <p className="text-[10px] text-slate-500 mb-1">{q.concept}</p>
+          <h3 className="font-heading font-bold text-lg text-slate-100 mb-5">{q.q}</h3>
+          <div className="space-y-3">
+            {["A","B","C","D"].map(k=>{
+              const txt=q[k.toLowerCase()];if(!txt)return null;
+              const sel=ans[q.id]===k;
+              return(
+                <button key={k} onClick={()=>setAns(a=>({...a,[q.id]:k}))}
+                  className={`w-full text-left p-4 rounded-xl border text-sm font-medium transition-all ${sel?"bg-indigo-600/20 border-indigo-500 text-indigo-200":"bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600"}`}>
+                  <span className="font-bold mr-2 text-indigo-400">{k}.</span>{txt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex justify-between">
+          <button disabled={qi===0} onClick={()=>{setQi(c=>c-1);setTkey(k=>k+1);}} className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs disabled:opacity-40 border border-slate-700">← Prev</button>
+          {last?<button onClick={submit} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold">Submit ✓</button>
+            :<button onClick={()=>{setQi(c=>c+1);setTkey(k=>k+1);}} className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">Next →</button>}
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div className="max-w-2xl mx-auto pb-20 md:pb-0 fade-up">
+      <Hdr title="AI Adaptive Quiz" sub="30-second timer per question · ML score prediction · Firebase sync" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="glass rounded-2xl p-6 space-y-5">
+        <div><label className="block text-xs font-semibold text-slate-300 mb-2">Select Topic</label>
+          <select value={selId} onChange={e=>setSelId(parseInt(e.target.value))} className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
+            {state.subjects.map(s=><optgroup key={s.id} label={`${s.code} — ${s.name}`}>{s.topics.map(t=><option key={t.id} value={t.id}>{t.name} [{t.status}]</option>)}</optgroup>)}
+          </select>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20"><p className="text-xs text-slate-400 mb-1">ML Predicted Score</p><p className="text-2xl font-bold text-cyan-400">{pred}%</p></div>
+          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700"><p className="text-xs text-slate-400 mb-1">Questions Available</p><p className={`text-2xl font-bold ${hasQ?"text-emerald-400":"text-rose-400"}`}>{qs.length}</p></div>
+        </div>
+        {!hasQ&&<div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex gap-2"><i data-lucide="alert-triangle" className="w-4 h-4 shrink-0"/>No questions for this topic yet. Select a topic with questions.</div>}
+        <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 text-xs text-slate-300 space-y-1">
+          <p className="font-semibold text-slate-200 mb-1.5">📋 Quiz Rules</p>
+          <p>⏱ 30 seconds per question — auto-advances on expire</p>
+          <p>🎯 Updates your AI profile in real-time</p>
+          <p>💾 Synced to Firebase instantly</p>
+          <p>💡 Wrong answers show explanations after</p>
+        </div>
+        <button onClick={start} disabled={!hasQ} className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm shadow-lg disabled:opacity-40 flex items-center justify-center gap-2">
+          <i data-lucide="play" className="w-4 h-4 fill-white"/>Start Quiz — {qs.length} Questions
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// RECOMMENDATIONS
+const Recs=({state,setMOpen,onLogout})=>{
+  const [sid,setSid]=React.useState("all");
+  const recs=ML.recs(state,sid);
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[sid]);
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="AI Recommendation Engine" sub="Priority-ranked topics with reasoning" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="glass rounded-2xl p-4 mb-5 border-l-4 border-l-indigo-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div><p className="font-heading font-bold text-sm text-slate-200">Filter by Subject</p><p className="text-xs text-slate-400">{recs.length} topics ranked by priority</p></div>
+        <select value={sid} onChange={e=>setSid(e.target.value)} className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-indigo-300 font-bold text-xs focus:outline-none focus:border-indigo-500">
+          <option value="all">🌟 All Subjects</option>
+          {state.subjects.map(s=><option key={s.id} value={s.id}>{s.code} — {s.name.split(" ")[0]}</option>)}
+        </select>
+      </div>
+      <div className="space-y-3">
+        {recs.map(r=>(
+          <div key={r.tid} className="glass rounded-2xl p-4 border-l-4 border-l-indigo-500 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="w-7 h-7 rounded-full bg-indigo-600/20 text-indigo-400 text-xs font-bold flex items-center justify-center">#{r.rank}</span>
+                <h4 className="font-heading font-bold text-sm text-slate-100">{r.name}</h4>
+                <Badge type={r.rev}/>
+              </div>
+              <p className="text-xs text-indigo-300 font-semibold mb-1">{r.scode} — {r.sname}</p>
+              <p className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">{r.reason}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-[10px] text-slate-500">Priority</p>
+              <p className="text-lg font-bold text-indigo-400">{r.ps}</p>
+              <p className="text-[10px] text-slate-500">⏱ {r.dur} min</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// PERFORMANCE
+const Perf=({state,setMOpen,onLogout})=>{
+  const all=state.subjects.flatMap(s=>s.topics);
+  const [sortCol,setSort]=React.useState("ws");
+  const [dir,setDir]=React.useState("desc");
+  const toggle=col=>{if(sortCol===col)setDir(d=>d==="asc"?"desc":"asc");else{setSort(col);setDir("desc");}};
+  const sorted=[...all].sort((a,b)=>dir==="asc"?a[sortCol]-b[sortCol]:b[sortCol]-a[sortCol]);
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[sortCol,dir]);
+  const SI=({col})=>{if(sortCol!==col)return<i data-lucide="chevrons-up-down" className="w-3 h-3 inline ml-0.5 text-slate-600"/>;return dir==="asc"?<i data-lucide="chevron-up" className="w-3 h-3 inline ml-0.5 text-indigo-400"/>:<i data-lucide="chevron-down" className="w-3 h-3 inline ml-0.5 text-indigo-400"/>;};
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="Performance Analytics" sub="Click column headers to sort" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="glass rounded-2xl p-5 overflow-x-auto">
+        <table className="w-full text-left text-xs min-w-[560px]">
+          <thead><tr className="border-b border-slate-800 text-slate-400">
+            <th className="pb-3">Topic</th>
+            <th className="pb-3 cursor-pointer hover:text-slate-200" onClick={()=>toggle("att")}>Attempts<SI col="att"/></th>
+            <th className="pb-3 cursor-pointer hover:text-slate-200" onClick={()=>toggle("acc")}>Accuracy<SI col="acc"/></th>
+            <th className="pb-3 cursor-pointer hover:text-slate-200" onClick={()=>toggle("ws")}>Weakness<SI col="ws"/></th>
+            <th className="pb-3 cursor-pointer hover:text-slate-200" onClick={()=>toggle("cs")}>Confidence<SI col="cs"/></th>
+            <th className="pb-3">Status</th>
+          </tr></thead>
+          <tbody className="divide-y divide-slate-800/50">
+            {sorted.map(t=>(
+              <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
+                <td className="py-2.5 font-semibold text-slate-200 max-w-[180px]"><div className="truncate">{t.name}</div></td>
+                <td className="py-2.5 text-slate-300">{t.att}</td>
+                <td className="py-2.5"><div className="flex items-center gap-2"><div className="w-14 h-1.5 rounded-full bg-slate-700"><div className="h-full bg-indigo-500 rounded-full" style={{width:`${t.acc}%`}}/></div><span className="font-bold text-indigo-300">{t.acc}%</span></div></td>
+                <td className="py-2.5 font-mono text-rose-400">{t.ws}</td>
+                <td className="py-2.5 font-mono text-emerald-400">{t.cs}</td>
+                <td className="py-2.5"><Badge type={t.status}/></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// STUDY PLAN
+const Plan=({state,setTab,setMOpen,onLogout})=>{
+  const recs=ML.recs(state);
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const today=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
+  const plan=days.map((d,i)=>({d,today:d===today,topics:recs.slice(i*2,i*2+2)}));
+  const totalMin=recs.reduce((s,r)=>s+r.dur,0);
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[]);
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="AI Weekly Study Plan" sub="7-day schedule from AI priority recommendations" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {[{l:"Weekly Topics",v:Math.min(recs.length,14),c:"text-indigo-400"},{l:"Total Time",v:`${Math.round(totalMin/60)}h ${totalMin%60}m`,c:"text-emerald-400"},{l:"Avg/Day",v:`${Math.round(totalMin/7)}m`,c:"text-cyan-400"},{l:"Intensive",v:recs.filter(r=>r.rev==="High (Intensive)").length,c:"text-rose-400"}].map((k,i)=>(
+          <div key={i} className="glass rounded-xl p-4"><p className="text-[10px] text-slate-400">{k.l}</p><p className={`text-lg font-bold font-heading ${k.c} mt-1`}>{k.v}</p></div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {plan.map(({d,today,topics})=>(
+          <div key={d} className={`glass rounded-2xl p-4 ${today?"border-2 border-indigo-500 shadow-lg shadow-indigo-500/20":""}`}>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className={`font-heading font-bold text-sm ${today?"text-indigo-300":"text-slate-200"}`}>{d}</h4>
+              {today&&<span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">TODAY</span>}
+            </div>
+            {topics.length>0?(
+              <div className="space-y-2">
+                {topics.map((t,i)=>(
+                  <div key={i} className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/40">
+                    <p className="text-xs font-semibold text-slate-200 leading-snug">{t.name}</p>
+                    <div className="flex items-center justify-between mt-1"><span className="text-[10px] text-indigo-400">{t.scode}</span><span className="text-[10px] text-slate-500">⏱ {t.dur}m</span></div>
+                    <div className="mt-1"><Badge type={t.rev}/></div>
+                  </div>
+                ))}
+                {today&&<button onClick={()=>setTab("quiz")} className="w-full py-2 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold hover:bg-indigo-600/30 transition-colors">Start Session →</button>}
+              </div>
+            ):<div className="text-center py-4"><p className="text-slate-500 text-xs">Rest Day 🌙</p></div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// LEARNING PROFILE
+const Profile=({state,user,profile,setMOpen,onLogout})=>{
+  const rc=React.useRef(null);
+  const subs=state.subjects.map(s=>({code:s.code,avg:Math.round(s.topics.reduce((a,t)=>a+t.acc,0)/s.topics.length)}));
+  const all=state.subjects.flatMap(s=>s.topics);
+  const totalAtt=all.reduce((a,t)=>a+t.att,0);
+  const achs=getAchievements(state);
+  const name=profile?.full_name||user?.displayName||"Student";
+  const overallAvg=Math.round(all.reduce((a,t)=>a+t.acc,0)/all.length);
+
+  React.useEffect(()=>{
+    if(window.lucide)lucide.createIcons();
+    if(!window.Chart)return;
+    const ctx=document.getElementById("rc");
+    if(!ctx)return;
+    if(rc.current){rc.current.destroy();rc.current=null;}
+    rc.current=new Chart(ctx,{type:"radar",
+      data:{labels:subs.map(s=>s.code),datasets:[{label:"Mastery %",data:subs.map(s=>s.avg),backgroundColor:"rgba(99,102,241,.2)",borderColor:"#6366f1",pointBackgroundColor:"#818cf8",pointBorderColor:"#fff",borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:true,scales:{r:{min:0,max:100,ticks:{color:"#94a3b8",backdropColor:"transparent",stepSize:20},grid:{color:"rgba(255,255,255,.07)"},pointLabels:{color:"#e2e8f0",font:{size:12,weight:"bold"}}}},plugins:{legend:{display:false}}}
+    });
+  },[state]);
+
+  return(
+    <div className="pb-20 md:pb-0 fade-up">
+      <Hdr title="Learning Profile" sub="Competency radar, achievements & history" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Card */}
+        <div className="glass rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+          {profile?.photoURL?<img src={profile.photoURL} className="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-indigo-500" alt=""/>:
+            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-bold text-3xl flex items-center justify-center mx-auto mb-3 shadow-lg">{name[0]}</div>}
+          <h3 className="font-heading font-bold text-xl text-slate-100">{name}</h3>
+          <p className="text-xs text-indigo-300 mb-3">{user?.email}</p>
+          <div className="space-y-2 text-xs text-left border-t border-slate-800 pt-3">
+            {[{l:"Overall Accuracy",v:`${overallAvg}%`,c:"text-indigo-300"},{l:"Topics Studied",v:`${all.filter(t=>t.att>0).length}/${all.length}`,c:"text-emerald-300"},{l:"Total Attempts",v:totalAtt,c:"text-cyan-300"},{l:"Study Streak",v:`🔥 ${state.streak||0} days`,c:"text-orange-300"},{l:"College",v:profile?.college||"University",c:"text-slate-300"}].map((s,i)=>(
+              <div key={i} className="flex justify-between"><span className="text-slate-400">{s.l}</span><span className={`font-bold ${s.c}`}>{s.v}</span></div>
+            ))}
+          </div>
+        </div>
+        {/* Radar */}
+        <div className="glass rounded-2xl p-5">
+          <h4 className="font-heading font-bold text-sm text-slate-200 mb-4 text-center">Subject Mastery Radar</h4>
+          <div className="max-w-xs mx-auto"><canvas id="rc"/></div>
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {subs.map(s=>(
+              <div key={s.code} className="p-2 rounded-lg bg-slate-800/60 border border-slate-700 text-center">
+                <p className="text-[10px] text-slate-400">{s.code}</p>
+                <p className={`text-sm font-bold ${s.avg>=75?"text-emerald-400":s.avg>=55?"text-indigo-400":"text-rose-400"}`}>{s.avg}%</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Achievements */}
+        <div className="glass rounded-2xl p-5">
+          <h4 className="font-heading font-bold text-sm text-slate-200 mb-4 flex items-center gap-2">🏆 Achievements <span className="text-xs text-slate-400 font-normal">({achs.length})</span></h4>
+          {achs.length===0?(
+            <div className="text-center py-8"><p className="text-4xl mb-2">🎯</p><p className="text-slate-400 text-sm">Complete quizzes to unlock badges!</p></div>
+          ):(
+            <div className="space-y-2">
+              {achs.map(a=>(
+                <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/40">
+                  <span className="text-xl">{a.name.split(" ")[0]}</span>
+                  <div><p className="text-xs font-bold text-slate-200">{a.name}</p><p className="text-[10px] text-slate-400">{a.desc}</p></div>
+                  <i data-lucide="check-circle" className="w-4 h-4 text-emerald-400 ml-auto shrink-0"/>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-4 pt-3 border-t border-slate-800"><p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Locked</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[{ic:"🐍",n:"Python Pro"},{ic:"☕",n:"Java Dev"},{ic:"⚡",n:"DSA Expert"},{ic:"🏆",n:"Week Warrior"}].filter(b=>!achs.find(a=>a.name.startsWith(b.ic))).map((b,i)=>(
+                <span key={i} className="px-2 py-1 rounded-lg bg-slate-800/40 border border-slate-700/40 text-slate-600 text-[10px] font-medium grayscale">{b.ic} {b.n}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Recent quizzes */}
+      {(state.attempts||[]).length>0&&(
+        <div className="mt-5 glass rounded-2xl p-5">
+          <h4 className="font-heading font-bold text-sm text-slate-200 mb-3">Recent Quiz History</h4>
+          <div className="space-y-2">
+            {state.attempts.slice(0,5).map((a,i)=>(
+              <div key={a.id||i} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 text-xs">
+                <div><p className="font-semibold text-slate-200">{a.name}</p><p className="text-slate-500">{a.date}</p></div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400">Pred: <strong className="text-cyan-400">{a.pred}%</strong></span>
+                  <span className={`font-bold text-base ${a.actual>=75?"text-emerald-400":a.actual>=55?"text-amber-400":"text-rose-400"}`}>{a.actual}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ACCOUNT PAGE
+const Account=({state,setState,user,profile,setProfile,fbUser,setMOpen,onLogout})=>{
+  const [fn,setFn]=React.useState(profile?.full_name||user?.displayName||"");
+  const [cl,setCl]=React.useState(profile?.college||"");
+  const [cr,setCr]=React.useState(profile?.course||"B.Tech Computer Science");
+  const [sem,setSem]=React.useState(profile?.semester||"Semester 4");
+  const [gpa,setGpa]=React.useState(profile?.target_gpa||3.9);
+  const [ok,setOk]=React.useState(false);
+  const [saving,setSaving]=React.useState(false);
+  React.useEffect(()=>{if(window.lucide)lucide.createIcons();},[ok]);
+
+  const save=async e=>{
+    e.preventDefault();setSaving(true);
+    const p={...profile,full_name:fn,college:cl,course:cr,semester:sem,target_gpa:parseFloat(gpa)||3.8};
+    setProfile(p);
+    if(fbUser?.uid)await fbDb.collection('users').doc(fbUser.uid).set({profile:p},{merge:true});
+    setOk(true);setSaving(false);setTimeout(()=>setOk(false),3000);
+  };
+
+  const name=fn||user?.displayName||"Student";
+  return(
+    <div className="max-w-4xl mx-auto pb-20 md:pb-0 fade-up">
+      <Hdr title="My Account" sub="Manage your profile synced to Firebase" setMOpen={setMOpen} onLogout={onLogout} streak={state.streak}/>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="glass rounded-2xl p-6 text-center border-t-4 border-t-indigo-500">
+          {profile?.photoURL?<img src={profile.photoURL} className="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-indigo-500" alt=""/>:
+            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-bold text-3xl flex items-center justify-center mx-auto mb-3 shadow-lg">{name[0]}</div>}
+          <h3 className="font-heading font-bold text-xl text-slate-100">{name}</h3>
+          <p className="text-xs text-indigo-300 mb-3">{user?.email}</p>
+          <div className="space-y-2 text-xs text-left border-t border-slate-800 pt-3">
+            {[{l:"Auth",v:user?.providerData?.[0]?.providerId==="google.com"?"Google OAuth":"Email/Password"},{l:"Semester",v:sem},{l:"Target GPA",v:`${gpa}/4.0`},{l:"Streak",v:`🔥 ${state.streak||0} days`}].map((s,i)=>(
+              <div key={i} className="flex justify-between"><span className="text-slate-400">{s.l}:</span><span className="text-slate-200 font-semibold">{s.v}</span></div>
+            ))}
+          </div>
+          <button onClick={onLogout} className="w-full mt-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center justify-center gap-2">
+            <i data-lucide="log-out" className="w-4 h-4"/>Sign Out
+          </button>
+        </div>
+        <div className="md:col-span-2 glass rounded-2xl p-6">
+          <h4 className="font-heading font-bold text-lg text-slate-100 mb-4 pb-2 border-b border-slate-800">Profile Settings</h4>
+          {ok&&<div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex gap-2"><i data-lucide="check-circle" className="w-4 h-4"/>Profile saved & synced to Firebase!</div>}
+          <form onSubmit={save} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[{l:"Full Name",v:fn,set:setFn,t:"text"},{l:"Email (readonly)",v:user?.email||"",t:"email",ro:true}].map(f=>(
+                <div key={f.l}><label className="block text-xs font-semibold text-slate-300 mb-1.5">{f.l}</label>
+                  <input type={f.t} value={f.v} onChange={f.ro?undefined:e=>f.set(e.target.value)} readOnly={f.ro}
+                    className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm focus:outline-none focus:border-indigo-500 ${f.ro?"text-slate-500 cursor-not-allowed":"text-slate-200"}`}/></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">College/University</label>
+                <input type="text" value={cl} onChange={e=>setCl(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/></div>
+              <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">Course</label>
+                <input type="text" value={cr} onChange={e=>setCr(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">Semester</label>
+                <select value={sem} onChange={e=>setSem(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
+                  {[1,2,3,4,5,6,7,8].map(n=><option key={n} value={`Semester ${n}`}>Semester {n}</option>)}
+                </select></div>
+              <div><label className="block text-xs font-semibold text-slate-300 mb-1.5">Target GPA</label>
+                <input type="number" step="0.1" min="1" max="4" value={gpa} onChange={e=>setGpa(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-indigo-500"/></div>
+            </div>
+            <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg disabled:opacity-50 flex items-center gap-2">
+              {saving?<><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full spin"/>Saving...</>:"Save & Sync to Firebase"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── ROOT APP ─────────────────────────────────────────────────────────────────
+const App=()=>{
+  const [fbUser,setFbUser]=React.useState(undefined);
+  const [profile,setProfile]=React.useState(null);
+  const [state,setState]=React.useState(null);
+  const [tab,setTab]=React.useState("dashboard");
+  const [mOpen,setMOpen]=React.useState(false);
+  // Ref flag: prevents onAuthStateChanged from double-loading when handleLogin already ran
+  const loginHandled=React.useRef(false);
+
+  const initUser=async(u,profileOverride)=>{
+    if(!u)return;
+    setFbUser(u);
+    // Load profile: use override first, then Firestore, then fallback
+    let prof=profileOverride||null;
+    if(!prof){
+      try{
+        const doc=await fbDb.collection('users').doc(u.uid).get();
+        if(doc.exists&&doc.data()&&doc.data().profile)prof=doc.data().profile;
+      }catch(e){}  // Firestore unavailable — use fallback
+    }
+    if(!prof)prof={full_name:u.displayName||u.email?.split('@')[0]||'Student',email:u.email};
+    setProfile(prof);
+    // Load study data: Firestore -> localStorage -> default
+    let data=null;
+    try{data=await fsLoad(u.uid);}catch(e){}
+    if(!data)data=lsLoad(u.email||'demo');
+    // Apply streak directly on loaded data object (no stale closure)
+    const withStreak=updStreak(data);
+    setState(withStreak);
+    lsSave(u.email||'demo',withStreak);
+    // Firestore sync (don't await — non-blocking background save)
+    dbSave(u.uid,withStreak);
+  };
+
+  React.useEffect(()=>{
+    const unsub=fbAuth.onAuthStateChanged(async u=>{
+      if(u){
+        if(loginHandled.current){
+          // handleLogin already ran — just ensure fbUser is set, skip double-load
+          loginHandled.current=false;
+          return;
+        }
+        // Page refresh / returning user — load everything
+        await initUser(u,null);
+      }else{
+        loginHandled.current=false;
+        setFbUser(null);setState(null);setProfile(null);
+      }
+    });
+    return unsub;
+  },[]);
+
+  const handleLogin=async(u,p)=>{
+    loginHandled.current=true;  // Tell onAuthStateChanged to skip
+    await initUser(u,p);
+  };
+
+  const handleLogout=()=>{fbAuth.signOut();setFbUser(null);setState(null);setProfile(null);};
+
+  if(fbUser===undefined)return <Splash/>;
+  if(!fbUser)return <AuthPage onLogin={handleLogin}/>;
+  if(!state)return <Splash/>;
+
+  const props={state,setState:ns=>{setState(ns);lsSave(fbUser.email,ns);dbSave(fbUser.uid,ns);},setMOpen,onLogout:handleLogout,streak:state.streak||0};
+  const pageMap={
+    dashboard:<Dashboard {...props} profile={profile} setTab={setTab}/>,
+    subjects:<Subjects {...props} setTab={setTab}/>,
+    notes:<Notes {...props}/>,
+    plan:<Plan {...props} setTab={setTab}/>,
+    quiz:<Quiz {...props} fbUser={fbUser}/>,
+    perf:<Perf {...props}/>,
+    recs:<Recs {...props}/>,
+    profile:<Profile {...props} user={fbUser} profile={profile}/>,
+    account:<Account {...props} user={fbUser} profile={profile} setProfile={setProfile} fbUser={fbUser}/>
+  };
+
+  return(
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      <Sidebar active={tab} setActive={setTab} user={fbUser} profile={profile} streak={state.streak||0} mOpen={mOpen} setMOpen={setMOpen} onLogout={handleLogout}/>
+      <main className="md:ml-64 flex-1 p-4 sm:p-7 overflow-y-auto min-h-screen">
+        {pageMap[tab]||pageMap.dashboard}
+      </main>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
