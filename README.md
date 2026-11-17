@@ -43,9 +43,9 @@ flowchart TD
 
 ### Backend
 - **Framework**: Python 3.14 + FastAPI
-- **Web Server**: Uvicorn
-- **Database ORM**: SQLAlchemy (Default SQLite for zero-setup execution, fully configurable for MySQL via `DATABASE_URL`)
-- **Authentication**: PyJWT + Passlib / PBKDF2 Password Hashing
+- **Web Server**: Github Pages
+- **Database ORM**: Firebase Database(MY SQL Lite)
+- **Authentication**: Firebase
 - **Data Validation**: Pydantic v2
 
 ### AI / Machine Learning
